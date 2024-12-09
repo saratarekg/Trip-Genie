@@ -67,6 +67,7 @@ const ProductReport = () => {
     useState(0);
   const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
   const [isFiltering, setIsFiltering] = useState(false);
+  const[isLoading,setIsLoading]= useState(false);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -76,6 +77,7 @@ const ProductReport = () => {
 
   useEffect(() => {
     const fetchSalesReport = async () => {
+      setIsLoading(true);
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
@@ -116,6 +118,7 @@ const ProductReport = () => {
             )
           : response.data.sellerProductsSales;
         setFilteredSales(filteredData);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching sales report:", error);
       }
@@ -247,18 +250,18 @@ const ProductReport = () => {
     });
   };
 
-  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
+  //if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
 
   const fillPercentage =
     (selectedPeriodRevenue / totalRevenueAfterCommission) * 100;
 
   const thisMonthSales = calculatePeriodRevenue(
-    salesReport.sellerProductsSales,
+    salesReport?.sellerProductsSales,
     "month"
   );
   const lastMonthSales = (() => {
     const lastMonth = subMonths(new Date(), 1);
-    return salesReport.sellerProductsSales.reduce((sum, item) => {
+    return salesReport?.sellerProductsSales.reduce((sum, item) => {
       const saleDate = new Date(item.product.createdAt);
       return (
         sum +
@@ -405,6 +408,22 @@ const ProductReport = () => {
                     </th>
                   </tr>
                 </thead>
+                {isLoading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3,4].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) :(
                 <AnimatePresence mode="wait">
                   {!isFiltering && (
                     <motion.tbody
@@ -465,7 +484,9 @@ const ProductReport = () => {
                       </motion.tr>
                     </motion.tbody>
                   )}
-                </AnimatePresence>
+                </AnimatePresence>)}
+  
+  
               </table>
             </div>
           </CardContent>

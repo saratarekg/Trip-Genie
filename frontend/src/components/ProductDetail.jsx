@@ -1110,9 +1110,7 @@ const ProductDetail = () => {
     );
   }
 
-  if (loading) {
-    return <ProductDetailSkeleton />;
-  }
+  
 
   if (error) {
     return (

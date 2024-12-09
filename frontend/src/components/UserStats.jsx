@@ -74,7 +74,7 @@ export default function UserStats() {
         }
       );
       setStats(response.data);
-      setIsLoading(false);
+     setIsLoading(false);
     } catch (err) {
       setError(err.message);
     }
@@ -115,6 +115,7 @@ export default function UserStats() {
   };
 
   const fetchFilteredStats = async () => {
+    setIsLoading(true);
     try {
       setIsFiltering(true);
       const token = Cookies.get("jwt");
@@ -124,6 +125,7 @@ export default function UserStats() {
       );
       setFilteredStats(response.data);
       setIsFiltering(false);
+      setIsLoading(false);
     } catch (err) {
       console.error("Error fetching filtered stats:", err);
       setIsFiltering(false);
@@ -135,7 +137,7 @@ export default function UserStats() {
     return ((current?.total - previous.total) / previous.total) * 100;
   };
 
-  if (isLoading) return <div className="p-6 text-center">Loading...</div>;
+  //if (isLoading) return <div className="p-6 text-center">Loading...</div>;
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
 
   const monthlyChange = calculateChange(
@@ -211,6 +213,55 @@ export default function UserStats() {
                 </DropdownMenu>
               </div>
             </CardHeader>
+            {isLoading ? (
+  
+   
+   <CardContent className="p-3 flex flex-col justify-center items-center w-full">
+              <div className="relative flex items-center justify-center w-32 h-32">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#E6DCCF"
+                    strokeWidth="10"
+                  />
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#1A3B47"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray="283"
+                    strokeDashoffset="283"
+                    initial={{ strokeDashoffset: 283 }}
+                    animate={{
+                      strokeDashoffset: 283 - (283 * fillPercentage) / 100,
+                    }}
+                    transition={{
+                      duration: 1,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </svg>
+                
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-lg font-bold text-[#1A3B47]">
+                  <div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                  </span>
+                  <div className="h-4 w-1/2 mx-auto bg-gray-200 rounded mb-4 animate-pulse -mt-4"></div>
+                </div>
+              </div>
+              <div className="text-center mt-4">
+                <p className="text-base text-[#5D9297]">
+                % of total
+                </p>
+              </div>
+            </CardContent>
+) : (
             <CardContent className="p-3 flex flex-col justify-center items-center w-full">
               <div className="relative flex items-center justify-center w-32 h-32">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -242,6 +293,7 @@ export default function UserStats() {
                     }}
                   />
                 </svg>
+                
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-bold text-[#1A3B47]">
                     {selectedUserCount}
@@ -257,7 +309,9 @@ export default function UserStats() {
                   {fillPercentage.toFixed(1)}% of total
                 </p>
               </div>
+
             </CardContent>
+)}
           </Card>
 
           {/* User Growth Chart */}
@@ -267,10 +321,15 @@ export default function UserStats() {
                 User Growth
               </CardTitle>
             </CardHeader>
+           
             <CardContent>
+            
               <UserGrowthChart />
+                    
             </CardContent>
+                    
           </Card>
+                    
         </div>
 
         {/* Detailed Stats Table */}
@@ -343,6 +402,22 @@ export default function UserStats() {
                     </th>
                   </tr>
                 </thead>
+                {isLoading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) : (
                 <AnimatePresence mode="wait">
                   {!isFiltering && (
                     <motion.tbody
@@ -381,6 +456,7 @@ export default function UserStats() {
                     </motion.tbody>
                   )}
                 </AnimatePresence>
+)}
               </table>
             </div>
           </CardContent>
@@ -400,6 +476,7 @@ export function UserGrowthChart() {
   }, []);
 
   const fetchYearlyData = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const currentYear = new Date().getFullYear();
@@ -426,11 +503,23 @@ export function UserGrowthChart() {
     }
   };
 
-  if (isLoading) return <div className="p-6 text-center">Loading...</div>;
+  //if (isLoading) return <div className="p-6 text-center">Loading...</div>;
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
 
   return (
+    
     <div className="h-[200px]">
+      {isLoading ?(
+      <div className="md:col-span-8 bg-transparent">
+      <div className="p-3 mb-2"></div>
+      <div className="pl-0">
+        {/* Reduced width for the chart skeleton */}
+        <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
+      </div>
+    </div>
+    
+    
+    ):(
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={yearlyData}
@@ -455,6 +544,9 @@ export function UserGrowthChart() {
           />
         </AreaChart>
       </ResponsiveContainer>
+    )}
     </div>
+    
+    
   );
 }

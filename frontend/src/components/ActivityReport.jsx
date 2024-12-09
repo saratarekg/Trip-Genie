@@ -65,6 +65,7 @@ const ActivityReport = () => {
   const [initialTotalCommissionRevenue, setInitialTotalCommissionRevenue] = useState(0);
   const initialGraphDataRef = useRef(null);
   const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
+  const [isloading,setisLoading]= useState(false);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -73,6 +74,7 @@ const ActivityReport = () => {
   };
 
   const calculateTotals = () => {
+    
     return filteredSales.reduce(
       (acc, item) => {
         acc.ticketsSold += Math.round(item.totalRevenue / item.activity.price);
@@ -81,10 +83,13 @@ const ActivityReport = () => {
         return acc;
       },
       { ticketsSold: 0, revenue: 0, commissionRevenue: 0 }
+      
     );
+   
   };
 
   const loadStatistics = async () => {
+    setisLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -139,6 +144,7 @@ const ActivityReport = () => {
           "Invalid data structure received from the server: activitiesSales missing"
         );
       }
+      setisLoading(false);
     } catch (error) {
       console.error("Error fetching sales report:", error);
       setError("Failed to fetch sales report. Please try again later.");
@@ -146,6 +152,7 @@ const ActivityReport = () => {
   };
 
   const fetchFilteredData = async (newFilters) => {
+    setisLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -175,6 +182,7 @@ const ActivityReport = () => {
       } else {
         setError("Invalid data structure received from the server: activitiesSales missing");
       }
+      setisLoading(false);
     } catch (error) {
       console.error("Error fetching filtered data:", error);
       setError("Failed to fetch filtered data. Please try again later.");
@@ -243,6 +251,7 @@ const ActivityReport = () => {
   };
 
   const calculatePeriodRevenue = (salesData, period) => {
+   
     if (!Array.isArray(salesData)) return 0;
     const now = new Date();
     return salesData.reduce((sum, item) => {
@@ -305,10 +314,86 @@ const ActivityReport = () => {
     }
     setFilters(newFilters);
   };
-
+  const ActivityReportSkeleton = () => {
+    return (
+      <div className="bg-gray-100 min-h-screen p-6">
+        <div className="grid gap-4 md:grid-cols-12 mb-4">
+          {/* Total Revenue Skeleton */}
+          <Card className="md:col-span-4 flex flex-col justify-center items-center">
+            <CardHeader className="p-3 w-full">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-bold text-gray-300 bg-gray-300 rounded w-1/2 h-6"></CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 flex flex-col justify-center items-center w-full">
+              <div className="relative flex items-center justify-center w-40 h-40">
+                <div className="w-full h-full rounded-full bg-gray-200"></div>
+              </div>
+              <div className="text-center mt-4">
+                <p className="text-base font-semibold bg-gray-300 rounded w-3/4 h-4 mx-auto"></p>
+              </div>
+            </CardContent>
+          </Card>
+  
+          {/* Sales Analytics Skeleton */}
+          <Card className="md:col-span-8">
+            <CardHeader className="p-3 mb-2">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg font-bold bg-gray-300 rounded w-1/3 h-6"></CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pl-0">
+              <div className="h-[200px] bg-gray-200 rounded"></div>
+            </CardContent>
+          </Card>
+        </div>
+  
+        {/* Sales Report Skeleton */}
+        <Card>
+          <CardHeader className="p-4">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-xl font-bold bg-gray-300 rounded w-1/4 h-6"></CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4 mb-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="w-full sm:w-[200px] h-10 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {[1, 2, 3, 4].map((i) => (
+                      <th key={i} className="px-6 py-3">
+                        <div className="bg-gray-300 rounded w-full h-4"></div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3, 4, 5].map((row) => (
+                    <tr key={row} className="bg-white">
+                      {[1, 2, 3, 4].map((cell) => (
+                        <td key={cell} className="px-6 py-4">
+                          <div className="bg-gray-200 rounded w-full h-4"></div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+  
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
-
+  //if (!salesReport) return <div className="p-6 text-center">{ActivityReportSkeleton}</div>;
+    //if(isloading) return <div className="p-6 text-center">{ActivityReportSkeleton}</div>;
   const thisMonthChange =
     lastMonthSales === 0
       ? 100
@@ -358,13 +443,25 @@ const ActivityReport = () => {
                     }}
                   />
                 </svg>
+                {isloading ? (
+  <>
+   
+    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  
+    <div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                 
+                  <span className="text-sm text-[#5D9297]">Filtered Total</span>
+                </div>
+  </>
+) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-bold text-[#1A3B47]">
                     ${calculateTotals().commissionRevenue.toFixed(2)}
                   </span>
                   <span className="text-sm text-[#5D9297]">Filtered Total</span>
-                </div>
+                </div>)}
               </div>
+              
               <div className="text-center mt-4">
                 <p className="text-base font-semibold text-[#1A3B47]">
                   Total Commission Revenue
@@ -382,13 +479,26 @@ const ActivityReport = () => {
                 </CardTitle>
               </div>
             </CardHeader>
+            {isloading ?(
+                      <div className="md:col-span-8 bg-transparent">
+                      <div className="p-3 mb-2"></div>
+                      <div className="pl-0">
+                        {/* Reduced width for the chart skeleton */}
+                        <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
+                      </div>
+                    </div>
+                    
+                    
+                    ):(
             <CardContent className="pl-0">
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={graphData}
                     margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
+                    
                   >
+                    
                     <defs>
                       <linearGradient
                         id="colorRevenue"
@@ -433,10 +543,15 @@ const ActivityReport = () => {
                         fill: "white",
                       }}
                     />
+                    
                   </AreaChart>
+                    
                 </ResponsiveContainer>
+                    
               </div>
             </CardContent>
+                    )}
+                  
           </Card>
         </div>
 
@@ -530,6 +645,22 @@ const ActivityReport = () => {
                     </th>
                   </tr>
                 </thead>
+                {isloading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3,4].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) : (
                 <AnimatePresence mode="wait">
                   {!isFiltering && (
                     <motion.tbody
@@ -594,6 +725,7 @@ const ActivityReport = () => {
                     </motion.tbody>
                   )}
                 </AnimatePresence>
+)}
               </table>
             </div>
           </CardContent>

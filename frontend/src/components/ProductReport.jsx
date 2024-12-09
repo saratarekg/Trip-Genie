@@ -66,6 +66,7 @@ const ProductReport = () => {
   const [thisMonthSales, setThisMonthSales] = useState(0);
   const [lastMonthSales, setLastMonthSales] = useState(0);
   const initialGraphDataRef = useRef(null);
+  const [isloading,setisLoading]=useState(false);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -74,6 +75,7 @@ const ProductReport = () => {
   };
 
   const loadStatistics = async () => {
+    setisLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -123,6 +125,7 @@ const ProductReport = () => {
           "Invalid data structure received from the server: adminProductsSales missing"
         );
       }
+     setisLoading(false);
     } catch (error) {
       console.error("Error fetching sales report:", error);
       setError("Failed to fetch sales report. Please try again later.");
@@ -130,6 +133,7 @@ const ProductReport = () => {
   };
 
   const fetchFilteredData = async (newFilters) => {
+    setisLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -161,6 +165,7 @@ const ProductReport = () => {
       } else {
         setError("Invalid data structure received from the server: adminProductsSales missing");
       }
+      setisLoading(false);
     } catch (error) {
       console.error("Error fetching filtered data:", error);
       setError("Failed to fetch filtered data. Please try again later.");
@@ -307,7 +312,7 @@ const ProductReport = () => {
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
+  //if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
 
   const fillPercentage = (initialSelectedPeriodRevenue / initialTotalRevenue) * 100;
 
@@ -438,6 +443,22 @@ const ProductReport = () => {
                     </th>
                   </tr>
                 </thead>
+                {isloading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) : (
                 <AnimatePresence mode="wait">
                   {!isFiltering && (
                     <motion.tbody
@@ -470,6 +491,7 @@ const ProductReport = () => {
                     </motion.tbody>
                   )}
                 </AnimatePresence>
+)}
               </table>
             </div>
           </CardContent>

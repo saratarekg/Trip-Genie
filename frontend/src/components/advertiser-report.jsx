@@ -271,11 +271,11 @@ const AdvertiserReport = () => {
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!isDataLoaded) return <div className="p-6 text-center">Loading...</div>;
+  //if (!isDataLoaded) return <div className="p-6 text-center">Loading...</div>;
 
-  const totalRevenue = salesReport.totalRevenue || 0;
+  const totalRevenue = salesReport?.totalRevenue || 0;
   const selectedPeriodRevenue = calculatePeriodRevenue(
-    salesReport.activityReport || [],
+    salesReport?.activityReport || [],
     selectedPeriod
   );
   const fillPercentage = initialTotalRevenue
@@ -283,13 +283,13 @@ const AdvertiserReport = () => {
     : 0;
 
   const thisMonthSales = calculatePeriodRevenue(
-    salesReport.activityReport || [],
+    salesReport?.activityReport || [],
     "month"
   );
   const lastMonthSales = (() => {
     const now = new Date();
     const lastMonth = subMonths(now, 1);
-    return (salesReport.activityReport || []).reduce((sum, item) => {
+    return (salesReport?.activityReport || []).reduce((sum, item) => {
       const saleDate = new Date(now.getFullYear(), parseInt(item.month) - 1);
       return (
         sum +
@@ -325,6 +325,7 @@ const AdvertiserReport = () => {
                 </CardTitle>
               </div>
             </CardHeader>
+           
             <CardContent className="p-3 flex flex-col justify-center items-center w-full">
               <div className="relative flex items-center justify-center w-48 h-48">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -357,15 +358,17 @@ const AdvertiserReport = () => {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
+                {isLoading ? (<div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>):(
                   <span className="text-lg font-bold text-[#1A3B47]">
                     ${totalFilteredRevenue.toFixed(2)}
-                  </span>
+                  </span>)}
                   <span className="text-sm text-[#5D9297]">
                     {selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)}
                   </span>
                 </div>
               </div>
             </CardContent>
+                    
           </Card>
 
           {/* Sales Analytics Card */}
@@ -377,6 +380,17 @@ const AdvertiserReport = () => {
                 </CardTitle>
               </div>
             </CardHeader>
+            {isLoading ?(
+                      <div className="md:col-span-8 bg-transparent">
+                      <div className="p-3 mb-2"></div>
+                      <div className="pl-0">
+                        {/* Reduced width for the chart skeleton */}
+                        <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
+                      </div>
+                    </div>
+                    
+                    
+                    ):(
             <CardContent className="pl-4 pr-4">
               <div className="h-[210px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -431,7 +445,7 @@ const AdvertiserReport = () => {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </CardContent>
+            </CardContent>)}
           </Card>
         </div>
 
@@ -540,6 +554,22 @@ const AdvertiserReport = () => {
                     </th>
                   </tr>
                 </thead>
+                {isLoading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) : (
                 <AnimatePresence mode="wait">
                   <motion.tbody
                     key="table-body"
@@ -591,6 +621,7 @@ const AdvertiserReport = () => {
                     </motion.tr>
                   </motion.tbody>
                 </AnimatePresence>
+)}
               </table>
             </div>
           </CardContent>

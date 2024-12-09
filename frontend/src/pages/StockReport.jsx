@@ -60,6 +60,7 @@ const StockReport = () => {
   const [error, setError] = useState(null);
 
   const fetchMyProducts = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = Cookies.get("role");
@@ -78,12 +79,14 @@ const StockReport = () => {
           name: product.name,
         }))
       );
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching products:", error);
       setError("Failed to fetch products. Please try again later.");
     }
   };
   const fetchProductsReport = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = Cookies.get("role");
@@ -113,7 +116,9 @@ const StockReport = () => {
         setError(
           "Invalid data structure received from the server: stockReport missing"
         );
+        
       }
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching stock report:", error);
       setError("Failed to fetch stock report. Please try again later.");
@@ -242,7 +247,7 @@ const StockReport = () => {
   const role = Cookies.get("role");
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (isLoading) return <div className="p-6 text-center">Loading...</div>;
+  //if (isLoading) return <div className="p-6 text-center">{ActivityReportSkeleton}</div>;
 
   //   const fillPercentage = totalRevenue
   //     ? (selectedPeriodRevenue / totalRevenue) * 100
@@ -688,59 +693,79 @@ const StockReport = () => {
                       </th>
                     </tr>
                   </thead>
-                  <AnimatePresence mode="wait">
-                    {!isLoading && (
-                      <motion.tbody
-                        key="table-body"
-                        className="bg-white divide-y divide-gray-200"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {filteredReport.map((item, index) => (
-                          <motion.tr
-                            key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.2, delay: index * 0.05 }}
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {item.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              ${parseFloat(item.sales).toFixed(2)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {item.quantity}
-                            </td>
-                          </motion.tr>
-                        ))}
-                        <motion.tr
-                          key="total-row"
-                          className="bg-gray-50 font-semibold"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{
-                            duration: 0.2,
-                            delay: filteredReport.length * 0.05,
-                          }}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            -
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Total:${totalSales.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Total:{totalStock}
-                          </td>
-                        </motion.tr>
-                      </motion.tbody>
-                    )}
-                  </AnimatePresence>
+                 
+                 
+  
+  {/* 6 more rows of pulsing lines with more space and bigger size */}
+  {isLoading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) : (
+  <AnimatePresence mode="wait">
+    {!isLoading && (
+      <motion.tbody
+        key="table-body"
+        className="bg-white divide-y divide-gray-200"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        {filteredReport.map((item, index) => (
+          <motion.tr
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2, delay: index * 0.05 }}
+          >
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {item.name}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              ${parseFloat(item.sales).toFixed(2)}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {item.quantity}
+            </td>
+          </motion.tr>
+        ))}
+        <motion.tr
+          key="total-row"
+          className="bg-gray-50 font-semibold"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{
+            duration: 0.2,
+            delay: filteredReport.length * 0.05,
+          }}
+        >
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">-</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            Total: ${totalSales.toFixed(2)}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            Total: {totalStock}
+          </td>
+        </motion.tr>
+      </motion.tbody>
+    )}
+  </AnimatePresence>
+)}
+
                 </table>
               </div>
             </CardContent>

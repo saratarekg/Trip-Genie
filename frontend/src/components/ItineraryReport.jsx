@@ -67,6 +67,7 @@ const ItineraryReport = () => {
   const [lastMonthSales, setLastMonthSales] = useState(0);
   const [initialTotalCommissionRevenue, setInitialTotalCommissionRevenue] = useState(0);
   const initialGraphDataRef = useRef(null);
+  const [isloading,setisLoading]= useState(false);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -87,6 +88,7 @@ const ItineraryReport = () => {
   };
 
   const loadStatistics = async () => {
+    setisLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -148,7 +150,7 @@ const ItineraryReport = () => {
         setError(
           "Invalid data structure received from the server: itinerariesSales missing"
         );
-      }
+      }setisLoading(false);
     } catch (error) {
       console.error("Error fetching sales report:", error);
       setError("Failed to fetch sales report. Please try again later.");
@@ -156,6 +158,7 @@ const ItineraryReport = () => {
   };
 
   const fetchFilteredData = async (newFilters) => {
+    setisLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -185,6 +188,7 @@ const ItineraryReport = () => {
       } else {
         setError("Invalid data structure received from the server: itinerariesSales missing");
       }
+      setisLoading(false);
     } catch (error) {
       console.error("Error fetching filtered data:", error);
       setError("Failed to fetch filtered data. Please try again later.");
@@ -317,7 +321,7 @@ const ItineraryReport = () => {
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
+  //if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
 
   const fillPercentage = initialTotalRevenue
     ? (selectedPeriodRevenue / initialTotalRevenue) * 100
@@ -374,12 +378,24 @@ const ItineraryReport = () => {
                     }}
                   />
                 </svg>
+                {isloading ? (
+  <>
+   
+    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  
+    <div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                 
+                  <span className="text-sm text-[#5D9297]">Filtered Total</span>
+                </div>
+  </>
+) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-bold text-[#1A3B47]">
                     ${calculateTotals().commissionRevenue.toFixed(2)}
                   </span>
                   <span className="text-sm text-[#5D9297]">Filtered Total</span>
                 </div>
+)}
               </div>
               <div className="text-center mt-4">
                 <p className="text-base font-semibold text-[#1A3B47]">
@@ -398,6 +414,17 @@ const ItineraryReport = () => {
                 </CardTitle>
               </div>
             </CardHeader>
+            {isloading ?(
+                      <div className="md:col-span-8 bg-transparent">
+                      <div className="p-3 mb-2"></div>
+                      <div className="pl-0">
+                        {/* Reduced width for the chart skeleton */}
+                        <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
+                      </div>
+                    </div>
+                    
+                    
+                    ):(
             <CardContent className="pl-0">
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -453,6 +480,7 @@ const ItineraryReport = () => {
                 </ResponsiveContainer>
               </div>
             </CardContent>
+                    )}
           </Card>
         </div>
 
@@ -546,6 +574,22 @@ const ItineraryReport = () => {
                     </th>
                   </tr>
                 </thead>
+                {isloading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3,4].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) : (
                 <AnimatePresence mode="wait">
                   {!isFiltering && (
                     <motion.tbody
@@ -610,6 +654,7 @@ const ItineraryReport = () => {
                     </motion.tbody>
                   )}
                 </AnimatePresence>
+)}
               </table>
             </div>
           </CardContent>
