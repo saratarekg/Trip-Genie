@@ -2237,7 +2237,7 @@ const ActivityDetail = () => {
                     )}
 
                     <div className="grid grid-cols-2 gap-4">
-                      <Label className="text-right"> Points Earned:</Label>
+                      <Label className="text-right"> Loyalty Points Earned:</Label>
 
                       {loyaltyy}
                     </div>

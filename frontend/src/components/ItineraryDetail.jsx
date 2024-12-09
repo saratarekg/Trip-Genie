@@ -2606,8 +2606,11 @@ const ItineraryDetail = () => {
                     </div>
                   </div>
                 )}
-                <Label className="text-left">Loyalty Points Earned:</Label>
-                <div>{loyalty}</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Label className="text-right">Loyalty Points Earned:</Label>
+                  <div>{loyalty}</div>
+</div>
+
               </div>
             </div>
 
