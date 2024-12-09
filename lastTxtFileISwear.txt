@@ -46,7 +46,7 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
         - shay be laban 3amatan (create activity we create products we kol el create ) (done✅ radwa)
         -create promo code layout (stretch start and end date we geeb el button foo2 ) (done✅)
 -update itinerary betawel w fl akhr error lama bghyr sowar kteer f activities (radwa)
-        -leave a review navigation aal past lw deleted bydy error (aby)
+        -leave a review navigation aal past lw deleted bydy error (done)
 		-no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review (zeina done✅)
 		-lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh(zeina done✅)
 		-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha(zeina done✅ INSHALLAH)
