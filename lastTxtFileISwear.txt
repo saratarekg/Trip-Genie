@@ -3,8 +3,6 @@ Priority List:
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
--mafish loading baad ma badoos update product (Hazem)
-- navigation notification fe admin (radwa)
 - sales report margins
 - booking confirmation popouts mesh zy b3d
 -update itinerary leha popup(cant aw succesfully updated)
@@ -19,6 +17,7 @@ Priority List:
 flights we hotels we trans y2bo fe component wa7ed fel homepage
 - graph in admin dashboard bytawl w fel user stats report 
 - pagination msh btl3 l awl elpage
+- alwan flag inappropriate fe admin activites different 3n itineraries
 
 
 ------------------------------------done-------------------------------------------
@@ -51,7 +50,7 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 		-create promo code msh sha8ala (done ✅)
 		-admin b y create activity category etnen b nafs elesm aady (zeina done✅)
 		- currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)(done✅)
-
+        - navigation notification fe admin (done ✅ radwa)
 
 
 -CANT TEST CREATE/UPDATE HISTORICAL PLACE AASHAN COUNTRIES (had y testaha)
@@ -175,7 +174,6 @@ Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button
 
 
 
-
 Jana:
 105   
 106  
@@ -242,7 +240,6 @@ Radwa:
 
 - add user l governor w admin not functional (done✅)
 - sort by preference shklo w alwano mokhtlfa f kol page (done✅) (m3ada el sam hyrg3ha)
-- alwan flag inappropriate fe admin activites different 3n itineraries
 - shakl view all done✅
 - change pass fe admin (done✅)
 - khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done✅)

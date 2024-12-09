@@ -959,7 +959,7 @@ export function MyItinerariesComponent() {
                 {isPriceInitialized && (
                   <DualHandleSliderComponent
                     min={0}
-                    max={maxPriceOfItinerary}
+                    max={maxPriceOfItinerary === 0 ? 1000 : maxPriceOfItinerary}
                     symbol={getSymbol()}
                     step={Math.max(
                       1,

@@ -297,7 +297,7 @@ const ProductCard = ({
   );
 };
 
-export function AllProducts() {
+export function AllProducts({ notificationId }) {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
@@ -326,7 +326,7 @@ export function AllProducts() {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [alertMessage, setAlertMessage] = useState(null);
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState(null); // Add state for selected historical place
+  const [selectedProductId, setSelectedProductId] = useState(notificationId || null); // Initialize with notificationId if available
 
   const tripsPerPage = 6;
 
@@ -344,6 +344,7 @@ export function AllProducts() {
 
   const getUserRole = useCallback(() => {
     let role = Cookies.get("role");
+    console.log(notificationId);
     return role || "guest";
   }, []);
 
@@ -353,6 +354,7 @@ export function AllProducts() {
 
   const handleBackToAll = () => {
     setSelectedProductId(null);
+    
   };
 
   const fetchUserInfo = useCallback(async () => {
@@ -842,7 +844,7 @@ export function AllProducts() {
             <ChevronLeft className="w-5 h-5 mr-2" />
             Back to All Products
           </Button>
-          <ProductDetail id={selectedProductId} />
+          <ProductDetail id={notificationId || selectedProductId} /> {/* Use notificationId if available */}
         </div>
       ) : (
         <div className="">
