@@ -34,7 +34,14 @@ import defaultImage from "@/assets/images/default-image.jpg";
 import activityImage from "@/assets/images/sam.png";
 import DualHandleSliderComponent from "@/components/dual-handle-slider";
 import { UserGuide } from "@/components/UserGuide";
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
 
 const renderStars = (rating) => {
   return (
@@ -42,8 +49,9 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-4 h-4 ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
         />
       ))}
     </div>
@@ -105,8 +113,8 @@ const ActivityCard = ({
     const initializeCard = async () => {
       await Promise.all([
         userInfo &&
-          userInfo.role === "tourist" &&
-          userInfo.preferredCurrency !== activity.currency
+        userInfo.role === "tourist" &&
+        userInfo.preferredCurrency !== activity.currency
           ? fetchExchangeRate()
           : getCurrencySymbol(),
       ]);
@@ -197,10 +205,11 @@ const ActivityCard = ({
             }}
           >
             <Bookmark
-              className={`w-6 h-6 ${isSaved
-                ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]"
-                : "stroke-black"
-                }`}
+              className={`w-6 h-6 ${
+                isSaved
+                  ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]"
+                  : "stroke-black"
+              }`}
             />
           </Button>
         )}
@@ -304,10 +313,8 @@ export default function AllActivities() {
   const activitiesPerPage = 6;
   const [savedActivities, setSavedActivities] = useState([]);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastType, setToastType] = useState('success');
-  const [toastMessage, setToastMessage] = useState('');
-
-
+  const [toastType, setToastType] = useState("success");
+  const [toastMessage, setToastMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -384,7 +391,6 @@ export default function AllActivities() {
     },
     [fetchSavedActivities]
   );
-
 
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
@@ -780,8 +786,7 @@ export default function AllActivities() {
 
   return (
     <div className="bg-gray-100">
-
-    <ToastProvider>
+      <ToastProvider>
         <div
           className="relative h-[330px] bg-cover bg-center"
           style={{ backgroundImage }}
@@ -808,7 +813,9 @@ export default function AllActivities() {
           <div className="flex gap-8">
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+                <h2 className="text-xl font-semibold text-[#1A3B47]">
+                  Filters
+                </h2>
                 <Button
                   onClick={clearFilters}
                   size="sm"
@@ -819,7 +826,9 @@ export default function AllActivities() {
               </div>
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Price Range
+                  </h3>
                   {isPriceInitialized && (
                     <DualHandleSliderComponent
                       min={0}
@@ -835,7 +844,9 @@ export default function AllActivities() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Date Range
+                  </h3>
                   <div className="space-y-2">
                     <input
                       type="date"
@@ -856,7 +867,9 @@ export default function AllActivities() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Star Rating</h3>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Star Rating
+                  </h3>
                   <div className="space-y-2">
                     {[5, 4, 3, 2, 1].map((rating) => (
                       <button
@@ -866,8 +879,9 @@ export default function AllActivities() {
                             rating === selectedRating ? null : rating
                           )
                         }
-                        className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                          }`}
+                        className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
+                          selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                        }`}
                       >
                         {renderStars(rating)}
                       </button>
@@ -955,15 +969,17 @@ export default function AllActivities() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""
-                          }`}
+                        className={`whitespace-nowrap rounded-full ${
+                          isSortedByPreference ? "bg-red-100" : ""
+                        }`}
                         onClick={handleSortByPreference}
                       >
                         <Heart
-                          className={`w-4 h-4 mr-2 ${isSortedByPreference
-                            ? "fill-current text-red-500"
-                            : ""
-                            }`}
+                          className={`w-4 h-4 mr-2 ${
+                            isSortedByPreference
+                              ? "fill-current text-red-500"
+                              : ""
+                          }`}
                         />
                         Sort by Preference
                       </Button>
@@ -1004,7 +1020,9 @@ export default function AllActivities() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                    onClick={() =>
+                      handlePageChange(Math.max(currentPage - 1, 1))
+                    }
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -1044,8 +1062,9 @@ export default function AllActivities() {
         </div>
         {alertMessage && (
           <Alert
-            className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-              } text-white`}
+            className={`fixed bottom-4 right-4 w-96 ${
+              alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
           >
             <AlertTitle>
               {alertMessage.type === "success" ? "Success" : "Error"}
@@ -1057,36 +1076,31 @@ export default function AllActivities() {
           <UserGuide steps={guideSteps} pageName="activities" />
         )}
 
-
-
-
         <ToastViewport className="fixed top-0 right-0 p-4" />
-        {
-          isToastOpen && (
-            
+        {isToastOpen && (
           <Toast
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
             duration={5000}
-            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
           >
             <div className="flex items-center">
-              {toastType === 'success' ? (
+              {toastType === "success" ? (
                 <CheckCircle className="text-green-500 mr-2" />
               ) : (
                 <XCircle className="text-red-500 mr-2" />
               )}
               <div>
-                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-                <ToastDescription>
-                  {toastMessage}
-                </ToastDescription>
+                <ToastTitle>
+                  {toastType === "success" ? "Success" : "Error"}
+                </ToastTitle>
+                <ToastDescription>{toastMessage}</ToastDescription>
               </div>
             </div>
             <ToastClose />
           </Toast>
-          )}
-          </ToastProvider>
-          </div>
-      );
+        )}
+      </ToastProvider>
+    </div>
+  );
 }

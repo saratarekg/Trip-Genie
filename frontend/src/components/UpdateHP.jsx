@@ -28,7 +28,6 @@ import {
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 import backgroundPicture from "../assets/images/backgroundPattern.png";
 
-
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
     <svg
@@ -509,7 +508,8 @@ export default function UpdateHistoricalPlace() {
               Update Historical Place
             </h2>
             <p className="text-sm mb-6 text-[#1A3B47]">
-              Update the details of your historical place. Make sure all information is accurate and up-to-date.
+              Update the details of your historical place. Make sure all
+              information is accurate and up-to-date.
             </p>
           </div>
           <div className="w-full md:w-3/4 p-6">
@@ -539,7 +539,9 @@ export default function UpdateHistoricalPlace() {
                   ref={descriptionRef}
                 />
                 {formErrors.description && (
-                  <p className="text-red-500 text-xs">{formErrors.description}</p>
+                  <p className="text-red-500 text-xs">
+                    {formErrors.description}
+                  </p>
                 )}
               </div>
 
@@ -597,9 +599,7 @@ export default function UpdateHistoricalPlace() {
                     <SelectTrigger>
                       <SelectValue
                         placeholder={
-                          citiesLoading
-                            ? "Loading cities..."
-                            : "Select a city"
+                          citiesLoading ? "Loading cities..." : "Select a city"
                         }
                       />
                     </SelectTrigger>
@@ -632,7 +632,9 @@ export default function UpdateHistoricalPlace() {
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="openingHours.weekdays">Opening Hours (Weekdays)</Label>
+                <Label htmlFor="openingHours.weekdays">
+                  Opening Hours (Weekdays)
+                </Label>
                 <Input
                   id="openingHours.weekdays"
                   name="openingHours.weekdays"
@@ -645,7 +647,9 @@ export default function UpdateHistoricalPlace() {
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="openingHours.weekends">Opening Hours (Weekends)</Label>
+                <Label htmlFor="openingHours.weekends">
+                  Opening Hours (Weekends)
+                </Label>
                 <Input
                   id="openingHours.weekends"
                   name="openingHours.weekends"
@@ -658,7 +662,9 @@ export default function UpdateHistoricalPlace() {
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="ticketPrices.native">Ticket Price (Native)</Label>
+                <Label htmlFor="ticketPrices.native">
+                  Ticket Price (Native)
+                </Label>
                 <Input
                   type="number"
                   id="ticketPrices.native"
@@ -669,12 +675,16 @@ export default function UpdateHistoricalPlace() {
                   ref={nativePriceRef}
                 />
                 {formErrors.nativePrice && (
-                  <p className="text-red-500 text-xs">{formErrors.nativePrice}</p>
+                  <p className="text-red-500 text-xs">
+                    {formErrors.nativePrice}
+                  </p>
                 )}
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="ticketPrices.student">Ticket Price (Student)</Label>
+                <Label htmlFor="ticketPrices.student">
+                  Ticket Price (Student)
+                </Label>
                 <Input
                   type="number"
                   id="ticketPrices.student"
@@ -685,12 +695,16 @@ export default function UpdateHistoricalPlace() {
                   ref={studentPriceRef}
                 />
                 {formErrors.studentPrice && (
-                  <p className="text-red-500 text-xs">{formErrors.studentPrice}</p>
+                  <p className="text-red-500 text-xs">
+                    {formErrors.studentPrice}
+                  </p>
                 )}
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="ticketPrices.foreigner">Ticket Price (Foreigner)</Label>
+                <Label htmlFor="ticketPrices.foreigner">
+                  Ticket Price (Foreigner)
+                </Label>
                 <Input
                   type="number"
                   id="ticketPrices.foreigner"
@@ -701,7 +715,9 @@ export default function UpdateHistoricalPlace() {
                   ref={foreignerPriceRef}
                 />
                 {formErrors.foreignerPrice && (
-                  <p className="text-red-500 text-xs">{formErrors.foreignerPrice}</p>
+                  <p className="text-red-500 text-xs">
+                    {formErrors.foreignerPrice}
+                  </p>
                 )}
               </div>
 
@@ -740,7 +756,11 @@ export default function UpdateHistoricalPlace() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button onClick={handleAddTag} disabled={!newTag}>
+                  <Button
+                    onClick={handleAddTag}
+                    disabled={!newTag}
+                    className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                  >
                     Add Tag
                   </Button>
                 </div>
@@ -820,7 +840,10 @@ export default function UpdateHistoricalPlace() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate("/all-historical-places")} className="bg-[#5D9297] text-white hover:bg-[#1A3B47]">
+            <Button
+              onClick={() => navigate("/all-historical-places")}
+              className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+            >
               Back to All Historical Places
             </Button>
           </DialogFooter>

@@ -311,7 +311,7 @@ export function MyProducts() {
                 {isPriceInitialized && (
                   <DualHandleSliderComponent
                     min={0}
-                    max={maxPriceOfProducts}
+                    max={maxPriceOfProducts === 0 ? 1000 : maxPriceOfProducts}
                     symbol="$"
                     step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
                     values={priceRange}

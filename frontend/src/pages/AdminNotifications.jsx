@@ -32,11 +32,11 @@ import {
 } from "@/components/ui/popover"
 import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast"
 
-export default function NotificationsPage() {
+export default function NotificationsPage( { setActiveTab, setSelectedProductId } ) {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [activeTab, setActiveTab] = useState("general")
+  const [activeTabs, setActiveTabs] = useState("general")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedPriorities, setSelectedPriorities] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
@@ -47,6 +47,7 @@ export default function NotificationsPage() {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
+  // const [selectedProductId, setSelectedProductId] = useState(null);
 
   const navigate = useNavigate()
 
@@ -160,8 +161,8 @@ export default function NotificationsPage() {
   }
 
   const renderNotificationBody = (body, notification) => {
-    const regex = /<b>(.*?)<\/b>/g
-    const parts = body.split(regex)
+    const regex = /<b>(.*?)<\/b>/g;
+    const parts = body.split(regex);
 
     return parts.map((part, index) => {
       if (index % 2 === 1) {
@@ -171,9 +172,13 @@ export default function NotificationsPage() {
               <span
                 className="font-bold cursor-pointer text-[#1A3B47] hover:underline"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  markNotificationAsSeen(notification._id)
-                  navigate(notification.link)
+                  e.stopPropagation();
+                  markNotificationAsSeen(notification._id);
+                  console.log(`Notification clicked: ${part}`);
+                  const productId = notification.link.split("/").pop();
+                  console.log(`Product ID: ${productId}`);
+                  setActiveTab("manage-products");
+                  setSelectedProductId(productId); // Set selectedProductId instead of navigating
                 }}
               >
                 {part}
@@ -191,17 +196,17 @@ export default function NotificationsPage() {
               {`Show details for ${part}`}
             </TooltipContent>
           </Tooltip>
-        )
+        );
       }
-      return part
-    })
-  }
+      return part;
+    });
+  };
 
   const getFilteredNotifications = () => {
     let filtered = notifications
 
     // Tab filter
-    switch (activeTab) {
+    switch (activeTabs) {
       case "reminders":
         filtered = filtered.filter(n => n.tags.includes("reminder"))
         break
@@ -334,13 +339,13 @@ export default function NotificationsPage() {
                 <div className="grid grid-cols-9 items-center gap-4">
     {/* Tabs */}
     <div className="col-span-3">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTabs} onValueChange={setActiveTabs}>
         <TabsList className="grid grid-cols-2 bg-white">
           {/* General Tab */}
           <TabsTrigger
             value="general"
             className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
-              activeTab === 'general'
+              activeTabs === 'general'
                 ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
                 : 'border-gray-300 text-gray-500 bg-white'
             }`}
@@ -349,7 +354,7 @@ export default function NotificationsPage() {
             {getCounts().general > 0 && (
               <span
                 className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
-                  activeTab === 'general' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+                  activeTabs === 'general' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
                 }`}
               >
                 {getCounts().general}
@@ -361,7 +366,7 @@ export default function NotificationsPage() {
           <TabsTrigger
             value="alert"
             className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
-              activeTab === 'alert'
+              activeTabs === 'alert'
                 ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
                 : 'border-gray-300 text-gray-500 bg-white'
             }`}
@@ -370,7 +375,7 @@ export default function NotificationsPage() {
             {getCounts().alert > 0 && (
               <span
                 className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
-                  activeTab === 'alert' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+                  activeTabs === 'alert' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
                 }`}
               >
                 {getCounts().alert}
@@ -538,7 +543,7 @@ export default function NotificationsPage() {
       </AccordionItem>
     ))}
   </Accordion>
-  {visibleNotifications < getTotalCounts()[activeTab] && (
+  {visibleNotifications < getTotalCounts()[activeTabs] && (
     <div className="p-4 flex justify-center border-t border-gray-200">
       <span
         className="text-[#388A94] cursor-pointer hover:text-[#2e6b77] hover:underline"
