@@ -2,23 +2,23 @@ Priority List:
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola 
--single pages el title mktoob 3 mrat leh f activity/itinerary/product
 - booking confirmation popouts mesh zy b3d
 -update itinerary leha popup(cant aw succesfully updated)
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
--creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
--updating activity popup btdos basraha 3adi w btfdl f update activity
--single ay haga el title el fo2 saye2
 - delete popups yeb2o zai bto3 radwa f tourist
 - when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin) (radwa)
-flights we hotels we trans y2bo fe component wa7ed fel homepage
+-flights we hotels we trans y2bo fe component wa7ed fel homepage
 - graph in admin dashboard bytawl w fel user stats report 
 - pagination msh btl3 l awl elpage
 - alwan flag inappropriate fe admin activites different 3n itineraries
 
 
+
+
 ------------------------------------done-------------------------------------------
+-single ay haga el title el fo2 saye2(done✅)
+-single pages el title mktoob 3 mrat leh f activity/itinerary/product(done✅)
 -Error updating product. Please try again later. lama ba update product f admin s3at (radwa sam done✅)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra) (sam done✅)
 -lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated (zeina hateit toast done✅)

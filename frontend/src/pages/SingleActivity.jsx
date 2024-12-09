@@ -80,6 +80,7 @@ import {
   Frown,
   Car,
   Bus,
+  StarHalf,
 } from "lucide-react";
 import PaymentPopup from "@/components/payment-popup";
 import { use } from "react";
@@ -1121,7 +1122,7 @@ const ActivityDetail = () => {
     {
       target: ".ActivityDetail",
       content:
-        "This section provides a detailed overview of the activity, including its name, timing, price, and location.",
+        "This section provides a detailed overview of the activity, including its timing, price, and location.",
       placement: "left",
     },
     // Conditionally add the Save step based on user role
@@ -1427,19 +1428,10 @@ const ActivityDetail = () => {
     <ToastProvider>
       <div className="min-h-screen bg-gray-100">
         <div
-          style={{
-            backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.7), rgba(93, 146, 151, 0.5)), url(${activity.pictures[0]?.url})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-          className="bg-[#1a202c] text-white py-20 px-4"
+
+          className="bg-[#1A3B47] text-white py-8 px-4"
         >
-          <div className="container mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              {activity.name}
-            </h1>
-          </div>
+
         </div>
 
         <div className="bg-gray-100">
@@ -1557,11 +1549,7 @@ const ActivityDetail = () => {
                     <div>
                       <div className="space-y-4">
                         <div className="ActivityDetail">
-                          <div className="">
-                            <h1 className="text-3xl font-bold">
-                              {activity.name}
-                            </h1>
-                          </div>
+
                           {(userRole === "advertiser" || userRole === "admin") &&
                             !activity.isBookingOpen && (
                               <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
@@ -1569,21 +1557,54 @@ const ActivityDetail = () => {
                               </div>
                             )}
                           <div className="flex items-center">
-                            {/* Rating Badge */}
-                            <div className="flex items-center px-3 py-1 rounded-full">
-                              <StarRating
-                                rating={activity.rating}
-                                readOnly={true}
-                              />
-                            </div>
+                            {Array.from({ length: 5 }, (_, index) => {
+                              let ratingValue = 0;
+                              if (activity.rating) {
+                                ratingValue = Math.floor(activity.rating);
+                              }
+                              const isHalfStar = activity.rating - ratingValue >= 0.5; // Check for half-star
 
-                            {/* Rating Count outside the badge */}
-                            <span className="text-sm font-normal ml-2">
-                              {activity.comments
-                                ? `(${activity.comments.length})`
-                                : "(0)"}
+                              if (index < ratingValue) {
+                                // Full star
+                                return (
+                                  <Star
+                                    key={index}
+                                    fill="#F88C33"
+                                    strokeWidth={0}
+                                    className="w-7 h-7"
+                                  />
+                                );
+                              } else if (index === ratingValue && isHalfStar) {
+                                // Half star
+                                return (
+                                  <StarHalf
+                                    key={index}
+                                    fill="#F88C33"
+                                    strokeWidth={0}
+                                    className="w-7 h-7"
+                                  />
+                                );
+                              } else {
+                                // Empty star (if you have a separate empty Star component, use it here)
+                                return (
+                                  <Star
+                                    key={index}
+                                    fill="#E5E7EB"
+                                    strokeWidth={0}
+                                    className="w-7 h-7"
+                                  />
+                                );
+                              }
+                            })}
+                            <span className="text-xl font-semibold text-black ml-2">
+                              {activity.rating ? activity.rating.toFixed(1) : 0}
                             </span>
                           </div>
+
+                          <span className="  text-[#5D9297] text-medium font-semibold ml-4">
+                            {activity.reviews ? activity.reviews.length : 0} Item
+                            Ratings
+                          </span>
                           <div className="flex items-start">
                             <div>
                               <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
@@ -2612,8 +2633,8 @@ const ActivityDetail = () => {
         )}
 
       </div >
-      </ToastProvider>
-      );
+    </ToastProvider>
+  );
 };
 
-      export default ActivityDetail;
+export default ActivityDetail;
