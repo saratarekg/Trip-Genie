@@ -214,16 +214,15 @@ const flagActivity = async (req, res) => {
       await emailService.sendActivityFlaggedEmail(activity);
 
       const notification = {
-        tags: ["alert", "activity", "inappropriate"], 
+        tags: ["alert", "activity", "inappropriate"],
         title: "Activity Flagged as Inappropriate",
-        priority: "high", 
-        type: "alert", 
+        priority: "high",
+        type: "alert",
         body: `Your activity <b>${activity.name}</b> has been flagged as inappropriate by the admin.`,
         link: `/activity/${req.params.id}`, // Directs the user to the flagged activity's details
-        date: new Date(), 
+        date: new Date(),
         seen: false, // Defaults to false to indicate it hasn't been viewed yet
       };
-      
 
       await Advertiser.findByIdAndUpdate(activity.advertiser._id, {
         $push: { notifications: notification },
@@ -491,6 +490,15 @@ const updateActivity = async (req, res) => {
         .status(403)
         .json({ message: "You are not authorized to update this activity" });
     }
+
+    //Check if activity is booked
+    const bookings = await ActivityBooking.find({ activity: req.params.id });
+    if (bookings.length > 0) {
+      return res.status(400).json({
+        message: "Activity cannot be updated as it is already booked",
+      });
+    }
+
     const {
       name,
       location,
@@ -579,7 +587,6 @@ const updateActivity = async (req, res) => {
           $set: {
             hasUnseenNotifications: true, // Set the hasUnseen flag to true
           },
-          
         });
       }
     }

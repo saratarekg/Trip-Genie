@@ -10,6 +10,7 @@ import {
   Trash2,
   Edit,
   CheckCircleIcon,
+  XCircle,
 } from "lucide-react";
 import {
   FaMapMarkerAlt,
@@ -163,6 +164,7 @@ export default function UpdateActivity() {
   const [newPictures, setNewPictures] = useState([]);
   const [base64Pictures, setBase64Pictures] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [showErrorPopup, setShowErrorPopup] = useState(null);
   const navigate = useNavigate();
 
   // const [transportations, setTransportations] = useState([]);
@@ -316,6 +318,7 @@ export default function UpdateActivity() {
       console.log("Updated activity:", response.data);
       setShowDialog(true);
     } catch (error) {
+      setShowErrorPopup(error.response.data.message);
       console.error("Failed to update activity:", error.message);
     } finally {
       setLoading(false);
@@ -479,7 +482,7 @@ export default function UpdateActivity() {
 
   return (
     <div>
-       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div
@@ -852,6 +855,35 @@ export default function UpdateActivity() {
               className="bg-[#1A3B47] hover:bg-[#142B36] text-white"
             >
               Back to Activities
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showErrorPopup !== null}
+        onOpenChange={() => setShowErrorPopup(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Update Activity
+            </DialogTitle>
+            <DialogDescription>
+              <div className="text-m">
+                {showErrorPopup ||
+                  "An error occurred while updating the itinerary."}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="default"
+              className="bg-gray-400 hover:bg-gray-500"
+              onClick={() => setShowErrorPopup(null)}
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

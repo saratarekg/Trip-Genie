@@ -502,6 +502,11 @@ const updateItinerary = async (req, res) => {
     }
 
     // Check if the itinerary is booked
+    if (itinerary.isBooked) {
+      return res.status(400).json({
+        message: "Itinerary cannot be updated as it is already booked",
+      });
+    }
 
     // If all checks pass, delete the itinerary
     const {
@@ -645,7 +650,6 @@ const flagItinerary = async (req, res) => {
         date: new Date(),
         seen: false,
       };
-
 
       await TourGuide.findByIdAndUpdate(itinerary.tourGuide._id, {
         $push: { notifications: notification },
@@ -937,8 +941,9 @@ const toggleActivationStatus = async (req, res) => {
 
     // Return the updated itinerary details
     return res.status(200).json({
-      message: `Itinerary ${updatedItinerary.isActivated ? "activated" : "deactivated"
-        } successfully`,
+      message: `Itinerary ${
+        updatedItinerary.isActivated ? "activated" : "deactivated"
+      } successfully`,
       itinerary: updatedItinerary,
     });
   } catch (error) {

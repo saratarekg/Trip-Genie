@@ -3,17 +3,13 @@ Priority List:
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
-- sales report margins
 - booking confirmation popouts mesh zy b3d
 -update itinerary leha popup(cant aw succesfully updated)
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
--birthday promocode msh beyban fel notifications  and mail
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
 -updating activity popup btdos basraha 3adi w btfdl f update activity
 -single ay haga el title el fo2 saye2
--out of stock notification  elleh fel navbar msh sha8ala fe seller 
--lazem refresh when adding addres 3ashan tzhar f tourist profile
 - delete popups yeb2o zai bto3 radwa f tourist
 - when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin) (radwa)
 flights we hotels we trans y2bo fe component wa7ed fel homepage
@@ -157,7 +153,7 @@ save/unsave itinerary men single
 archive w unarchive product men admin
 
 -check hn3ml eh f update itinerary lw booked
-- make all popups consistent (success toast and delete popup zay el radwa 3amlha)
+
 
 92(done✅)
 93(done✅)
@@ -171,6 +167,8 @@ archive w unarchive product men admin
 -Tourguide camel case fe registration (da role kefaya 7anyaka ya hadwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa done✅)
 ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)(done✅)
 Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)(7a2ak ya aby done✅)
+- make all popups consistent(done✅ till further notice)
+
 
 
 
