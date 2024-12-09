@@ -14,8 +14,6 @@ Priority List:
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
 -updating activity popup btdos basraha 3adi w btfdl f update activity
 -single ay haga el title el fo2 saye2
--out of stock notification  elleh fel navbar msh sha8ala fe seller 
--lazem refresh when adding addres 3ashan tzhar f tourist profile
 - delete popups yeb2o zai bto3 radwa f tourist
 - when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin) (radwa)
 flights we hotels we trans y2bo fe component wa7ed fel homepage
