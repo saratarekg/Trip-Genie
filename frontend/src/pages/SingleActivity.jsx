@@ -982,7 +982,7 @@ const ActivityDetail = () => {
           "success",
           isSaved
             ? "Activity unsaved successfully!"
-            : "Activity saved successfully!"
+            : "Activity unsaved successfully!"
         );
 
         // Clear the toast message after 3 seconds

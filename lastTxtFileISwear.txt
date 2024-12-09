@@ -1,14 +1,10 @@
 Priority List: 
-		
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -Error updating product. Please try again later. lama ba update product f admin s3at (radwa)
--Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
 -advertiser cannot delete/update his activity mn bara (all activities)
--admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
--lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated 
+-admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
--mafish loading baad ma badoos update product
--sa3at beyede error lama mark all as read
+-mafish loading baad ma badoos update product (Hazem)
 - navigation notification fe admin (radwa)
 - sales report margins
 - booking confirmation popouts mesh zy b3d
@@ -17,7 +13,6 @@ Priority List:
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
 -birthday promocode msh beyban fel notifications  and mail
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
--add loading for wishlist 
 -updating activity popup btdos basraha 3adi w btfdl f update activity
 -single ay haga el title el fo2 saye2
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
@@ -30,7 +25,11 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 
 
 ------------------------------------done-------------------------------------------
-
+-cancel booking 48 hrs before (bycancel lw activity/itinerary bokra) (sam done✅)
+-lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated (zeina hateit toast done✅)
+-sa3at beyede error lama mark all as read (sam done✅)
+-add loading for wishlist (done✅)
+--Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. (Hazem done✅)
         - when updating itinerary and there dates that have passed error message displayed "please choose a future date" (done✅)
 		-logout popup 3and admin na2sa(ehab done✅)
         - consistency fe pages el all  (done✅ radwa)
@@ -41,7 +40,6 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 		-promo code activities, itineraries, hotels msh sha8al (sam done✅)
 		-reports bayza (done✅ Radwa)
 		-notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries) (done aby)
--cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
         -ALL msh zy MY (done✅ habiba)
         -button add user f admin add admin/gov bayez msh by3ml haga (done✅ radwa)
 -types filter in all - my itineraires

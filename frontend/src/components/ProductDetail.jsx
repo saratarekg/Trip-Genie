@@ -1365,9 +1365,6 @@ const ProductDetail = () => {
               <Card>
                 {/* Product Info Section */}
                 <CardHeader>
-                  <CardTitle className="text-4xl font-bold">
-                    {product.name}
-                  </CardTitle>
                   <CardDescription className="flex items-center">
                     <div className="flex items-center">
                       {Array.from({ length: 5 }, (_, index) => {
