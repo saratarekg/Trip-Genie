@@ -25,9 +25,9 @@ import {
 } from "lucide-react";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 
-export default function ShippingAddresses({ 
+export default function ShippingAddresses({
   fetch,
-  showToast // Add showToast prop
+  showToast, // Add showToast prop
 }) {
   const [addresses, setAddresses] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -251,107 +251,98 @@ export default function ShippingAddresses({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100">
-                <div className="flex space-x-3">
-                  <Button
-                    onClick={() => handleOpenModal(address)}
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-600 hover:text-[#1A3B47]"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setAddressToDelete(address._id);
-                      openDelete();
-                    }}
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-600 hover:text-red-600"
-                  >
-                    Delete
-                  </Button>
-                </div>
-
-                <div className="flex items-center">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[#388A94] hover:text-[#1A3B47] mr-3"
-                      >
-                        View Details
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader className="bg-[#388A94] text-white p-4 rounded-t-lg">
-                        <DialogTitle className="text-xl font-semibold">
-                          Address Details
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 p-4 bg-[#F4F4F4] rounded-b-lg">
-                        <p>
-                          <strong className="text-[#1A3B47]">Street:</strong>{" "}
-                          {address.streetName} {address.streetNumber}
-                        </p>
-                        {address.floorUnit && (
-                          <p>
-                            <strong className="text-[#1A3B47]">
-                              Floor/Unit:
-                            </strong>{" "}
-                            {address.floorUnit}
-                          </p>
-                        )}
-                        <p>
-                          <strong className="text-[#1A3B47]">City:</strong>{" "}
-                          {address.city}
-                        </p>
-                        <p>
-                          <strong className="text-[#1A3B47]">State:</strong>{" "}
-                          {address.state}
-                        </p>
-                        <p>
-                          <strong className="text-[#1A3B47]">Country:</strong>{" "}
-                          {address.country}
-                        </p>
+              <div className="grid grid-cols-2 gap-2 pt-3 mt-3 border-t border-gray-100">
+                <Button
+                  onClick={() => handleOpenModal(address)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-[#1A3B47]"
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => {
+                    setAddressToDelete(address._id);
+                    openDelete();
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-red-600"
+                >
+                  Delete
+                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-[#388A94] hover:text-[#1A3B47]"
+                    >
+                      View Details
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader className="bg-[#388A94] text-white p-4 rounded-t-lg">
+                      <DialogTitle className="text-xl font-semibold">
+                        Address Details
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 p-4 bg-[#F4F4F4] rounded-b-lg">
+                      <p>
+                        <strong className="text-[#1A3B47]">Street:</strong>{" "}
+                        {address.streetName} {address.streetNumber}
+                      </p>
+                      {address.floorUnit && (
                         <p>
                           <strong className="text-[#1A3B47]">
-                            Postal Code:
+                            Floor/Unit:
                           </strong>{" "}
-                          {address.postalCode}
+                          {address.floorUnit}
                         </p>
-                        {address.landmark && (
-                          <p>
-                            <strong className="text-[#1A3B47]">
-                              Landmark:
-                            </strong>{" "}
-                            {address.landmark}
-                          </p>
-                        )}
+                      )}
+                      <p>
+                        <strong className="text-[#1A3B47]">City:</strong>{" "}
+                        {address.city}
+                      </p>
+                      <p>
+                        <strong className="text-[#1A3B47]">State:</strong>{" "}
+                        {address.state}
+                      </p>
+                      <p>
+                        <strong className="text-[#1A3B47]">Country:</strong>{" "}
+                        {address.country}
+                      </p>
+                      <p>
+                        <strong className="text-[#1A3B47]">Postal Code:</strong>{" "}
+                        {address.postalCode}
+                      </p>
+                      {address.landmark && (
                         <p>
-                          <strong className="text-[#1A3B47]">
-                            Location Type:
-                          </strong>{" "}
-                          {address.locationType}
+                          <strong className="text-[#1A3B47]">Landmark:</strong>{" "}
+                          {address.landmark}
                         </p>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                      )}
+                      <p>
+                        <strong className="text-[#1A3B47]">
+                          Location Type:
+                        </strong>{" "}
+                        {address.locationType}
+                      </p>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
-                  <Button
-                    onClick={() => handleSetDefault(address._id)}
-                    variant="ghost"
-                    size="sm"
-                    className={`text-gray-600 hover:text-[#1A3B47] ${
-                      address.default ? "cursor-not-allowed opacity-50" : ""
-                    }`}
-                    disabled={address.default}
-                  >
-                    Set as Default
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => handleSetDefault(address._id)}
+                  variant="ghost"
+                  size="sm"
+                  className={`text-gray-600 hover:text-[#1A3B47] ${
+                    address.default ? "cursor-not-allowed opacity-50" : ""
+                  }`}
+                  disabled={address.default}
+                >
+                  Set as Default
+                </Button>
               </div>
             </div>
           ))
