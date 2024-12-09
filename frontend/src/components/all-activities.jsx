@@ -810,7 +810,9 @@ export default function AllActivities() {
                 {isPriceInitialized && (
                   <DualHandleSliderComponent
                     min={0}
-                    max={maxPriceOfActivities}
+                    max={
+                      maxPriceOfActivities === 0 ? 1000 : maxPriceOfActivities
+                    }
                     symbol={userInfo?.preferredCurrency?.symbol || "$"}
                     step={10}
                     values={priceRange}

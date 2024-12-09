@@ -402,12 +402,12 @@ export default function MyHistoricalPlacesComponent() {
   return (
     <div className="bg-gray-100">
       <div
-    className="relative h-[330px] bg-cover bg-center"
-    style={{ backgroundImage }}
-  >
-    <div className="absolute inset-0"></div>
-    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
-    <div className="flex-1">
+        className="relative h-[330px] bg-cover bg-center"
+        style={{ backgroundImage }}
+      >
+        <div className="absolute inset-0"></div>
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+          <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">
               My Historical Places
             </h1>
@@ -421,8 +421,8 @@ export default function MyHistoricalPlacesComponent() {
               / My Historical Places
             </p>
           </div>
-    </div>
-  </div>
+        </div>
+      </div>
       <div className="container py-8">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
@@ -575,13 +575,19 @@ export default function MyHistoricalPlacesComponent() {
                     </Button>
                     <span className="text-sm font-medium">
                       Page {currentPage} of{" "}
-                      {Math.ceil(historicalPlaces.length / tripsPerPage)}
+                      {Math.max(
+                        1,
+                        Math.ceil(historicalPlaces.length / tripsPerPage)
+                      )}
                     </span>
                     <Button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={
                         currentPage ===
-                        Math.ceil(historicalPlaces.length / tripsPerPage)
+                        Math.max(
+                          1,
+                          Math.ceil(historicalPlaces.length / tripsPerPage)
+                        )
                       }
                       variant="outline"
                       size="icon"
