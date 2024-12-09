@@ -14,8 +14,19 @@ import {
 import Loader from "./Loader";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Card,
   CardContent,
@@ -91,15 +102,15 @@ const StarRating = ({ rating, onRatingChange = null }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-5 h-5 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            } ${onRatingChange ? "cursor-pointer" : ""}`}
+          className={`w-5 h-5 ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          } ${onRatingChange ? "cursor-pointer" : ""}`}
           onClick={() => onRatingChange && onRatingChange(star)}
         />
       ))}
     </div>
   );
 };
-
 
 const ImageGallery = ({ pictures }) => {
   const [mainImage, setMainImage] = useState(pictures[0]?.url);
@@ -121,8 +132,9 @@ const ImageGallery = ({ pictures }) => {
           {pictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? 'bg-gray-400' : 'bg-black'
-                }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -137,15 +149,16 @@ const ImageGallery = ({ pictures }) => {
                 alt={`Product image ${startIndex + index + 1}`}
                 className="w-full h-[20%] object-cover rounded-lg cursor-pointer"
                 onClick={() => setMainImage(pic.url)}
-                style={{ transition: 'transform 0.7s ease-in-out' }}
+                style={{ transition: "transform 0.7s ease-in-out" }}
               />
             ))}
           </div>
           {pictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= pictures.length - 5 ? 'bg-gray-400' : 'bg-black'
-                }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= pictures.length - 5 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex >= pictures.length - 5}
               aria-label="Next images"
             >
@@ -169,8 +182,6 @@ const ImageGallery = ({ pictures }) => {
   );
 };
 
-
-
 const ProductDetail = ({ id, onBack }) => {
   // const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -181,7 +192,7 @@ const ProductDetail = ({ id, onBack }) => {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
- // const [showArchiveSuccess, setShowArchiveSuccess] = useState(false);
+  // const [showArchiveSuccess, setShowArchiveSuccess] = useState(false);
   const [archiveError, setArchiveError] = useState(null);
   const [canModify, setCanModify] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -230,8 +241,8 @@ const ProductDetail = ({ id, onBack }) => {
   const [isExpandedComment, setIsExpandedComment] = useState(false);
   const [open, setOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState('');
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
   const [isDeleteToastOpen, setIsDeleteToastOpen] = useState(false);
   const [isLinkCopiedToastOpen, setIsLinkCopiedToastOpen] = useState(false);
   const [updateProductId, setUpdateProductId] = useState(null);
@@ -248,6 +259,7 @@ const ProductDetail = ({ id, onBack }) => {
 
   const handleBackToProduct = () => {
     setUpdateProductId(null);
+    fetchProductDetails();
   };
 
   const handleToggleComment = () => {
@@ -270,14 +282,17 @@ const ProductDetail = ({ id, onBack }) => {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    showToast('Link Copied', 'success', setIsLinkCopiedToastOpen);
+    showToast("Link Copied", "success", setIsLinkCopiedToastOpen);
     setOpen(false);
   };
 
-
   const handleEmailShare = () => {
-    const subject = encodeURIComponent(`Check out this product: ${product.name}`);
-    const body = encodeURIComponent(`I thought you might be interested in this product:\n\n${product.name}\n\n${window.location.href}`);
+    const subject = encodeURIComponent(
+      `Check out this product: ${product.name}`
+    );
+    const body = encodeURIComponent(
+      `I thought you might be interested in this product:\n\n${product.name}\n\n${window.location.href}`
+    );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     setOpen(false); // Close the popover
   };
@@ -470,7 +485,6 @@ const ProductDetail = ({ id, onBack }) => {
     updateLocation();
   };
 
-
   // Function to toggle between expanded and collapsed states
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -478,80 +492,79 @@ const ProductDetail = ({ id, onBack }) => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProductDetails = async () => {
-      if (!id) {
-        setError("Invalid product ID.");
-        setLoading(false);
-        return;
+  const fetchProductDetails = async () => {
+    if (!id) {
+      setError("Invalid product ID.");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/products/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch product details");
       }
 
-      setLoading(true);
-      try {
-        const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/products/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+      const data = await response.json();
+      setProduct(data);
+      setError(null);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch product details");
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        if (data.seller === undefined) {
+          setCanModify(true);
+        } else {
+          setCanModify(decodedToken.id === data.seller._id);
         }
+      }
 
-        const data = await response.json();
+      if (data) {
+        setFilteredReviews(data.reviews);
         setProduct(data);
-        setError(null);
+        // Calculate rating distribution
+        const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        data.reviews.forEach((review) => {
+          distribution[Math.floor(review.rating)] =
+            (distribution[Math.floor(review.rating)] || 0) + 1;
+        });
+        setRatingDistribution(distribution);
 
+        // Find user's review if exists
+        const token = Cookies.get("jwt");
         if (token) {
           const decodedToken = jwtDecode(token);
-          if (data.seller === undefined) {
-            setCanModify(true);
-          } else {
-            setCanModify(decodedToken.id === data.seller._id);
+          const userReview = data.reviews.find(
+            (review) => review.tourist?._id === decodedToken.id
+          );
+          if (userReview) {
+            console.log(userReview);
+            setUserReview(userReview);
+            setQuickRating(userReview.rating || 0);
+            setRating(userReview.rating || 0);
+            setComment(userReview.comment || "");
+            setIsAnonymous(!(userReview?.user === userReview.tourist.username));
           }
         }
-
-        if (data) {
-          setFilteredReviews(data.reviews);
-          setProduct(data);
-          // Calculate rating distribution
-          const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-          data.reviews.forEach((review) => {
-            distribution[Math.floor(review.rating)] =
-              (distribution[Math.floor(review.rating)] || 0) + 1;
-          });
-          setRatingDistribution(distribution);
-
-          // Find user's review if exists
-          const token = Cookies.get("jwt");
-          if (token) {
-            const decodedToken = jwtDecode(token);
-            const userReview = data.reviews.find(
-              (review) => review.tourist?._id === decodedToken.id,
-            );
-            if (userReview) {
-              console.log(userReview);
-              setUserReview(userReview);
-              setQuickRating(userReview.rating || 0);
-              setRating(userReview.rating || 0);
-              setComment(userReview.comment || "");
-              setIsAnonymous(!(userReview?.user === userReview.tourist.username));
-            }
-          }
-        }
-
-
-      } catch (err) {
-        setError("Error fetching product details. Please try again later.");
-        console.error("Error fetching product details:", err);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      setError("Error fetching product details. Please try again later.");
+      console.error("Error fetching product details:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserInfo();
     fetchProductDetails();
   }, [id, userRole]);
@@ -641,17 +654,25 @@ const ProductDetail = ({ id, onBack }) => {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 400) {
-          showToast('Cannot delete product, there are pending purchases', 'error', setIsDeleteToastOpen);
+          showToast(
+            "Cannot delete product, there are pending purchases",
+            "error",
+            setIsDeleteToastOpen
+          );
           return;
         }
         throw new Error("Failed to delete product");
       }
 
-      showToast('Product deleted successfully!', 'success', setIsDeleteToastOpen);
+      showToast(
+        "Product deleted successfully!",
+        "success",
+        setIsDeleteToastOpen
+      );
       setShowDeleteSuccess(true);
     } catch (err) {
       console.error("Error deleting product:", err);
-      showToast('Error deleting product', 'error', setIsDeleteToastOpen);
+      showToast("Error deleting product", "error", setIsDeleteToastOpen);
     } finally {
       setLoading(false);
     }
@@ -871,9 +892,114 @@ const ProductDetail = ({ id, onBack }) => {
       setActionError("Error submitting review. Please try again.");
     }
   };
+  const ItineraryDetailSkeleton = () => {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <div className="mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="lg:w-3/4">
+              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="h-10 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                  </div>
+
+                  <div className="w-full h-[400px] bg-gray-300 rounded animate-pulse mb-6"></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:w-1/4">
+              <Card>
+                <CardHeader>
+                  <div className="h-8 w-3/4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
+                    <div className="text-sm text-gray-500 flex items-center justify-center mt-6"></div>
+                  </div>
+
+                  <div className="mt-4 animate-pulse">
+                    <div className="h-12 w-1/2 bg-gray-300 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-300 rounded mt-40"></div>
+                  </div>
+
+                  <div className="mt-6 animate-pulse">
+                    <div className="h-10  bg-gray-300 rounded"></div>
+                    <div className="h-10 bg-gray-300 rounded mt-6"></div>
+                    <div className="h-10 bg-gray-300 rounded mt-6"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mt-8 bg-white p-6 rounded-lg shadow-md ">
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-8 w-1/4 bg-gray-300 rounded animate-pulse"></div>
+                <div className="h-8 w-20 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+
+              <div className="flex gap-8 mb-6">
+                <div className="text-center">
+                  <div className="h-12 w-12 bg-gray-300 rounded animate-pulse mx-auto mb-2"></div>
+                  <div className="h-4 w-16 bg-gray-300 rounded animate-pulse mx-auto"></div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="h-4 w-full bg-gray-300 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-6">
+              <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="flex items-left justify-between mb-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="flex-1 flex justify-between px-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card
+                      key={i}
+                      className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+                    >
+                      <CardHeader className="flex items-start">
+                        <div className="flex">
+                          <div className="h-12 w-12 bg-gray-300 rounded-full animate-pulse mr-4"></div>
+                          <div className="flex flex-col">
+                            <div className="h-4 w-24 bg-gray-300 rounded animate-pulse mb-2"></div>
+                            <div className="h-3 w-16 bg-gray-300 rounded animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-3/4 bg-gray-300 rounded animate-pulse"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (loading) {
-    return <Loader />;
+    return <ItineraryDetailSkeleton />;
   }
 
   if (error) {
@@ -898,7 +1024,10 @@ const ProductDetail = ({ id, onBack }) => {
     <div className="min-h-screen bg-gray-100 ">
       {updateProductId ? (
         <div>
-          <Button onClick={handleBackToProduct} className="mb-4 bg-[#5D9297] text-white text-base">
+          <Button
+            onClick={handleBackToProduct}
+            className="mb-4 bg-[#5D9297] text-white text-base"
+          >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Back to Product
           </Button>
@@ -918,7 +1047,11 @@ const ProductDetail = ({ id, onBack }) => {
                       <ToastProvider>
                         <Popover open={open} onOpenChange={setOpen}>
                           <PopoverTrigger asChild>
-                            <Button variant="outline" size="sm" className="ml-auto">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="ml-auto"
+                            >
                               <Share2 className="h-4 w-4" />
                             </Button>
                           </PopoverTrigger>
@@ -947,7 +1080,13 @@ const ProductDetail = ({ id, onBack }) => {
                         <ToastViewport />
 
                         {isToastOpen && (
-                          <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
+                          <Toast
+                            onOpenChange={setIsToastOpen}
+                            open={isToastOpen}
+                            duration={3000}
+                          >
+                            {" "}
+                            {/* Auto close after 3 seconds */}
                             <ToastTitle>Link Copied</ToastTitle>
                             <ToastDescription>
                               The link has been copied to your clipboard.
@@ -1050,14 +1189,15 @@ const ProductDetail = ({ id, onBack }) => {
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            className={`w-8 h-8 cursor-pointer ${(
+                            className={`w-8 h-8 cursor-pointer ${
+                              (
                                 isRatingHovered
                                   ? quickRating >= star
                                   : quickRating >= star
                               )
                                 ? "text-[#F88C33] fill-current"
                                 : "text-gray-300"
-                              }`}
+                            }`}
                             onMouseEnter={() => {
                               setIsRatingHovered(true);
                               setQuickRating(star);
@@ -1166,7 +1306,6 @@ const ProductDetail = ({ id, onBack }) => {
                               />
                             );
                           }
-
                         })}
                         <span className="text-xl font-semibold text-black ml-2">
                           {product.rating ? product.rating.toFixed(1) : 0}
@@ -1194,7 +1333,6 @@ const ProductDetail = ({ id, onBack }) => {
                           ) : product.quantity > 0 ? (
                             <>
                               {/* <Package className="w-6 h-6 mr-2 text-blue-500" /> */}
-
                             </>
                           ) : (
                             <div className="w-full">
@@ -1202,8 +1340,8 @@ const ProductDetail = ({ id, onBack }) => {
                                 Out of stock
                               </span>
                               <div className="mt-2 text-sm text-gray-600 w-full">
-                                Add to wishlist now and you will be notified when
-                                it's back in stock!
+                                Add to wishlist now and you will be notified
+                                when it's back in stock!
                               </div>
                             </div>
                           )}
@@ -1244,8 +1382,6 @@ const ProductDetail = ({ id, onBack }) => {
                         ) : null}
                       </div>
 
-
-
                       <div className="flex items-center">
                         {/* <DollarSign className="w-6 h-6 mr-2 text-green-500" /> */}
                         <span className="text-5xl font-bold text-[#1A3B47]">
@@ -1270,9 +1406,12 @@ const ProductDetail = ({ id, onBack }) => {
                     <div>
                       <p className="text-gray-700 inline break-words ">
                         {isExpanded ||
-                          product.description.length <= characterLimit
+                        product.description.length <= characterLimit
                           ? product.description
-                          : `${product.description.slice(0, characterLimit)}...`}
+                          : `${product.description.slice(
+                              0,
+                              characterLimit
+                            )}...`}
 
                         {/* "View More / View Less" link placed inline */}
                         {product.description.length > characterLimit && (
@@ -1324,46 +1463,56 @@ const ProductDetail = ({ id, onBack }) => {
                       )}
                     </div>
                     <div className="mt-8 space-y-4">
-                      {(userRole === "admin" && product.seller == null ||
-                        (userRole === "seller" && canModify && product.seller)) && (
-                          <Button
-                            className="w-full bg-[#1A3B47] text-xl  text-white"
-                            variant="default"
-                            onClick={() => handleProductSelectbyid(product._id)}
-                          >
-                            <Edit className="w-5 h-5 mr-2" /> Update Product
-                          </Button>
-                        )}
+                      {((userRole === "admin" && product.seller == null) ||
+                        (userRole === "seller" &&
+                          canModify &&
+                          product.seller)) && (
+                        <Button
+                          className="w-full bg-[#1A3B47] text-xl  text-white"
+                          variant="default"
+                          onClick={() => handleProductSelectbyid(product._id)}
+                        >
+                          <Edit className="w-5 h-5 mr-2" /> Update Product
+                        </Button>
+                      )}
 
                       {((userRole === "admin" && product.seller == null) ||
-                        (userRole === "seller" && canModify && product.seller)) && (
-                          <Button
-                            variant={product.isArchived ? "outline" : "default"}
-                            className={`w-full text-xl ${product.isArchived ? "text-white" : ""} bg-[#388A94] hover:bg-[#2d6e78]`}
-                            onClick={() => setShowArchiveConfirm(true)}
-                          >
-                            {product.isArchived ? (
-                              <>
-                                <ArchiveX className="w-5 h-5 mr-2" /> Unarchive Product
-                              </>
-                            ) : (
-                              <>
-                                <Archive className="w-5 h-5 mr-2" /> Archive Product
-                              </>
-                            )}
-                          </Button>
-                        )}
+                        (userRole === "seller" &&
+                          canModify &&
+                          product.seller)) && (
+                        <Button
+                          variant={product.isArchived ? "outline" : "default"}
+                          className={`w-full text-xl ${
+                            product.isArchived ? "text-white" : ""
+                          } bg-[#388A94] hover:bg-[#2d6e78]`}
+                          onClick={() => setShowArchiveConfirm(true)}
+                        >
+                          {product.isArchived ? (
+                            <>
+                              <ArchiveX className="w-5 h-5 mr-2" /> Unarchive
+                              Product
+                            </>
+                          ) : (
+                            <>
+                              <Archive className="w-5 h-5 mr-2" /> Archive
+                              Product
+                            </>
+                          )}
+                        </Button>
+                      )}
 
                       {(userRole === "admin" ||
-                        (userRole === "seller" && canModify && product.seller)) && (
-                          <Button
-                            className="w-full text-xl bg-red-500 hover:bg-red-600"
-                            variant="destructive"
-                            onClick={handleDeleteClick}
-                          >
-                            <Trash2 className="w-5 h-5 mr-2" /> Delete Product
-                          </Button>
-                        )}
+                        (userRole === "seller" &&
+                          canModify &&
+                          product.seller)) && (
+                        <Button
+                          className="w-full text-xl bg-red-500 hover:bg-red-600"
+                          variant="destructive"
+                          onClick={handleDeleteClick}
+                        >
+                          <Trash2 className="w-5 h-5 mr-2" /> Delete Product
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
 
@@ -1441,14 +1590,14 @@ const ProductDetail = ({ id, onBack }) => {
                   )}
                 </Card>
               </div>
-
-
             </div>
           </div>
 
-
           {/* Dialogs */}
-          <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm}>
+          <Dialog
+            open={showArchiveConfirm}
+            onOpenChange={setShowArchiveConfirm}
+          >
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
@@ -1467,7 +1616,11 @@ const ProductDetail = ({ id, onBack }) => {
                 >
                   Cancel
                 </Button>
-                <Button variant="default" onClick={handleArchive} className="bg-[#388A94] hover:bg-[#2d6e78]" >
+                <Button
+                  variant="default"
+                  onClick={handleArchive}
+                  className="bg-[#388A94] hover:bg-[#2d6e78]"
+                >
                   {product.isArchived ? "Unarchive" : "Archive"}
                 </Button>
               </DialogFooter>
@@ -1515,7 +1668,8 @@ const ProductDetail = ({ id, onBack }) => {
               <DialogHeader>
                 <DialogTitle>
                   <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
-                  Failed to {product.isArchived ? "Unarchive" : "Archive"} Product
+                  Failed to {product.isArchived ? "Unarchive" : "Archive"}{" "}
+                  Product
                 </DialogTitle>
                 <DialogDescription>{archiveError}</DialogDescription>
               </DialogHeader>
@@ -1527,7 +1681,6 @@ const ProductDetail = ({ id, onBack }) => {
                   Close
                 </Button>
               </DialogFooter>
-
             </DialogContent>
           </Dialog>
 
@@ -1550,7 +1703,10 @@ const ProductDetail = ({ id, onBack }) => {
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button variant="default" onClick={() => navigate("/all-products")}>
+                <Button
+                  variant="default"
+                  onClick={() => navigate("/all-products")}
+                >
                   <ChevronLeft className="w-5 h-5 mr-2" />
                   Back to All Products
                 </Button>
@@ -1558,7 +1714,10 @@ const ProductDetail = ({ id, onBack }) => {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
+          <Dialog
+            open={showPurchaseConfirm}
+            onOpenChange={setShowPurchaseConfirm}
+          >
             <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-3xl font-bold">
@@ -1573,7 +1732,10 @@ const ProductDetail = ({ id, onBack }) => {
                   <p className="text-xl font-semibold">{product.name}</p>
                 </div>
                 <div className="my-4">
-                  <label htmlFor="quantity" className="block text-lg font-medium">
+                  <label
+                    htmlFor="quantity"
+                    className="block text-lg font-medium"
+                  >
                     Quantity
                   </label>
                   <input
@@ -1589,8 +1751,9 @@ const ProductDetail = ({ id, onBack }) => {
                         setQuantity(value);
                       }
                     }}
-                    className={`w-full mt-1 px-3 py-2 border rounded-md ${quantityError ? "border-red-500" : ""
-                      }`}
+                    className={`w-full mt-1 px-3 py-2 border rounded-md ${
+                      quantityError ? "border-red-500" : ""
+                    }`}
                     min="1"
                     max={product.quantity}
                   />
@@ -1643,7 +1806,9 @@ const ProductDetail = ({ id, onBack }) => {
                       <SelectItem value="morning">
                         Morning (8 AM - 12 PM)
                       </SelectItem>
-                      <SelectItem value="midday">Midday (12 PM - 3 PM)</SelectItem>
+                      <SelectItem value="midday">
+                        Midday (12 PM - 3 PM)
+                      </SelectItem>
                       <SelectItem value="afternoon">
                         Afternoon (3 PM - 6 PM)
                       </SelectItem>
@@ -1689,7 +1854,10 @@ const ProductDetail = ({ id, onBack }) => {
                   >
                     Payment Method
                   </label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <Select
+                    value={paymentMethod}
+                    onValueChange={setPaymentMethod}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select payment method" />
                     </SelectTrigger>
@@ -1705,14 +1873,16 @@ const ProductDetail = ({ id, onBack }) => {
                 </div>
               </div>
 
-
               {/* Address Details Section */}
               <div className="my-4">
                 <h2 className="text-2xl font-bold">Address Details</h2>
 
                 {/* Street Name */}
                 <div className="my-4">
-                  <label htmlFor="streetName" className="block text-lg font-medium">
+                  <label
+                    htmlFor="streetName"
+                    className="block text-lg font-medium"
+                  >
                     Street Name
                   </label>
                   <input
@@ -1727,7 +1897,10 @@ const ProductDetail = ({ id, onBack }) => {
 
                 {/* Street Number */}
                 <div className="my-4">
-                  <label htmlFor="streetNumber" className="block text-lg font-medium">
+                  <label
+                    htmlFor="streetNumber"
+                    className="block text-lg font-medium"
+                  >
                     Street Number
                   </label>
                   <input
@@ -1742,7 +1915,10 @@ const ProductDetail = ({ id, onBack }) => {
 
                 {/* Floor/Unit */}
                 <div className="my-4">
-                  <label htmlFor="floorUnit" className="block text-lg font-medium">
+                  <label
+                    htmlFor="floorUnit"
+                    className="block text-lg font-medium"
+                  >
                     Floor/Unit
                   </label>
                   <input
@@ -1787,7 +1963,10 @@ const ProductDetail = ({ id, onBack }) => {
 
                 {/* Postal Code */}
                 <div className="my-4">
-                  <label htmlFor="postalCode" className="block text-lg font-medium">
+                  <label
+                    htmlFor="postalCode"
+                    className="block text-lg font-medium"
+                  >
                     Postal/ZIP Code
                   </label>
                   <input
@@ -1802,7 +1981,10 @@ const ProductDetail = ({ id, onBack }) => {
 
                 {/* Landmark / Additional Info */}
                 <div className="my-4">
-                  <label htmlFor="landmark" className="block text-lg font-medium">
+                  <label
+                    htmlFor="landmark"
+                    className="block text-lg font-medium"
+                  >
                     Landmark/Additional Info
                   </label>
                   <input
@@ -1846,7 +2028,6 @@ const ProductDetail = ({ id, onBack }) => {
                     </SelectContent>
                   </Select>
                 </div>
-
               </div>
 
               {/* Display Location */}
@@ -1862,7 +2043,9 @@ const ProductDetail = ({ id, onBack }) => {
                   <p className="text-lg">
                     {product.name} x {quantity}
                   </p>
-                  <p className="text-lg">{formatPrice(product.price * quantity)}</p>
+                  <p className="text-lg">
+                    {formatPrice(product.price * quantity)}
+                  </p>
                 </div>
                 <div className="flex justify-between mt-2">
                   <p className="text-lg">Delivery Cost:</p>
@@ -1874,7 +2057,8 @@ const ProductDetail = ({ id, onBack }) => {
                   <p className="text-lg">Total Price:</p>
                   <p className="text-lg">
                     {formatPrice(
-                      product.price * quantity + calculateDeliveryCost(deliveryType)
+                      product.price * quantity +
+                        calculateDeliveryCost(deliveryType)
                     )}
                   </p>
                 </div>
@@ -1906,16 +2090,13 @@ const ProductDetail = ({ id, onBack }) => {
                     !quantity ||
                     quantityError || // Disable submit if quantity exceeds max
                     !locationType // Location type is required
-                  }      >
+                  }
+                >
                   Checkout
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-
-
-
-
 
           <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
             <DialogContent>
@@ -2017,7 +2198,10 @@ const ProductDetail = ({ id, onBack }) => {
                 <DialogDescription>{actionSuccess}</DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button variant="default" onClick={() => setActionSuccess(null)}>
+                <Button
+                  variant="default"
+                  onClick={() => setActionSuccess(null)}
+                >
                   Close
                 </Button>
               </DialogFooter>
@@ -2050,7 +2234,9 @@ const ProductDetail = ({ id, onBack }) => {
                 <DialogTitle>All Reviews</DialogTitle>
                 <DialogDescription>
                   <div className="text-center my-4">
-                    <span className="text-gray-500 uppercase text-sm">Overall</span>
+                    <span className="text-gray-500 uppercase text-sm">
+                      Overall
+                    </span>
                     <div className="flex justify-center items-center">
                       <span className="text-4xl font-bold">
                         {product.rating ? product.rating.toFixed(1) : 0}
@@ -2059,14 +2245,20 @@ const ProductDetail = ({ id, onBack }) => {
                         {[...Array(5)].map((_, i) => {
                           if (i < Math.floor(product.rating)) {
                             return (
-                              <Star key={i} className="w-6 h-6 text-[#1A3B47]" />
+                              <Star
+                                key={i}
+                                className="w-6 h-6 text-[#1A3B47]"
+                              />
                             );
                           } else if (
                             i === Math.floor(product.rating) &&
                             product.rating % 1 >= 0.5
                           ) {
                             return (
-                              <StarHalf key={i} className="w-6 h-6 text-[#1A3B47]" />
+                              <StarHalf
+                                key={i}
+                                className="w-6 h-6 text-[#1A3B47]"
+                              />
                             );
                           } else {
                             return (
@@ -2087,10 +2279,11 @@ const ProductDetail = ({ id, onBack }) => {
                   {/* Filter by Rating Buttons */}
                   <div className="flex justify-center space-x-2 mb-4">
                     <button
-                      className={`px-3 py-2 rounded-md ${filteredRating === 0
+                      className={`px-3 py-2 rounded-md ${
+                        filteredRating === 0
                           ? "bg-[#388A94] text-white"
                           : "bg-gray-200"
-                        }`}
+                      }`}
                       onClick={() => handleFilterRating(0, product)}
                     >
                       All
@@ -2098,10 +2291,11 @@ const ProductDetail = ({ id, onBack }) => {
                     {[5, 4, 3, 2, 1].map((star) => (
                       <button
                         key={star}
-                        className={`px-3 py-2 rounded-md ${filteredRating === star
+                        className={`px-3 py-2 rounded-md ${
+                          filteredRating === star
                             ? "bg-[#388A94] text-white"
                             : "bg-gray-200"
-                          }`}
+                        }`}
                         onClick={() => handleFilterRating(star, product)}
                       >
                         {star} Star{star > 1 ? "s" : ""}
@@ -2121,13 +2315,17 @@ const ProductDetail = ({ id, onBack }) => {
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-lg font-semibold">{review.user}</h4>
+                          <h4 className="text-lg font-semibold">
+                            {review.user}
+                          </h4>
                           <StarRating rating={review.rating} />
                         </div>
 
                         {/* Show the first 50 characters of the comment and a "Show more" link */}
                         <p className="text-gray-600 mt-1">
-                          {isExpandedComment ? review.comment : `${review.comment.slice(0, 100)}...`}
+                          {isExpandedComment
+                            ? review.comment
+                            : `${review.comment.slice(0, 100)}...`}
                         </p>
 
                         {/* Only show "Show more" if the comment length exceeds 50 characters */}
@@ -2136,7 +2334,7 @@ const ProductDetail = ({ id, onBack }) => {
                             onClick={handleToggleComment}
                             className="text-blue-500 mt-2 hover:underline"
                           >
-                            {isExpandedComment ? 'Show less' : 'Show more'}
+                            {isExpandedComment ? "Show less" : "Show more"}
                           </button>
                         )}
                       </div>
@@ -2150,8 +2348,12 @@ const ProductDetail = ({ id, onBack }) => {
               </div>
 
               <DialogFooter>
-                <Button className="bg-[#1A3B47]"
-                  onClick={() => setShowAllReviews(false)}>Close</Button>
+                <Button
+                  className="bg-[#1A3B47]"
+                  onClick={() => setShowAllReviews(false)}
+                >
+                  Close
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -2160,19 +2362,21 @@ const ProductDetail = ({ id, onBack }) => {
               onOpenChange={setIsDeleteToastOpen}
               open={isDeleteToastOpen}
               duration={3000} // Set duration to 3 seconds
-              className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+              className={
+                toastType === "success" ? "bg-green-100" : "bg-red-100"
+              }
             >
               <div className="flex items-center">
-                {toastType === 'success' ? (
+                {toastType === "success" ? (
                   <CheckCircle className="text-green-500 mr-2" />
                 ) : (
                   <XCircle className="text-red-500 mr-2" />
                 )}
                 <div>
-                  <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-                  <ToastDescription>
-                    {toastMessage}
-                  </ToastDescription>
+                  <ToastTitle>
+                    {toastType === "success" ? "Success" : "Error"}
+                  </ToastTitle>
+                  <ToastDescription>{toastMessage}</ToastDescription>
                 </div>
               </div>
               <ToastClose />
@@ -2188,9 +2392,7 @@ const ProductDetail = ({ id, onBack }) => {
                 <CheckCircle className="text-green-500 mr-2" />
                 <div>
                   <ToastTitle>Success</ToastTitle>
-                  <ToastDescription>
-                    Link Copied
-                  </ToastDescription>
+                  <ToastDescription>Link Copied</ToastDescription>
                 </div>
               </div>
               <ToastClose />

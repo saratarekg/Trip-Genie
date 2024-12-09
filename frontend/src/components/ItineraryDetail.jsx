@@ -120,8 +120,9 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? "bg-gray-400" : "bg-black"
-                }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -143,10 +144,11 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= allPictures.length - 5
-                ? "bg-gray-400"
-                : "bg-black"
-                }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= allPictures.length - 5
+                  ? "bg-gray-400"
+                  : "bg-black"
+              }`}
               disabled={startIndex >= allPictures.length - 5}
               aria-label="Next images"
             >
@@ -189,8 +191,9 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -401,7 +404,6 @@ const TourguideProfileCard = ({
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="ItineraryDetail">
-        <h1 className="text-3xl font-bold text-center">{itinerary.title}</h1>
         {(userRole === "tour-guide" || userRole === "admin") &&
           !itinerary.isBookingOpen && (
             <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
@@ -461,10 +463,11 @@ const TourguideProfileCard = ({
             <Button
               onClick={() => handleActivationToggle()}
               variant={isActivated ? "destructive" : "default"}
-              className={`w-full flex items-center ${isActivated
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-                }`}
+              className={`w-full flex items-center ${
+                isActivated
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
             >
               {isActivated ? "Deactivate" : "Activate"}
             </Button>
@@ -492,27 +495,29 @@ const TourguideProfileCard = ({
                 e.stopPropagation();
                 handleSaveToggle();
               }}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
-                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                }`}
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${
+                isSaved
+                  ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                  : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+              }`}
             >
               <Bookmark
-                className={`w-5 h-5 ${isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"
-                  }`}
+                className={`w-5 h-5 ${
+                  isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"
+                }`}
               />
               {isSaved ? "Unsave" : "Save"}
             </Button>
 
-
             <Button
               onClick={handleBookNowClick}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${itinerary.isActivated
-                ? itinerary.isBookingOpen
-                  ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
+                itinerary.isActivated
+                  ? itinerary.isBookingOpen
+                    ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                    : "bg-gray-400 text-gray-700 cursor-not-allowed"
                   : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                }`}
+              }`}
               disabled={!itinerary.isActivated || !itinerary.isBookingOpen}
             >
               {itinerary.isActivated
@@ -521,8 +526,6 @@ const TourguideProfileCard = ({
                   : "Booking Closed"
                 : "Currently Unavailable"}
             </Button>
-           
-
           </>
         )}
         <div className="tourGuideDetail">
@@ -623,10 +626,11 @@ const TourguideProfileCard = ({
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-8 h-8 cursor-pointer ${tourGuideRating >= star
-                      ? "text-yellow-500 fill-current"
-                      : "text-gray-300"
-                      }`}
+                    className={`w-8 h-8 cursor-pointer ${
+                      tourGuideRating >= star
+                        ? "text-yellow-500 fill-current"
+                        : "text-gray-300"
+                    }`}
                     onClick={() => handleQuickTourGuideRating(star)}
                   />
                 ))}
@@ -649,10 +653,11 @@ const TourguideProfileCard = ({
           <>
             <div className="mt-6 border-t border-gray-300 pt-4"></div>
             <Button
-              className={`w-full mx-auto text-white ${isAppropriate
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-                }`}
+              className={`w-full mx-auto text-white ${
+                isAppropriate
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
               onClick={handleOpenDialog}
             >
               {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
@@ -692,8 +697,9 @@ const TourguideProfileCard = ({
       </CardContent>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -788,6 +794,9 @@ const ItineraryDetail = () => {
   const [loyalty, setLoyalty] = useState(0);
   const [discountedTotal, setDiscountedTotal] = useState(0);
 
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
+
   const handleDiscountedTotalChange = (newTotal) => {
     setDiscountedTotal(newTotal);
   };
@@ -809,6 +818,12 @@ const ItineraryDetail = () => {
 
     fetchTouristData();
   }, []);
+
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
 
   const [showTourGuideReviewDialog, setShowTourGuideReviewDialog] =
     useState(false);
@@ -1431,13 +1446,13 @@ const ItineraryDetail = () => {
         const userBookingsFetch =
           userRole === "tourist"
             ? axios
-              .get(
-                `http://localhost:4000/${userRole}/touristItineraryAttendedBookings`,
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                }
-              )
-              .then((response) => response.data)
+                .get(
+                  `http://localhost:4000/${userRole}/touristItineraryAttendedBookings`,
+                  {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }
+                )
+                .then((response) => response.data)
             : Promise.resolve([]);
 
         const [data, userBookings] = await Promise.all([
@@ -1515,6 +1530,10 @@ const ItineraryDetail = () => {
       }
 
       const updatedItinerary = await response.json();
+      showToast(
+        isActivated ? "Itinerary deactivated" : "Itinerary activated",
+        "success"
+      );
     } catch (error) {
       console.error("Error toggling activation:", error);
       setIsActivated((prevState) => !prevState); // Revert the state if there's an error
@@ -1720,34 +1739,34 @@ const ItineraryDetail = () => {
     // Conditionally add the Save step based on user role
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".Save",
-          content: (
-            <>
-              Click here to save this itinerary for later viewing or booking
-              in your saved itineraries list.
-              <br />
-              Tip:
-              <br />
-              You can view your saved itineraries anytime! Simply click the
-              hamburger menu on the top right corner → My Account →
-              Itineraries → Saved
-            </>
-          ),
-          placement: "left",
-        },
-      ]
+          {
+            target: ".Save",
+            content: (
+              <>
+                Click here to save this itinerary for later viewing or booking
+                in your saved itineraries list.
+                <br />
+                Tip:
+                <br />
+                You can view your saved itineraries anytime! Simply click the
+                hamburger menu on the top right corner → My Account →
+                Itineraries → Saved
+              </>
+            ),
+            placement: "left",
+          },
+        ]
       : []),
     // Conditionally add the bookNow step based on user role
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".bookNow",
-          content:
-            "Click here to be able to book this itinerary and proceed to the payment process.",
-          placement: "left",
-        },
-      ]
+          {
+            target: ".bookNow",
+            content:
+              "Click here to be able to book this itinerary and proceed to the payment process.",
+            placement: "left",
+          },
+        ]
       : []),
     {
       target: ".tourGuideDetail",
@@ -1769,12 +1788,12 @@ const ItineraryDetail = () => {
     },
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".review",
-          content: "Here you can add/edit your reviews to this itinerary ",
-          placement: "right",
-        },
-      ]
+          {
+            target: ".review",
+            content: "Here you can add/edit your reviews to this itinerary ",
+            placement: "right",
+          },
+        ]
       : []),
   ];
 
@@ -1965,20 +1984,8 @@ const ItineraryDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-[#1a202c] shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold text-white"></div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="bg-[#1a202c] text-white py-20 px-4">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            {itinerary.title}
-          </h1>
-        </div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
 
       <div className=" mx-auto px-4 py-8">
@@ -2051,19 +2058,19 @@ const ItineraryDetail = () => {
                   {itinerary.activities.map((activity, index) =>
                     activity.category
                       ? activity.category.map((cat, catIndex) => (
-                        <Badge key={catIndex} variant="secondary">
-                          {cat.name}
-                        </Badge>
-                      ))
+                          <Badge key={catIndex} variant="secondary">
+                            {cat.name}
+                          </Badge>
+                        ))
                       : null
                   )}
                   {itinerary.activities.map((activity, index) =>
                     activity.tags
                       ? activity.tags.map((tag, tagIndex) => (
-                        <Badge key={tagIndex} variant="outline">
-                          {tag.type}
-                        </Badge>
-                      ))
+                          <Badge key={tagIndex} variant="outline">
+                            {tag.type}
+                          </Badge>
+                        ))
                       : null
                   )}
                 </div>
@@ -2163,14 +2170,15 @@ const ItineraryDetail = () => {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-8 h-8 cursor-pointer ${(
-                          isRatingHovered
-                            ? quickRating >= star
-                            : quickRating >= star
-                        )
-                          ? "text-[#F88C33] fill-current"
-                          : "text-gray-300"
-                          }`}
+                        className={`w-8 h-8 cursor-pointer ${
+                          (
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-[#F88C33] fill-current"
+                            : "text-gray-300"
+                        }`}
                         onMouseEnter={() => {
                           setIsRatingHovered(true);
                           setQuickRating(star);
@@ -2211,10 +2219,11 @@ const ItineraryDetail = () => {
                       .map((comment, index) => (
                         <Card
                           key={index}
-                          className={`w-[30%] ${comment.tourist === userId
-                            ? "bg-[#B5D3D1]"
-                            : "bg-gray-100"
-                            } shadow-none border-none p-4 rounded-lg`}
+                          className={`w-[30%] ${
+                            comment.tourist === userId
+                              ? "bg-[#B5D3D1]"
+                              : "bg-gray-100"
+                          } shadow-none border-none p-4 rounded-lg`}
                         >
                           <CardHeader className="flex items-start">
                             <div className="flex">
@@ -2311,8 +2320,9 @@ const ItineraryDetail = () => {
               {tourGuideProfile?.comments.map((review, index) => (
                 <Card
                   key={index}
-                  className={`mb-4 ${review.tourist === userId ? "bg-[#B5D3D1]" : ""
-                    }`} // Apply blue background if comment is from the logged-in user
+                  className={`mb-4 ${
+                    review.tourist === userId ? "bg-[#B5D3D1]" : ""
+                  }`} // Apply blue background if comment is from the logged-in user
                 >
                   <CardHeader>
                     <div className="flex justify-between items-center">
@@ -2572,14 +2582,14 @@ const ItineraryDetail = () => {
                   <div>
                     {promoDetails?.percentOff
                       ? formatPrice(
-                        calculateTotalPrice() *
-                        (1 - promoDetails.percentOff / 100)
-                      )
+                          calculateTotalPrice() *
+                            (1 - promoDetails.percentOff / 100)
+                        )
                       : percentageOff
-                        ? formatPrice(
+                      ? formatPrice(
                           calculateTotalPrice() * (1 - percentageOff / 100)
                         )
-                        : formatPrice(calculateTotalPrice())}
+                      : formatPrice(calculateTotalPrice())}
                   </div>
                 </div>
                 {paymentType === "Wallet" && (
@@ -2588,10 +2598,10 @@ const ItineraryDetail = () => {
                     <div>
                       {promoDetails?.percentOff
                         ? formatPrice(
-                          tourist?.wallet -
-                          calculateTotalPrice() *
-                          (1 - promoDetails.percentOff / 100)
-                        )
+                            tourist?.wallet -
+                              calculateTotalPrice() *
+                                (1 - promoDetails.percentOff / 100)
+                          )
                         : formatPrice(tourist?.wallet - calculateTotalPrice())}
                     </div>
                   </div>
@@ -2778,8 +2788,9 @@ const ItineraryDetail = () => {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -2790,6 +2801,33 @@ const ItineraryDetail = () => {
       {(userRole === "guest" || userRole === "tourist") && (
         <UserGuide steps={guideSteps} pageName="singleItinerary" />
       )}
+
+      <ToastProvider>
+        <ToastViewport />
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={3000}
+            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
+          >
+            <div className="flex items-center">
+              {toastType === "success" ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>
+                  {toastType === "success" ? "Success" : "Error"}
+                </ToastTitle>
+                <ToastDescription>{toastMessage}</ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+        )}
+      </ToastProvider>
     </div>
   );
 };

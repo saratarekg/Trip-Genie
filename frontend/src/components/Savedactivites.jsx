@@ -82,15 +82,15 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
 
       <div className="flex flex-1 flex-col gap-1">
         <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-semibold text-[#1A3B47]">{activity.name}</h3>
-          <div className="flex items-start text-sm text-[#5D9297] font-semibold pt-1">
-            <div className="flex-shrink-0 h-4 w-4 flex items-center justify-center mr-1">
-              <MapPin className="h-4 w-4" />
+          <div>
+            <h3 className="font-semibold text-[#1A3B47]">{activity.name}</h3>
+            <div className="flex items-start text-sm text-[#5D9297] font-semibold pt-1">
+              <div className="flex-shrink-0 h-4 w-4 flex items-center justify-center mr-1">
+                <MapPin className="h-4 w-4" />
+              </div>
+              <span className="leading-tight">{activity.location?.address || "Location not available"}</span>
             </div>
-            <span className="leading-tight">{activity.location?.address || "Location not available"}</span>
           </div>
-        </div>
           <div className="flex items-center gap-1 text-base">
             <Star className="h-6 w-6 fill-[#F88C33] text-[#F88C33]" />
             <span className="text-[#F88C33]">{activity.rating?.toFixed(1) || "0.0"}</span>
@@ -296,7 +296,7 @@ export default function SavedActivities() {
   const handleActivityUnsaved = (activityId) => {
     setSavedActivities((prev) => prev.filter((activity) => activity._id !== activityId));
     showToast(
-       "success",
+      "success",
       "Activity removed from saved list successfully!",
     );
     setTimeout(() => setAlertMessage(null), 3000);
@@ -304,53 +304,53 @@ export default function SavedActivities() {
 
   return (
     <ToastProvider>
-    <div className="bg-gray-100 min-h-screen">
-       {/* <h1 className="text-3xl font-bold mb-2">Saved Activities</h1>
+      <div className="bg-gray-100 min-h-screen">
+        {/* <h1 className="text-3xl font-bold mb-2">Saved Activities</h1>
     <p className="text-sm text-gray-500 mb-2">Activities / Saved</p> */}
-    
-      <div className="container mx-auto px-4 py-8">
-        {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2">
-          {/* Render Skeletons for Cards */}
-          {[...Array(4)].map((_, idx) => (
-            <SkeletonCard key={idx} />
-          ))}
-        </div>
 
-        ) : savedActivities.length === 0 ? (
-          <div className="text-center space-y-4 py-12">
-            <h2 className="text-2xl font-semibold text-gray-600">
-              No activities saved yet
-            </h2>
-            <p className="text-gray-500">
-              Start exploring and save activities to your list!
-            </p>
-            <Button
-              size="lg"
-              variant="default"
-              className="mt-4 bg-[#388A94] text-white"
-              onClick={() => navigate("/activity")}
-            >
-              Explore Activities
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {savedActivities.map((activity) => (
-              <ActivityCard
-                key={activity._id}
-                activity={activity}
-                onSelect={handleActivitySelect}
-                onActivityUnsaved={handleActivityUnsaved}
-                userInfo={userInfo}
-                exchangeRates={exchangeRates}
-                showToast={showToast}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-      <ToastViewport className="fixed top-0 right-0 p-4" />
+        <div className="container mx-auto px-4 py-8">
+          {isLoading ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Render Skeletons for Cards */}
+              {[...Array(4)].map((_, idx) => (
+                <SkeletonCard key={idx} />
+              ))}
+            </div>
+
+          ) : savedActivities.length === 0 ? (
+            <div className="text-center space-y-4 py-12">
+              <h2 className="text-2xl font-semibold text-gray-600">
+                No activities saved yet
+              </h2>
+              <p className="text-gray-500">
+                Start exploring and save activities to your list!
+              </p>
+              <Button
+                size="lg"
+                variant="default"
+                className="mt-4 bg-[#388A94] text-white"
+                onClick={() => navigate("/activity")}
+              >
+                Explore Activities
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {savedActivities.map((activity) => (
+                <ActivityCard
+                  key={activity._id}
+                  activity={activity}
+                  onSelect={handleActivitySelect}
+                  onActivityUnsaved={handleActivityUnsaved}
+                  userInfo={userInfo}
+                  exchangeRates={exchangeRates}
+                  showToast={showToast}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        <ToastViewport className="fixed top-0 right-0 p-4" />
         {isToastOpen && (
           <Toast
             onOpenChange={setIsToastOpen}
@@ -376,7 +376,7 @@ export default function SavedActivities() {
         )}
       </div>
     </ToastProvider>
-  
+
   );
 }
 

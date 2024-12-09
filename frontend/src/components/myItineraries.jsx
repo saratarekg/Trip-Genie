@@ -258,14 +258,14 @@ const ItineraryCard = ({
           </h3>
           {!itinerary.isActivated && (
             <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
-              {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
+              {role === "tour-guide" ? "Deactivated" : "Unavailable"}
             </span>
           )}
           {!itinerary.appropriate && (
             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
               {role === "tour-guide"
                 ? "inappropriate"
-                : "Currently Unavailable"}
+                : "Unavailable"}
             </span>
           )}
         </div>
@@ -959,7 +959,7 @@ export function MyItinerariesComponent() {
                 {isPriceInitialized && (
                   <DualHandleSliderComponent
                     min={0}
-                    max={maxPriceOfItinerary}
+                    max={maxPriceOfItinerary === 0 ? 1000 : maxPriceOfItinerary}
                     symbol={getSymbol()}
                     step={Math.max(
                       1,

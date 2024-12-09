@@ -81,7 +81,6 @@ export default function HotelDetails() {
   const [tourist, setTourist] = useState(null);
   const [promo, setPromo] = useState("");
 
-
   const checkinDate = searchParams.get("checkinDate");
   const checkoutDate = searchParams.get("checkoutDate");
   const numberOfAdults = parseInt(searchParams.get("adults") || "1", 10);
@@ -527,7 +526,7 @@ export default function HotelDetails() {
           price: convertedPrice,
           numberOfAdults,
           paymentType,
-          promoCode
+          promoCode,
         }),
       });
 
@@ -554,8 +553,10 @@ export default function HotelDetails() {
       setReservedBefore(true);
       setIsBookingConfirmationOpen(false);
     } catch (error) {
-      console.error("Booking error:", error);
-      setBookingError("Failed to book the hotel. Please try again.");
+      console.error("Unable to book!", error);
+      setBookingError(
+        "Failed to book the hotel due to insufficient funds in wallet."
+      );
       setBookingSuccess(false);
       setIsBookingConfirmationOpen(false);
     } finally {
@@ -720,7 +721,7 @@ export default function HotelDetails() {
             className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
           >
             {reservedBefore ? "Reserve Again" : "Reserve Now"}
-            </Button>
+          </Button>
         </div>
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="w-4/5 hotelPictures">
@@ -877,17 +878,14 @@ export default function HotelDetails() {
               <DialogTitle>Booking Successful</DialogTitle>
               <DialogDescription>
                 Your hotel room has been booked successfully.
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Label className="text-right">
-                        Amount Paid:{" "}
-                      </Label>
-                      <div>
-                        {Number(price).toFixed(2)} {currencyCode}{" "}
-                      </div>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Label className="text-right">Amount Paid: </Label>
+                    <div>
+                      {Number(price).toFixed(2)} {currencyCode}{" "}
                     </div>
-                    {paymentType === "Wallet" && (
-
+                  </div>
+                  {paymentType === "Wallet" && (
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">New Wallet Balance: </Label>
                       <div>
@@ -897,12 +895,16 @@ export default function HotelDetails() {
                         {currencyCode}
                       </div>
                     </div>
-                  
-                )}
+                  )}
                 </div>
               </DialogDescription>
             </DialogHeader>
-            <Button className = "w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white" onClick={() => handleFinalOK()}>Close</Button>
+            <Button
+              className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+              onClick={() => handleFinalOK()}
+            >
+              Close
+            </Button>
           </DialogContent>
         </Dialog>
         <Dialog
@@ -927,8 +929,10 @@ export default function HotelDetails() {
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
                     <div>
-                      {Number(convertPrice(tourist?.wallet, "USD", currencyCode) -
-                        price).toFixed(2)}
+                      {Number(
+                        convertPrice(tourist?.wallet, "USD", currencyCode) -
+                          price
+                      ).toFixed(2)}
                       {currencyCode}
                     </div>
                   </div>
@@ -942,7 +946,7 @@ export default function HotelDetails() {
         </Dialog>
         {bookingError && (
           <Alert variant="destructive" className="mt-4">
-            <AlertTitle>Booking Error</AlertTitle>
+            <AlertTitle>Booking did not proceed.</AlertTitle>
             <AlertDescription>{bookingError}</AlertDescription>
           </Alert>
         )}
