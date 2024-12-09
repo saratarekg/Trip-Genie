@@ -186,25 +186,20 @@ const getItinerariesByPreference = async (req, res) => {
     const { budget, price, tourType, tourLanguages } = tourist.preference;
 
     // Apply filters based on preferences and query params
-    const { upperDate, lowerDate, sort, asc, myItineraries } = req.query;
 
-    console.log(budget, price, upperDate, lowerDate, tourType, tourLanguages);
     const filterResult = await Itinerary.filter(
       budget, //max
       price, //min
-      upperDate,
-      lowerDate,
+      undefined,
+      undefined, 
       tourType,
       tourLanguages
     );
 
-    const searchResult = await Itinerary.findByFields(tourist.searchBy);
 
-    const searchResultIds = searchResult.map((itinerary) => itinerary._id);
     const filterResultIds = filterResult.map((itinerary) => itinerary._id);
 
     const query = [];
-    query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
 
     // Only show future itineraries if 'myItineraries' is not specified
@@ -240,17 +235,6 @@ const getItinerariesByPreference = async (req, res) => {
     })
       .populate("tourGuide")
       .populate({ path: "activities", populate: { path: "tags category" } });
-
-    // Apply sorting
-    if (sort) {
-      const sortBy = {};
-      sortBy[sort] = parseInt(asc); // Ascending (1) or Descending (-1)
-      itinerariesQuery = itinerariesQuery.sort(sortBy);
-    } else {
-      itinerariesQuery = itinerariesQuery.sort({ createdAt: -1 });
-    }
-
-    
 
     const itineraries = await itinerariesQuery;
 
