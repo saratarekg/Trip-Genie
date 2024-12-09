@@ -1,6 +1,5 @@
 Priority List: 
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
--Error updating product. Please try again later. lama ba update product f admin s3at (radwa)
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
@@ -22,10 +21,10 @@ Priority List:
 flights we hotels we trans y2bo fe component wa7ed fel homepage
 - graph in admin dashboard bytawl w fel user stats report 
 - pagination msh btl3 l awl elpage
-- currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)
 
 
 ------------------------------------done-------------------------------------------
+-Error updating product. Please try again later. lama ba update product f admin s3at (radwa sam done✅)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra) (sam done✅)
 -lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated (zeina hateit toast done✅)
 -sa3at beyede error lama mark all as read (sam done✅)
@@ -53,6 +52,8 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 		-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha(zeina done✅ INSHALLAH)
 		-create promo code msh sha8ala (done ✅)
 		-admin b y create activity category etnen b nafs elesm aady (zeina done✅)
+		- currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)(done✅)
+
 
 
 -CANT TEST CREATE/UPDATE HISTORICAL PLACE AASHAN COUNTRIES (had y testaha)
@@ -147,10 +148,11 @@ Houba:
 18(done✅ added to radwa's bomh)
 
 toasts ele 3ayza teb2a zai eleradwa 3mla:
+
 add to cart 
 advertiser deleting activity
-save/unsave activity men all
-save/unsave activity men single 
+save/unsave activity men all(done✅)
+save/unsave activity men single(done✅)
 save/unsave itinerary men all
 save/unsave itinerary men single 
 archive w unarchive product men admin

@@ -126,6 +126,7 @@ export function MyProducts() {
 
   const handleBackToAll = () => {
     setSelectedProductId(null);
+    fetchProducts();
   };
 
   const fetchUserInfo = useCallback(async () => {
