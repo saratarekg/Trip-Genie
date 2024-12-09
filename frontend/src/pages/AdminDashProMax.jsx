@@ -159,6 +159,7 @@ export function Dashboard() {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("");
   const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
+  const [notificationId, setNotificationId] = useState(null);
 
   useEffect(() => {
     console.log(`Active tab changed: ${activeTab}`);
@@ -322,7 +323,7 @@ export function Dashboard() {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <NotificationsDropdownAdmin setActiveTabNav={setActiveTab} />
+            <NotificationsDropdownAdmin setActiveTabNav={setActiveTab} handleNotificationClick={setNotificationId} />
           </div>
         </div>
         <div className="flex bg-gray-100 relative">
@@ -340,6 +341,7 @@ export function Dashboard() {
                 activeTab={activeTab}
                 tabs={tabs}
                 setActiveTab={setActiveTab}
+                notificationId={notificationId}
               />
             </main>
             <footer className="sticky text-[#1A3B47] p-2 border-t border-gray-300 bg-white">

@@ -574,8 +574,6 @@ const ActivityForm = ({
           Save Activity
         </Button>
       </div>
-
-
     </form>
   );
 };
@@ -688,14 +686,14 @@ export default function UpdateItinerary() {
       activities: prev.activities.map((a) =>
         a._id === editingActivity._id
           ? {
-            ...updatedActivity,
-            _id: a._id,
-            tags: updatedActivity.tags.map((tagId) => ({ _id: tagId })),
-            category: updatedActivity.category.map((categoryId) => ({
-              _id: categoryId,
-            })),
-            pictures: updatedActivity.pictures,
-          }
+              ...updatedActivity,
+              _id: a._id,
+              tags: updatedActivity.tags.map((tagId) => ({ _id: tagId })),
+              category: updatedActivity.category.map((categoryId) => ({
+                _id: categoryId,
+              })),
+              pictures: updatedActivity.pictures,
+            }
           : a
       ),
     }));
@@ -860,7 +858,7 @@ export default function UpdateItinerary() {
 
       setShowSuccessPopup(true);
     } catch (err) {
-      setShowErrorPopup("Error updating itinerary. Please try again later.");
+      setShowErrorPopup(err.response.data.message);
       console.error("Error updating itinerary:", err);
     } finally {
       setLoading(false);
@@ -959,10 +957,10 @@ export default function UpdateItinerary() {
                 {(itinerary.price === "" ||
                   isNaN(itinerary.price) ||
                   Number(itinerary.price) < 0) && (
-                    <span className="text-red-500 text-xs">
-                      Price must be a positive number.
-                    </span>
-                  )}
+                  <span className="text-red-500 text-xs">
+                    Price must be a positive number.
+                  </span>
+                )}
               </div>
 
               <div>
@@ -1014,44 +1012,48 @@ export default function UpdateItinerary() {
               </div>
 
               <div className="col-span-2 p-4 border rounded space-y-4">
-  <Label className="text-sm font-medium">Available Dates</Label>
+                <Label className="text-sm font-medium">Available Dates</Label>
 
-  {itinerary.availableDates.map((dateObj, dateIndex) => {
-    const currentDate = new Date();
-    const selectedDate = new Date(dateObj.date);
+                {itinerary.availableDates.map((dateObj, dateIndex) => {
+                  const currentDate = new Date();
+                  const selectedDate = new Date(dateObj.date);
 
-    return (
-      <div key={dateIndex} className="space-y-2">
-        <div className="flex items-center space-x-2">
-          <Input
-            type="date"
-            value={dateObj.date.split("T")[0]}
-            min={currentDate.toISOString().split("T")[0]}
-            onChange={(e) => handleDateChange(e.target.value, dateIndex)}
-            className={`w-40 ${
-              !dateObj.date || selectedDate < currentDate ? "border-red-500" : ""
-            }`}
-          />
-          {itinerary.availableDates.length > 1 && (
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              onClick={() => removeDate(dateIndex)}
-              className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
-          )}
-        </div>
-        {selectedDate < currentDate && (
-          <p className="text-sm text-red-500">Please choose a future date</p>
-        )}
-      </div>
-    );
-  })}
-
-
+                  return (
+                    <div key={dateIndex} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="date"
+                          value={dateObj.date.split("T")[0]}
+                          min={currentDate.toISOString().split("T")[0]}
+                          onChange={(e) =>
+                            handleDateChange(e.target.value, dateIndex)
+                          }
+                          className={`w-40 ${
+                            !dateObj.date || selectedDate < currentDate
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                        />
+                        {itinerary.availableDates.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => removeDate(dateIndex)}
+                            className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        )}
+                      </div>
+                      {selectedDate < currentDate && (
+                        <p className="text-sm text-red-500">
+                          Please choose a future date
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
 
                 <Button
                   type="button"
@@ -1190,7 +1192,6 @@ export default function UpdateItinerary() {
                 Back to All Itineraries
               </Button>
             </div>
-
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1213,7 +1214,11 @@ export default function UpdateItinerary() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="default" onClick={() => setShowErrorPopup(null)}>
+            <Button
+              variant="default"
+              className="bg-gray-400 hover:bg-gray-500"
+              onClick={() => setShowErrorPopup(null)}
+            >
               Close
             </Button>
           </DialogFooter>

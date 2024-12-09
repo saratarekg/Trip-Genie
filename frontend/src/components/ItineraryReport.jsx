@@ -74,6 +74,18 @@ const ItineraryReport = () => {
     return role;
   };
 
+  const calculateTotals = () => {
+    return filteredSales.reduce(
+      (acc, item) => {
+        acc.ticketsSold += Math.round(item.totalRevenue / item.itinerary.price);
+        acc.revenue += parseFloat(item.totalRevenue);
+        acc.commissionRevenue += parseFloat(item.appRevenue);
+        return acc;
+      },
+      { ticketsSold: 0, revenue: 0, commissionRevenue: 0 }
+    );
+  };
+
   const loadStatistics = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -316,17 +328,7 @@ const ItineraryReport = () => {
       ? 100
       : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
-  const calculateTotals = () => {
-    return filteredSales.reduce(
-      (acc, item) => {
-        acc.ticketsSold += Math.round(item.totalRevenue / item.itinerary.price);
-        acc.revenue += parseFloat(item.totalRevenue);
-        acc.commissionRevenue += parseFloat(item.appRevenue);
-        return acc;
-      },
-      { ticketsSold: 0, revenue: 0, commissionRevenue: 0 }
-    );
-  };
+
 
   return (
     <div className=" bg-gray-100 min-h-screen">
