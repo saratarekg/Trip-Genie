@@ -16,6 +16,7 @@ import {
   Edit,
   Trash2,
   Bookmark,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ import defaultImage from "@/assets/images/default-image.jpg";
 import activityImage from "@/assets/images/sam.png";
 import DualHandleSliderComponent from "@/components/dual-handle-slider";
 import { UserGuide } from "@/components/UserGuide";
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
 
 const renderStars = (rating) => {
   return (
@@ -40,9 +42,8 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
         />
       ))}
     </div>
@@ -104,8 +105,8 @@ const ActivityCard = ({
     const initializeCard = async () => {
       await Promise.all([
         userInfo &&
-        userInfo.role === "tourist" &&
-        userInfo.preferredCurrency !== activity.currency
+          userInfo.role === "tourist" &&
+          userInfo.preferredCurrency !== activity.currency
           ? fetchExchangeRate()
           : getCurrencySymbol(),
       ]);
@@ -196,11 +197,10 @@ const ActivityCard = ({
             }}
           >
             <Bookmark
-              className={`w-6 h-6 ${
-                isSaved
-                  ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]"
-                  : "stroke-black"
-              }`}
+              className={`w-6 h-6 ${isSaved
+                ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]"
+                : "stroke-black"
+                }`}
             />
           </Button>
         )}
@@ -303,6 +303,11 @@ export default function AllActivities() {
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const activitiesPerPage = 6;
   const [savedActivities, setSavedActivities] = useState([]);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastType, setToastType] = useState('success');
+  const [toastMessage, setToastMessage] = useState('');
+
+
 
   const navigate = useNavigate();
 
@@ -355,15 +360,20 @@ export default function AllActivities() {
       });
     }
   };
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastOpen(true);
+  };
 
   const handleActivitySaved = useCallback(
     (activityId, isSaved) => {
-      setAlertMessage({
-        type: "success",
-        message: isSaved
+      showToast(
+        "success",
+        isSaved
           ? "Activity saved successfully!"
-          : "Activity unsaved successfully!",
-      });
+          : "Activity unsaved successfully!"
+      );
 
       // Clear the alert message after 3 seconds
       setTimeout(() => {
@@ -374,6 +384,7 @@ export default function AllActivities() {
     },
     [fetchSavedActivities]
   );
+
 
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
@@ -769,284 +780,313 @@ export default function AllActivities() {
 
   return (
     <div className="bg-gray-100">
-      <div
-        className="relative h-[330px] bg-cover bg-center"
-        style={{ backgroundImage }}
-      >
-        <div className="absolute inset-0"></div>
-        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
-          <div className="flex-1">
-            <h1 className="text-5xl font-bold text-white mb-4">
-              All Activities
-            </h1>
-            <p className="text-gray-200">
-              <Link
-                to="/"
-                className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
-              >
-                Home
-              </Link>{" "}
-              / Activities
-            </p>
+
+    <ToastProvider>
+        <div
+          className="relative h-[330px] bg-cover bg-center"
+          style={{ backgroundImage }}
+        >
+          <div className="absolute inset-0"></div>
+          <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+            <div className="flex-1">
+              <h1 className="text-5xl font-bold text-white mb-4">
+                All Activities
+              </h1>
+              <p className="text-gray-200">
+                <Link
+                  to="/"
+                  className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
+                >
+                  Home
+                </Link>{" "}
+                / Activities
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="container py-8">
-        <div className="flex gap-8">
-          <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
-              <Button
-                onClick={clearFilters}
-                size="sm"
-                className="text-gray-400 hover:text-gray-200 bg-transparent border-none"
-              >
-                Clear All
-              </Button>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-                {isPriceInitialized && (
-                  <DualHandleSliderComponent
-                    min={0}
-                    max={maxPriceOfActivities}
-                    symbol={userInfo?.preferredCurrency?.symbol || "$"}
-                    step={10}
-                    values={priceRange}
-                    exchangeRate={exchangeRateForFilter}
-                    onChange={(values) => setPriceRange(values)}
-                    middleColor="#5D9297"
-                    colorRing="blue"
-                  />
-                )}
+        <div className="container py-8">
+          <div className="flex gap-8">
+            <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+                <Button
+                  onClick={clearFilters}
+                  size="sm"
+                  className="text-gray-400 hover:text-gray-200 bg-transparent border-none"
+                >
+                  Clear All
+                </Button>
               </div>
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
-                <div className="space-y-2">
-                  <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, start: e.target.value })
-                    }
-                    className="w-full p-2 border rounded"
-                  />
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, end: e.target.value })
-                    }
-                    className="w-full p-2 border rounded"
-                  />
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
+                  {isPriceInitialized && (
+                    <DualHandleSliderComponent
+                      min={0}
+                      max={maxPriceOfActivities}
+                      symbol={userInfo?.preferredCurrency?.symbol || "$"}
+                      step={10}
+                      values={priceRange}
+                      exchangeRate={exchangeRateForFilter}
+                      onChange={(values) => setPriceRange(values)}
+                      middleColor="#5D9297"
+                      colorRing="blue"
+                    />
+                  )}
                 </div>
-              </div>
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Star Rating</h3>
-                <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <button
-                      key={rating}
-                      onClick={() =>
-                        setSelectedRating(
-                          rating === selectedRating ? null : rating
-                        )
-                      }
-                      className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
-                        selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                      }`}
-                    >
-                      {renderStars(rating)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Category</h3>
-                <ScrollArea className="h-[200px]">
+                <div>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
                   <div className="space-y-2">
-                    {categoryOptions.map((category) => (
-                      <div key={category._id} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={category._id}
-                          checked={selectedCategories.includes(category.name)}
-                          onChange={() => {
-                            setSelectedCategories((prev) =>
-                              prev.includes(category.name)
-                                ? prev.filter((cat) => cat !== category.name)
-                                : [...prev, category.name]
-                            );
-                          }}
-                          className="mr-2"
-                        />
-                        <label
-                          htmlFor={category._id}
-                          className="text-sm text-gray-600"
-                        >
-                          {category.name}
-                        </label>
-                      </div>
+                    <input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) =>
+                        setDateRange({ ...dateRange, start: e.target.value })
+                      }
+                      className="w-full p-2 border rounded"
+                    />
+                    <input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) =>
+                        setDateRange({ ...dateRange, end: e.target.value })
+                      }
+                      className="w-full p-2 border rounded"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">Star Rating</h3>
+                  <div className="space-y-2">
+                    {[5, 4, 3, 2, 1].map((rating) => (
+                      <button
+                        key={rating}
+                        onClick={() =>
+                          setSelectedRating(
+                            rating === selectedRating ? null : rating
+                          )
+                        }
+                        className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                          }`}
+                      >
+                        {renderStars(rating)}
+                      </button>
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
+                <div>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">Category</h3>
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-2">
+                      {categoryOptions.map((category) => (
+                        <div key={category._id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={category._id}
+                            checked={selectedCategories.includes(category.name)}
+                            onChange={() => {
+                              setSelectedCategories((prev) =>
+                                prev.includes(category.name)
+                                  ? prev.filter((cat) => cat !== category.name)
+                                  : [...prev, category.name]
+                              );
+                            }}
+                            className="mr-2"
+                          />
+                          <label
+                            htmlFor={category._id}
+                            className="text-sm text-gray-600"
+                          >
+                            {category.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex-1">
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-4">
-                <div className="relative flex-grow">
-                  <input
-                    type="text"
-                    placeholder="Search activities..."
-                    className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
-                </div>
-                <span className="text-gray-500 text-sm ml-4">
-                  ({sortedActivities.length} items)
-                </span>
-                <div className="flex items-center space-x-4 ml-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="whitespace-nowrap rounded-full"
-                    onClick={() => handleSort("rating")}
-                  >
-                    <ArrowUpDown className="w-4 h-4 mr-2" />
-                    Sort by Rating
-                    {sortBy === "rating" && (
-                      <span className="ml-2">
-                        {sortOrder === 1 ? "↓" : "↑"}
-                      </span>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="whitespace-nowrap rounded-full"
-                    onClick={() => handleSort("price")}
-                  >
-                    <ArrowUpDown className="w-4 h-4 mr-2" />
-                    Sort by Price
-                    {sortBy === "price" && (
-                      <span className="ml-2">
-                        {sortOrder === 1 ? "↓" : "↑"}
-                      </span>
-                    )}
-                  </Button>
-                  {userInfo?.role === "tourist" && (
+            <div className="flex-1">
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="relative flex-grow">
+                    <input
+                      type="text"
+                      placeholder="Search activities..."
+                      className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+                  </div>
+                  <span className="text-gray-500 text-sm ml-4">
+                    ({sortedActivities.length} items)
+                  </span>
+                  <div className="flex items-center space-x-4 ml-4">
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`whitespace-nowrap rounded-full ${
-                        isSortedByPreference ? "bg-red-100" : ""
-                      }`}
-                      onClick={handleSortByPreference}
+                      className="whitespace-nowrap rounded-full"
+                      onClick={() => handleSort("rating")}
                     >
-                      <Heart
-                        className={`w-4 h-4 mr-2 ${
-                          isSortedByPreference
+                      <ArrowUpDown className="w-4 h-4 mr-2" />
+                      Sort by Rating
+                      {sortBy === "rating" && (
+                        <span className="ml-2">
+                          {sortOrder === 1 ? "↓" : "↑"}
+                        </span>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="whitespace-nowrap rounded-full"
+                      onClick={() => handleSort("price")}
+                    >
+                      <ArrowUpDown className="w-4 h-4 mr-2" />
+                      Sort by Price
+                      {sortBy === "price" && (
+                        <span className="ml-2">
+                          {sortOrder === 1 ? "↓" : "↑"}
+                        </span>
+                      )}
+                    </Button>
+                    {userInfo?.role === "tourist" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""
+                          }`}
+                        onClick={handleSortByPreference}
+                      >
+                        <Heart
+                          className={`w-4 h-4 mr-2 ${isSortedByPreference
                             ? "fill-current text-red-500"
                             : ""
-                        }`}
-                      />
-                      Sort by Preference
-                    </Button>
-                  )}
+                            }`}
+                        />
+                        Sort by Preference
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            {isLoading ? (
-              <AllProductsSkeleton />
-            ) : error ? (
-              <div className="text-red-500 text-center py-8">{error}</div>
-            ) : sortedActivities.length === 0 ? (
-              <div className="text-center py-8">No activities found</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedActivities
-                  .slice(
-                    (currentPage - 1) * activitiesPerPage,
-                    currentPage * activitiesPerPage
-                  )
-                  .map((activity) => (
-                    <ActivityCard
-                      key={activity._id}
-                      activity={activity}
-                      onSelect={handleActivitySelect}
-                      userInfo={userInfo}
-                      exchangeRates={exchangeRates}
-                      currencies={currencies}
-                      onDeleteConfirm={handleDeleteConfirm}
-                      savedActivities={savedActivities}
-                      onActivitySaved={handleActivitySaved}
-                    />
-                  ))}
-              </div>
-            )}
-            {sortedActivities.length > 0 && (
-              <div className="mt-8 flex justify-center items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm">
-                  Page {currentPage} of{" "}
-                  {Math.max(
-                    1,
-                    Math.ceil(sortedActivities.length / activitiesPerPage)
-                  )}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    handlePageChange(
-                      Math.min(
-                        currentPage + 1,
-                        Math.ceil(sortedActivities.length / activitiesPerPage)
-                      )
+              {isLoading ? (
+                <AllProductsSkeleton />
+              ) : error ? (
+                <div className="text-red-500 text-center py-8">{error}</div>
+              ) : sortedActivities.length === 0 ? (
+                <div className="text-center py-8">No activities found</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {sortedActivities
+                    .slice(
+                      (currentPage - 1) * activitiesPerPage,
+                      currentPage * activitiesPerPage
                     )
-                  }
-                  disabled={
-                    currentPage ===
-                    Math.max(
+                    .map((activity) => (
+                      <ActivityCard
+                        key={activity._id}
+                        activity={activity}
+                        onSelect={handleActivitySelect}
+                        userInfo={userInfo}
+                        exchangeRates={exchangeRates}
+                        currencies={currencies}
+                        onDeleteConfirm={handleDeleteConfirm}
+                        savedActivities={savedActivities}
+                        onActivitySaved={handleActivitySaved}
+                      />
+                    ))}
+                </div>
+              )}
+              {sortedActivities.length > 0 && (
+                <div className="mt-8 flex justify-center items-center space-x-4">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm">
+                    Page {currentPage} of{" "}
+                    {Math.max(
                       1,
                       Math.ceil(sortedActivities.length / activitiesPerPage)
-                    )
-                  }
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+                    )}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      handlePageChange(
+                        Math.min(
+                          currentPage + 1,
+                          Math.ceil(sortedActivities.length / activitiesPerPage)
+                        )
+                      )
+                    }
+                    disabled={
+                      currentPage ===
+                      Math.max(
+                        1,
+                        Math.ceil(sortedActivities.length / activitiesPerPage)
+                      )
+                    }
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      {alertMessage && (
-        <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
-        >
-          <AlertTitle>
-            {alertMessage.type === "success" ? "Success" : "Error"}
-          </AlertTitle>
-          <AlertDescription>{alertMessage.message}</AlertDescription>
-        </Alert>
-      )}
-      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="activities" />
-      )}
-    </div>
-  );
+        {alertMessage && (
+          <Alert
+            className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+              } text-white`}
+          >
+            <AlertTitle>
+              {alertMessage.type === "success" ? "Success" : "Error"}
+            </AlertTitle>
+            <AlertDescription>{alertMessage.message}</AlertDescription>
+          </Alert>
+        )}
+        {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+          <UserGuide steps={guideSteps} pageName="activities" />
+        )}
+
+
+
+
+        <ToastViewport className="fixed top-0 right-0 p-4" />
+        {
+          isToastOpen && (
+            
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={5000}
+            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+          >
+            <div className="flex items-center">
+              {toastType === 'success' ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                <ToastDescription>
+                  {toastMessage}
+                </ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+          )}
+          </ToastProvider>
+          </div>
+      );
 }

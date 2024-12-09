@@ -167,9 +167,8 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -250,6 +249,15 @@ const ActivityDetail = () => {
   const [loyaltyy, setloyalty] = useState(0);
   const [totalloyaltyy, settotalloyalty] = useState(0);
   const [discountedTotal, setDiscountedTotal] = useState(0);
+  const [toastType, setToastType] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
+  const [isToastOpen2, setIsToastOpen2] = useState(false);
+
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastOpen2(true);
+  };
 
   const handleDiscountedTotalChange = (newTotal) => {
     setDiscountedTotal(newTotal);
@@ -378,7 +386,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                  transport.vehicleType === "Microbus" ? (
+                    transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -785,7 +793,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-          additionalTickets;
+        additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -806,7 +814,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-          "An error occurred while updating the booking."
+        "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -873,8 +881,8 @@ const ActivityDetail = () => {
       let totalPrice =
         discountPercentage > 0
           ? (calculateTotalPrice(numberOfTickets) *
-              (100 - discountPercentage)) /
-            100
+            (100 - discountPercentage)) /
+          100
           : calculateTotalPrice(numberOfTickets);
 
       if (paymentType === "Wallet") {
@@ -970,16 +978,17 @@ const ActivityDetail = () => {
         );
 
         // Show success message
-        setAlertMessage({
-          type: "success",
-          message:
-            response.data.message || "Activity saved/unsaved successfully!",
-        });
+        showToast(
+          "success",
+          isSaved
+            ? "Activity unsaved successfully!"
+            : "Activity unsaved successfully!"
+        );
 
-        // Hide alert after 2 seconds
+        // Clear the toast message after 3 seconds
         setTimeout(() => {
-          setAlertMessage(null);
-        }, 2000);
+          setIsToastOpen(false);
+        }, 3000);
       }
     } catch (error) {
       console.error("Error toggling save activity:", error);
@@ -1118,34 +1127,34 @@ const ActivityDetail = () => {
     // Conditionally add the Save step based on user role
     ...(userRole !== "guest"
       ? [
-          {
-            target: ".Save",
-            content: (
-              <>
-                Click here to save this activity for later viewing or booking in
-                your saved activities list.
-                <br />
-                Tip:
-                <br />
-                You can view your saved activities anytime! Simply click the
-                hamburger menu on the top right corner → My Account → Activities
-                → Saved
-              </>
-            ),
-            placement: "left",
-          },
-        ]
+        {
+          target: ".Save",
+          content: (
+            <>
+              Click here to save this activity for later viewing or booking in
+              your saved activities list.
+              <br />
+              Tip:
+              <br />
+              You can view your saved activities anytime! Simply click the
+              hamburger menu on the top right corner → My Account → Activities
+              → Saved
+            </>
+          ),
+          placement: "left",
+        },
+      ]
       : []),
     // Conditionally add the bookNow step based on user role
     ...(userRole !== "guest"
       ? [
-          {
-            target: ".bookNow",
-            content:
-              "Click here to be able to book this activity and proceed to the payment process.",
-            placement: "left",
-          },
-        ]
+        {
+          target: ".bookNow",
+          content:
+            "Click here to be able to book this activity and proceed to the payment process.",
+          placement: "left",
+        },
+      ]
       : []),
     {
       target: ".AdvertiserDetail",
@@ -1415,414 +1424,427 @@ const ActivityDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div>
-      <div className="bg-gray-100">
-        <div className="mx-4 ">
-          <div className="pt-4">
-            <div className="flex flex-col md:flex-row gap-8 justify-between">
-              <div className="md:w-full">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-4xl font-bold flex items-center justify-between">
-                      {activity.name}
-                      <div className="flex items-center">
-                        <ToastProvider>
-                          <Popover open={open} onOpenChange={setOpen}>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="ml-4"
-                              >
-                                <Share2 className="h-4 w-4" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                              <div className="flex flex-col">
-                                <Button
-                                  variant="ghost"
-                                  onClick={handleCopyLink}
-                                  className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                                >
-                                  <Link className="mr-2 h-4 w-4" />
-                                  Copy Link
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  onClick={handleEmailShare}
-                                  className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                                >
-                                  <Mail className="mr-2 h-4 w-4" />
-                                  Share by Email
-                                </Button>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+    <ToastProvider>
+      <div className="min-h-screen bg-gray-100">
+        <div
+          style={{
+            backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.7), rgba(93, 146, 151, 0.5)), url(${activity.pictures[0]?.url})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+          className="bg-[#1a202c] text-white py-20 px-4"
+        >
+          <div className="container mx-auto text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              {activity.name}
+            </h1>
+          </div>
+        </div>
 
-                          <ToastViewport />
-
-                          {isToastOpen && (
-                            <Toast
-                              onOpenChange={setIsToastOpen}
-                              open={isToastOpen}
-                              duration={2000}
-                            >
-                              <ToastTitle>Link Copied</ToastTitle>
-                              <ToastDescription>
-                                The link has been copied to your clipboard.
-                              </ToastDescription>
-                              <ToastClose />
-                            </Toast>
-                          )}
-                        </ToastProvider>
-                      </div>
-                    </CardTitle>
-
-                    <CardDescription className="flex items-center justify-end"></CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col lg:flex-row gap-8">
-                      <div className="w-full h-[400px]">
-                        <ImageGallery pictures={activity.pictures} />
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {/* Categories Badges */}
-                      {activity.category.map((cat, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="flex items-center text-base bg-[#388A94]  text-white font-semibold px-2 py-1 rounded
-            hover:bg-[#388A94] hover:text-white"
-                        >
-                          {cat.name}
-                        </Badge>
-                      ))}
-
-                      {/* Tags Badges */}
-                      {activity.tags.map((tag, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="flex items-center text-base font-semibold bg-[#1A3B47] text-white px-2 py-1 rounded hover:bg-[#1A3B47] hover:text-white"
-                        >
-                          {tag.type}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center p-6">
-                      <Map
-                        position={[
-                          activity.location.coordinates.latitude,
-                          activity.location.coordinates.longitude,
-                        ]}
-                        height="300px"
-                        width="100%"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="flex flex-col md:flex-col gap-8 md: w-2/5">
-                <div className="flex-1 bg-white shadow-md rounded-lg p-4">
-                  <div>
-                    <div className="space-y-4">
-                      <div className="ActivityDetail">
-                        <div className=""></div>
-                        {(userRole === "advertiser" || userRole === "admin") &&
-                          !activity.isBookingOpen && (
-                            <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
-                              Booking is currently closed.
-                            </div>
-                          )}
-                        <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
-                          {isExpanded
-                            ? activity.description
-                            : `${activity.description.substring(0, 130)}${
-                                activity.description.length > 130 ? "..." : ""
-                              }`}
-                          {activity.description.length > 130 && (
-                            <button
-                              onClick={toggleExpanded}
-                              className="text-blue-500 hover:underline ml-2"
-                            >
-                              {isExpanded ? "View Less" : "View More"}
-                            </button>
-                          )}
-                        </div>
+        <div className="bg-gray-100">
+          <div className="mx-4 ">
+            <div className="pt-4">
+              <div className="flex flex-col md:flex-row gap-8 justify-between">
+                <div className="md:w-full">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-4xl font-bold flex items-center justify-between">
+                        {activity.name}
                         <div className="flex items-center">
-                          {/* Rating Badge */}
-                          <div className="flex items-center py-1 rounded-full">
-                            <StarRating
-                              rating={activity.rating}
-                              readOnly={true}
-                            />
-                          </div>
+                          <ToastProvider>
+                            <Popover open={open} onOpenChange={setOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="ml-4"
+                                >
+                                  <Share2 className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <div className="flex flex-col">
+                                  <Button
+                                    variant="ghost"
+                                    onClick={handleCopyLink}
+                                    className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                                  >
+                                    <Link className="mr-2 h-4 w-4" />
+                                    Copy Link
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    onClick={handleEmailShare}
+                                    className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                                  >
+                                    <Mail className="mr-2 h-4 w-4" />
+                                    Share by Email
+                                  </Button>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
 
-                          {/* Rating Count outside the badge */}
-                          <span className="text-sm font-normal ml-2">
-                            {activity.comments
-                              ? `(${activity.comments.length})`
-                              : "(0)"}
-                          </span>
+                            <ToastViewport />
+
+                            {isToastOpen && (
+                              <Toast
+                                onOpenChange={setIsToastOpen}
+                                open={isToastOpen}
+                                duration={2000}
+                              >
+                                <ToastTitle>Link Copied</ToastTitle>
+                                <ToastDescription>
+                                  The link has been copied to your clipboard.
+                                </ToastDescription>
+                                <ToastClose />
+                              </Toast>
+                            )}
+                          </ToastProvider>
                         </div>
-                        <div className="flex items-start">
-                          <div>
-                            <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
-                              Limited time deal
+                      </CardTitle>
+
+                      <CardDescription className="flex items-center justify-end"></CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col lg:flex-row gap-8">
+                        <div className="w-full h-[400px]">
+                          <ImageGallery pictures={activity.pictures} />
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {/* Categories Badges */}
+                        {activity.category.map((cat, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="flex items-center text-base bg-[#388A94]  text-white font-semibold px-2 py-1 rounded
+            hover:bg-[#388A94] hover:text-white"
+                          >
+                            {cat.name}
+                          </Badge>
+                        ))}
+
+                        {/* Tags Badges */}
+                        {activity.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="flex items-center text-base font-semibold bg-[#1A3B47] text-white px-2 py-1 rounded hover:bg-[#1A3B47] hover:text-white"
+                          >
+                            {tag.type}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center p-6">
+                        <Map
+                          position={[
+                            activity.location.coordinates.latitude,
+                            activity.location.coordinates.longitude,
+                          ]}
+                          height="300px"
+                          width="100%"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="flex flex-col md:flex-col gap-8 md: w-2/5">
+                  <div className="flex-1 bg-white shadow-md rounded-lg p-4">
+                    <div>
+                      <div className="space-y-4">
+                        <div className="ActivityDetail">
+                          <div className="">
+                            <h1 className="text-3xl font-bold">
+                              {activity.name}
+                            </h1>
+                          </div>
+                          {(userRole === "advertiser" || userRole === "admin") &&
+                            !activity.isBookingOpen && (
+                              <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
+                                Booking is currently closed.
+                              </div>
+                            )}
+                          <div className="flex items-center">
+                            {/* Rating Badge */}
+                            <div className="flex items-center px-3 py-1 rounded-full">
+                              <StarRating
+                                rating={activity.rating}
+                                readOnly={true}
+                              />
                             </div>
 
-                            <div className="flex flex-col items-start">
-                              <div className="flex items-baseline">
-                                <span className="text-4xl font-bold text-gray-900">
+                            {/* Rating Count outside the badge */}
+                            <span className="text-sm font-normal ml-2">
+                              {activity.comments
+                                ? `(${activity.comments.length})`
+                                : "(0)"}
+                            </span>
+                          </div>
+                          <div className="flex items-start">
+                            <div>
+                              <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
+                                Limited time deal
+                              </div>
+
+                              <div className="flex flex-col items-start">
+                                <div className="flex items-baseline">
+                                  <span className="text-4xl font-bold text-gray-900">
+                                    {convertPrice(
+                                      calculateDiscountedPrice(
+                                        activity.price,
+                                        activity.specialDiscount
+                                      ),
+                                      "USD",
+                                      userPreferredCurrency?.code
+                                    )}
+                                  </span>
+                                  <span className="ml-3 text-xl font-semibold text-red-600">
+                                    -{activity.specialDiscount}% Discount
+                                  </span>
+                                </div>
+                                <div className="text-2xl text-gray-500 line-through mt-2">
                                   {convertPrice(
-                                    calculateDiscountedPrice(
-                                      activity.price,
-                                      activity.specialDiscount
-                                    ),
+                                    activity.price,
                                     "USD",
                                     userPreferredCurrency?.code
                                   )}
-                                </span>
-                                <span className="ml-3 text-xl font-semibold text-red-600">
-                                  -{activity.specialDiscount}% Discount
-                                </span>
-                              </div>
-                              <div className="text-2xl text-gray-500 line-through mt-2">
-                                {convertPrice(
-                                  activity.price,
-                                  "USD",
-                                  userPreferredCurrency?.code
-                                )}
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <div className="flex items-center">
+                            <MapPin className="w-5 h-5 mr-2 text-orange-500" />
+                            <span className="text-gray-700">
+                              Location: {activity.location.address}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <Calendar className="w-5 h-5 mr-2 text-orange-500" />
+                            <span className="text-gray-700">
+                              Date:{" "}
+                              {new Date(activity.timing).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="w-5 h-5 mr-2 text-orange-500" />
+                            <span className="text-gray-700">
+                              Time:{" "}
+                              {new Date(activity.timing).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                          <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
+                            {isExpanded
+                              ? activity.description
+                              : `${activity.description.substring(0, 130)}${activity.description.length > 130 ? "..." : ""
+                              }`}
+                            {activity.description.length > 130 && (
+                              <button
+                                onClick={toggleExpanded}
+                                className="text-blue-500 hover:underline ml-2"
+                              >
+                                {isExpanded ? "View Less" : "View More"}
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <MapPin className="w-5 h-5 mr-2 text-orange-500" />
-                          <span className="text-gray-700">
-                            Location: {activity.location.address}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <Calendar className="w-5 h-5 mr-2 text-orange-500" />
-                          <span className="text-gray-700">
-                            Date:{" "}
-                            {new Date(activity.timing).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="w-5 h-5 mr-2 text-orange-500" />
-                          <span className="text-gray-700">
-                            Time:{" "}
-                            {new Date(activity.timing).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      {userRole === "tourist" && !isActivityPassed() && (
-                        <>
-                          <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-3"></div>
+                        {userRole === "tourist" && !isActivityPassed() && (
+                          <>
+                            <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-3"></div>
 
-                          {!activity.isBookingOpen && (
-                            <div className="mb-3 p-3 bg-blue-50 text-[#1A3B47] border border-blue-300 rounded-md shadow-sm text-center">
-                              <strong>Save this activity</strong> to get
-                              notified when booking opens.
-                            </div>
-                          )}
+                            {!activity.isBookingOpen && (
+                              <div className="mb-3 p-3 bg-blue-50 text-[#1A3B47] border border-blue-300 rounded-md shadow-sm text-center">
+                                <strong>Save this activity</strong> to get
+                                notified when booking opens.
+                              </div>
+                            )}
 
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSaveToggle(activity._id);
-                            }}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${
-                              isSaved
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSaveToggle(activity._id);
+                              }}
+                              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
                                 ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
                                 : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                            }`}
-                          >
-                            <Bookmark
-                              className={`w-5 h-5 ${
-                                isSaved
+                                }`}
+                            >
+                              <Bookmark
+                                className={`w-5 h-5 ${isSaved
                                   ? "stroke-white fill-[#1A3B47]"
                                   : "stroke-white"
-                              }`}
-                            />
-                            {isSaved ? "Unsave" : "Save"}
-                          </Button>
+                                  }`}
+                              />
+                              {isSaved ? "Unsave" : "Save"}
+                            </Button>
 
-                          <Button
-                            onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
-                              activity.isBookingOpen
+                            <Button
+                              onClick={handleBookNowClick}
+                              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${activity.isBookingOpen
                                 ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
                                 : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                            }`}
-                            disabled={!activity.isBookingOpen}
+                                }`}
+                              disabled={!activity.isBookingOpen}
+                            >
+                              {activity.isBookingOpen
+                                ? "Book Now"
+                                : "Booking Closed"}
+                            </Button>
+                          </>
+                        )}
+                        {canModify && (
+                          <>
+                            <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-2"></div>
+                            <Button
+                              onClick={handleUpdate}
+                              variant="default"
+                              className="w-full bg-[#1A3B47] hover:bg-[#123239] text-white font-bold py-2 px-4 rounded mt-4"
+                            >
+                              <Edit className="mr-2" /> Update
+                            </Button>
+                            <Button
+                              onClick={handleDelete}
+                              variant="destructive"
+                              className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-4"
+                            >
+                              <Trash2 className="mr-2" /> Delete
+                            </Button>
+                          </>
+                        )}
+                        <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+                      </div>
+                    </div>
+
+                    <div className="AdvertiserDetail">
+                      <CardHeader>
+                        <div className="flex justify-between items-center">
+                          <span className="text-3xl font-bold -ml-2">
+                            Advertiser Profile
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
                           >
-                            {activity.isBookingOpen
-                              ? "Book Now"
-                              : "Booking Closed"}
-                          </Button>
-                        </>
-                      )}
-                      {canModify && (
-                        <>
-                          <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-2"></div>
+                            Verified Advertiser
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center">
+                          <Avatar className="h-16 w-16">
+                            <AvatarImage
+                              src={advertiserProfile.logo}
+                              alt={advertiserProfile.username}
+                            />
+                            <AvatarFallback>
+                              <User className="h-8 w-8" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="ml-4">
+                            <h3 className="text-2xl font-bold text-[#1A3B47]">
+                              {advertiserProfile.username}
+                            </h3>
+                            <div className="flex items-center text-sm text-gray-500 mt-1">
+                              <span className="font-semibold text-xs">
+                                95% Positive
+                              </span>
+                              <span className="mx-2">|</span>
+                              <span className="font-semibold text-xs">
+                                754 Bookings
+                              </span>
+                            </div>
+                            <div className="flex items-center mt-2">
+                              <StarRating rating={5} />
+                            </div>
+                          </div>
+                        </div>
+
+                        {showMore && (
+                          <div className="mt-4 space-y-2">
+                            <div className="flex items-center text-sm">
+                              <Mail className="h-5 w-5 mr-2 text-gray-500" />
+                              <span>{advertiserProfile.email}</span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <Globe className="h-5 w-5 mr-2 text-gray-500" />
+                              <span>{advertiserProfile.website}</span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <Phone className="h-5 w-5 mr-2 text-gray-500" />
+                              <span>{advertiserProfile.hotline}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="mt-4">
                           <Button
-                            onClick={handleUpdate}
-                            variant="default"
-                            className="w-full bg-[#1A3B47] hover:bg-[#123239] text-white font-bold py-2 px-4 rounded mt-4"
+                            variant="link"
+                            className="w-full p-0 h-auto font-normal text-blue-500 hover:text-blue-700"
+                            onClick={() => setShowMore(!showMore)}
                           >
-                            <Edit className="mr-2" /> Update
+                            {showMore ? "Less Info" : "More Info"}
                           </Button>
-                          <Button
-                            onClick={handleDelete}
-                            variant="destructive"
-                            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-4"
-                          >
-                            <Trash2 className="mr-2" /> Delete
-                          </Button>
-                        </>
-                      )}
-                      <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+                        </div>
+
+                        {userRole === "admin" && (
+                          <>
+                            <div className="mt-6 border-t border-gray-300 pt-4"></div>
+                            <Button
+                              className={`w-full mx-auto text-white ${isAppropriate
+                                ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                                : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                                }`}
+                              onClick={handleOpenDialog}
+                            >
+                              {isAppropriate
+                                ? "Flag as Inappropriate"
+                                : "Flag as Appropriate"}
+                            </Button>
+
+                            {dialogOpen && (
+                              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                                  <div className="mb-4">
+                                    <h2 className="text-lg font-semibold">
+                                      Confirm Action
+                                    </h2>
+                                    <p className="text-gray-600 mt-2">
+                                      Are you sure you want to change the status
+                                      of this itinerary/event?
+                                    </p>
+                                  </div>
+                                  <div className="flex justify-end space-x-4">
+                                    <Button
+                                      variant="outlined"
+                                      onClick={handleCloseDialog}
+                                      className="border-gray-300"
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      color="secondary"
+                                      onClick={handleConfirmFlag}
+                                      className="bg-[#5D9297] hover:[#388A94] text-white"
+                                    >
+                                      Confirm
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </CardContent>
                     </div>
                   </div>
 
-                  <div className="AdvertiserDetail">
-                    <CardHeader>
-                      <div className="flex justify-between items-center">
-                        <span className="text-3xl font-bold -ml-2">
-                          Advertiser Profile
-                        </span>
-                        <Badge
-                          variant="secondary"
-                          className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                        >
-                          Verified Advertiser
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center">
-                        <Avatar className="h-16 w-16">
-                          <AvatarImage
-                            src={advertiserProfile.logo}
-                            alt={advertiserProfile.username}
-                          />
-                          <AvatarFallback>
-                            <User className="h-8 w-8" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="ml-4">
-                          <h3 className="text-2xl font-bold text-[#1A3B47]">
-                            {advertiserProfile.username}
-                          </h3>
-                          <div className="flex items-center text-sm text-gray-500 mt-1">
-                            <span className="font-semibold text-xs">
-                              95% Positive
-                            </span>
-                            <span className="mx-2">|</span>
-                            <span className="font-semibold text-xs">
-                              754 Bookings
-                            </span>
-                          </div>
-                          <div className="flex items-center mt-2">
-                            <StarRating rating={5} />
-                          </div>
-                        </div>
-                      </div>
-
-                      {showMore && (
-                        <div className="mt-4 space-y-2">
-                          <div className="flex items-center text-sm">
-                            <Mail className="h-5 w-5 mr-2 text-gray-500" />
-                            <span>{advertiserProfile.email}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <Globe className="h-5 w-5 mr-2 text-gray-500" />
-                            <span>{advertiserProfile.website}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <Phone className="h-5 w-5 mr-2 text-gray-500" />
-                            <span>{advertiserProfile.hotline}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="mt-4">
-                        <Button
-                          variant="link"
-                          className="w-full p-0 h-auto font-normal text-blue-500 hover:text-blue-700"
-                          onClick={() => setShowMore(!showMore)}
-                        >
-                          {showMore ? "Less Info" : "More Info"}
-                        </Button>
-                      </div>
-
-                      {userRole === "admin" && (
-                        <>
-                          <div className="mt-6 border-t border-gray-300 pt-4"></div>
-                          <Button
-                            className={`w-full mx-auto text-white ${
-                              isAppropriate
-                                ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                                : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                            }`}
-                            onClick={handleOpenDialog}
-                          >
-                            {isAppropriate
-                              ? "Flag as Inappropriate"
-                              : "Flag as Appropriate"}
-                          </Button>
-
-                          {dialogOpen && (
-                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                              <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                                <div className="mb-4">
-                                  <h2 className="text-lg font-semibold">
-                                    Confirm Action
-                                  </h2>
-                                  <p className="text-gray-600 mt-2">
-                                    Are you sure you want to change the status
-                                    of this itinerary/event?
-                                  </p>
-                                </div>
-                                <div className="flex justify-end space-x-4">
-                                  <Button
-                                    variant="outlined"
-                                    onClick={handleCloseDialog}
-                                    className="border-gray-300"
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    color="secondary"
-                                    onClick={handleConfirmFlag}
-                                    className="bg-[#5D9297] hover:[#388A94] text-white"
-                                  >
-                                    Confirm
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </CardContent>
-                  </div>
-                </div>
-
-                {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
+                  {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
           <Button
           onClick={handleUpdateNowClick}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
@@ -1830,10 +1852,10 @@ const ActivityDetail = () => {
           {"Update Booking"}
           </Button>
           )} */}
+                </div>
               </div>
-            </div>
 
-            {/* {(userRole === "advertiser" || userRole === "tourist") && (
+              {/* {(userRole === "advertiser" || userRole === "tourist") && (
             <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4">
                 Transportation Options
@@ -1842,481 +1864,480 @@ const ActivityDetail = () => {
             </div>
           )} */}
 
-            {/* Comment Carousel */}
-            <div className="mt-8 relative bg-white p-6 mb-4 rounded-lg shadow-md">
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
-                  <Button variant="link" className="text-primary">
-                    See All
-                  </Button>
-                </div>
+              {/* Comment Carousel */}
+              <div className="mt-8 relative bg-white p-6 mb-4 rounded-lg shadow-md">
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
+                    <Button variant="link" className="text-primary">
+                      See All
+                    </Button>
+                  </div>
 
-                <div className="flex gap-8 mb-6">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold mb-1">
-                      {activity?.rating?.toFixed(1) || "0.0"}
+                  <div className="flex gap-8 mb-6">
+                    <div className="text-center">
+                      <div className="text-4xl font-bold mb-1">
+                        {activity?.rating?.toFixed(1) || "0.0"}
+                      </div>
+                      <div className="text-sm text-gray-500">out of 5</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {activity?.comments?.length || 0} Ratings
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">out of 5</div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      {activity?.comments?.length || 0} Ratings
+
+                    <div className="flex-1 space-y-1">
+                      {[5, 4, 3, 2, 1].map((stars) => {
+                        const count = ratingDistribution[stars] || 0;
+                        const percentage = activity?.comments?.length
+                          ? Math.round((count / activity.comments.length) * 100)
+                          : 0;
+                        return (
+                          <RatingDistributionBar
+                            key={stars}
+                            percentage={percentage}
+                            count={stars}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
 
-                  <div className="flex-1 space-y-1">
-                    {[5, 4, 3, 2, 1].map((stars) => {
-                      const count = ratingDistribution[stars] || 0;
-                      const percentage = activity?.comments?.length
-                        ? Math.round((count / activity.comments.length) * 100)
-                        : 0;
-                      return (
-                        <RatingDistributionBar
-                          key={stars}
-                          percentage={percentage}
-                          count={stars}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {userRole === "tourist" && userComment && (
-                  <div className="border-t pt-4">
-                    <div className="text-sm text-gray-500 mb-2">
-                      Tap to Rate:
-                    </div>
-                    <div
-                      className="flex gap-2"
-                      onMouseLeave={() => setIsRatingHovered(false)}
-                    >
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`w-8 h-8 cursor-pointer ${
-                            (
+                  {userRole === "tourist" && userComment && (
+                    <div className="border-t pt-4">
+                      <div className="text-sm text-gray-500 mb-2">
+                        Tap to Rate:
+                      </div>
+                      <div
+                        className="flex gap-2"
+                        onMouseLeave={() => setIsRatingHovered(false)}
+                      >
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-8 h-8 cursor-pointer ${(
                               isRatingHovered
                                 ? quickRating >= star
                                 : quickRating >= star
                             )
                               ? "text-yellow-500 fill-current"
                               : "text-gray-300"
-                          }`}
-                          onMouseEnter={() => {
-                            setIsRatingHovered(true);
-                            setQuickRating(star);
-                          }}
-                          onClick={() => handleQuickRating(star)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="border-t pt-6"></div>
-              <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                {getTotalRatings()} overall ratings, {getReviewsCount()} with
-                reviews
-              </p>
-              {activity.comments && activity.comments.length > 0 ? (
-                <>
-                  <div className="flex items-center justify-between mb-4">
-                    <Button
-                      onClick={handlePrevComment}
-                      variant="ghost"
-                      disabled={currentCommentIndex === 0}
-                    >
-                      <ChevronLeft />
-                    </Button>
-                    <div className="flex-1 flex justify-between px-4">
-                      {activity.comments
-                        .filter(
-                          (comment) =>
-                            comment.content.liked || comment.content.disliked
-                        ) // Filter for comments with content
-                        .slice(currentCommentIndex, currentCommentIndex + 3) // Slice the filtered comments
-                        .map((comment, index) => (
-                          <Card
-                            key={index}
-                            className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
-                          >
-                            <CardHeader className="flex items-start">
-                              <div className="flex">
-                                {/* User icon with larger first letter */}
-                                <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
-                                  {comment.username.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="flex flex-col">
-                                  {/* Larger Username */}
-                                  <CardTitle className="text-xl font-semibold">
-                                    {comment.username}
-                                  </CardTitle>
-                                  {/* Date under the username */}
-                                  <p className="text-sm text-gray-500">
-                                    {formatCommentDate(comment.date)}
-                                  </p>
-                                </div>
-                              </div>
-                              {/* Star Rating below username and date */}
-                              <div className="mt-2">
-                                <StarRating
-                                  rating={comment.rating}
-                                  readOnly={true}
-                                />
-                              </div>
-                            </CardHeader>
-
-                            <CardContent>
-                              {/* Liked content */}
-                              <p className="text-gray-700 line-clamp-3">
-                                {comment.content.liked ||
-                                  comment.content.disliked ||
-                                  "No comment provided"}
-                              </p>
-                              {/* View more link */}
-                              <a
-                                href="#"
-                                className="text-blue-500 hover:underline mt-2 inline-block"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setShowFullComment(comment);
-                                }}
-                              >
-                                View more
-                              </a>
-                            </CardContent>
-                          </Card>
+                              }`}
+                            onMouseEnter={() => {
+                              setIsRatingHovered(true);
+                              setQuickRating(star);
+                            }}
+                            onClick={() => handleQuickRating(star)}
+                          />
                         ))}
+                      </div>
                     </div>
+                  )}
+                </div>
+                <div className="border-t pt-6"></div>
+                <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  {getTotalRatings()} overall ratings, {getReviewsCount()} with
+                  reviews
+                </p>
+                {activity.comments && activity.comments.length > 0 ? (
+                  <>
+                    <div className="flex items-center justify-between mb-4">
+                      <Button
+                        onClick={handlePrevComment}
+                        variant="ghost"
+                        disabled={currentCommentIndex === 0}
+                      >
+                        <ChevronLeft />
+                      </Button>
+                      <div className="flex-1 flex justify-between px-4">
+                        {activity.comments
+                          .filter(
+                            (comment) =>
+                              comment.content.liked || comment.content.disliked
+                          ) // Filter for comments with content
+                          .slice(currentCommentIndex, currentCommentIndex + 3) // Slice the filtered comments
+                          .map((comment, index) => (
+                            <Card
+                              key={index}
+                              className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+                            >
+                              <CardHeader className="flex items-start">
+                                <div className="flex">
+                                  {/* User icon with larger first letter */}
+                                  <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                                    {comment.username.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    {/* Larger Username */}
+                                    <CardTitle className="text-xl font-semibold">
+                                      {comment.username}
+                                    </CardTitle>
+                                    {/* Date under the username */}
+                                    <p className="text-sm text-gray-500">
+                                      {formatCommentDate(comment.date)}
+                                    </p>
+                                  </div>
+                                </div>
+                                {/* Star Rating below username and date */}
+                                <div className="mt-2">
+                                  <StarRating
+                                    rating={comment.rating}
+                                    readOnly={true}
+                                  />
+                                </div>
+                              </CardHeader>
 
+                              <CardContent>
+                                {/* Liked content */}
+                                <p className="text-gray-700 line-clamp-3">
+                                  {comment.content.liked ||
+                                    comment.content.disliked ||
+                                    "No comment provided"}
+                                </p>
+                                {/* View more link */}
+                                <a
+                                  href="#"
+                                  className="text-blue-500 hover:underline mt-2 inline-block"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setShowFullComment(comment);
+                                  }}
+                                >
+                                  View more
+                                </a>
+                              </CardContent>
+                            </Card>
+                          ))}
+                      </div>
+
+                      <Button
+                        onClick={handleNextComment}
+                        variant="ghost"
+                        disabled={
+                          currentCommentIndex >= activity.comments.length - 3
+                        }
+                      >
+                        <ChevronRight />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <p>No comments yet.</p>
+                )}
+                {userBookings.some(
+                  (booking) => booking.activity._id === activity._id
+                ) &&
+                  !userComment && (
                     <Button
-                      onClick={handleNextComment}
-                      variant="ghost"
-                      disabled={
-                        currentCommentIndex >= activity.comments.length - 3
-                      }
+                      onClick={() => setShowAddReview(true)}
+                      className="mt-4 mr-4"
                     >
-                      <ChevronRight />
+                      Add a Review
                     </Button>
-                  </div>
-                </>
-              ) : (
-                <p>No comments yet.</p>
-              )}
-              {userBookings.some(
-                (booking) => booking.activity._id === activity._id
-              ) &&
-                !userComment && (
+                  )}
+                {userComment && (
                   <Button
                     onClick={() => setShowAddReview(true)}
                     className="mt-4 mr-4"
                   >
-                    Add a Review
+                    Edit Your Review
                   </Button>
                 )}
-              {userComment && (
-                <Button
-                  onClick={() => setShowAddReview(true)}
-                  className="mt-4 mr-4"
-                >
-                  Edit Your Review
-                </Button>
-              )}
+              </div>
             </div>
-          </div>
 
-          {userPreferredCurrency && userPreferredCurrency.code && (
-            <PaymentPopup
-              isOpen={showPaymentPopup}
-              onClose={() => setShowPaymentPopup(false)}
-              title={`${activity.name}`}
-              items={[
-                {
-                  name: activity.name,
-                  price:
-                    calculateDiscountedPrice(
-                      activity.price,
-                      activity.specialDiscount
-                    ) *
-                    (exchangeRates[userPreferredCurrency.code] /
-                      exchangeRates["USD"]) *
-                    100,
-                },
-              ]} // Convert price to cents
-              onWalletPayment={handlePaymentConfirm}
-              stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
-              onConfirm={handlePaymentConfirm}
-              priceOne={(
-                calculateDiscountedPrice(
-                  activity.price,
-                  activity.specialDiscount
-                ) *
-                (exchangeRates[userPreferredCurrency.code] /
-                  exchangeRates["USD"])
-              ).toFixed(2)}
-              currency={userPreferredCurrency.code}
-              symbol={userPreferredCurrency.symbol}
-              returnLoc={"http://localhost:3000/activity/" + id}
-              error={bookingError}
-              setError={setBookingError}
-              promoDetails={promoDetails}
-              setPromoDetails={setPromoDetails}
-              loyaltyPoints={calculateLoyaltyPoints(
-                activity.price,
-                tourist.loyaltyBadge
-              )}
-              onDiscountedTotalChange={handleDiscountedTotalChange}
-            />
-          )}
-
-          <Dialog
-            open={showUpdateBookingDialog}
-            onOpenChange={setShowUpdateBookingDialog}
-          >
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Update Booking: {activity.name}</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="tickets" className="text-right">
-                    Tickets
-                  </Label>
-                  <Input
-                    id="tickets"
-                    type="number"
-                    value={numberOfTickets}
-                    onChange={(e) =>
-                      setNumberOfTickets(
-                        Math.max(
-                          userBooking.numberOfTickets,
-                          parseInt(e.target.value)
-                        )
-                      )
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Additional Price</Label>
-                  <div className="col-span-3">
-                    {(
+            {userPreferredCurrency && userPreferredCurrency.code && (
+              <PaymentPopup
+                isOpen={showPaymentPopup}
+                onClose={() => setShowPaymentPopup(false)}
+                title={`${activity.name}`}
+                items={[
+                  {
+                    name: activity.name,
+                    price:
                       calculateDiscountedPrice(
                         activity.price,
                         activity.specialDiscount
                       ) *
-                      (numberOfTickets - userBooking.numberOfTickets)
-                    ).toFixed(2)}
+                      (exchangeRates[userPreferredCurrency.code] /
+                        exchangeRates["USD"]) *
+                      100,
+                  },
+                ]} // Convert price to cents
+                onWalletPayment={handlePaymentConfirm}
+                stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+                onConfirm={handlePaymentConfirm}
+                priceOne={(
+                  calculateDiscountedPrice(
+                    activity.price,
+                    activity.specialDiscount
+                  ) *
+                  (exchangeRates[userPreferredCurrency.code] /
+                    exchangeRates["USD"])
+                ).toFixed(2)}
+                currency={userPreferredCurrency.code}
+                symbol={userPreferredCurrency.symbol}
+                returnLoc={"http://localhost:3000/activity/" + id}
+                error={bookingError}
+                setError={setBookingError}
+                promoDetails={promoDetails}
+                setPromoDetails={setPromoDetails}
+                loyaltyPoints={calculateLoyaltyPoints(
+                  activity.price,
+                  tourist.loyaltyBadge
+                )}
+                onDiscountedTotalChange={handleDiscountedTotalChange}
+              />
+            )}
+
+            <Dialog
+              open={showUpdateBookingDialog}
+              onOpenChange={setShowUpdateBookingDialog}
+            >
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Update Booking: {activity.name}</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="tickets" className="text-right">
+                      Tickets
+                    </Label>
+                    <Input
+                      id="tickets"
+                      type="number"
+                      value={numberOfTickets}
+                      onChange={(e) =>
+                        setNumberOfTickets(
+                          Math.max(
+                            userBooking.numberOfTickets,
+                            parseInt(e.target.value)
+                          )
+                        )
+                      }
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Additional Price</Label>
+                    <div className="col-span-3">
+                      {(
+                        calculateDiscountedPrice(
+                          activity.price,
+                          activity.specialDiscount
+                        ) *
+                        (numberOfTickets - userBooking.numberOfTickets)
+                      ).toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Payment Type</Label>
+                    <RadioGroup
+                      value={paymentType}
+                      onValueChange={setPaymentType}
+                      className="col-span-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="CreditCard" id="CreditCard" />
+                        <Label htmlFor="CreditCard">Credit Card</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="DebitCard" id="DebitCard" />
+                        <Label htmlFor="DebitCard">Debit Card</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Wallet" id="Wallet" />
+                        <Label htmlFor="Wallet">Wallet</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  {bookingError && (
+                    <div className="text-red-500 text-sm">{bookingError}</div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button
+                    onClick={() => setShowUpdateBookingDialog(false)}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateBooking} disabled={isBooking}>
+                    {isBooking ? "Updating..." : "Confirm Update"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  {/* Flexbox container to align icon and title horizontally */}
+                  <div className="flex items-center">
+                    {/* Check Circle Icon */}
+                    <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    {/* Title */}
+                    <DialogTitle>Booking Successful</DialogTitle>
+                  </div>
+                </DialogHeader>
+
+                <div className="py-4">
+                  <p>
+                    You have successfully booked {numberOfTickets} ticket(s) for{" "}
+                    {activity.name}.
+                  </p>
+                  <div className="grid gap-4 py-4">
+                    {userPreferredCurrency && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <Label className="text-right">Amount Paid:</Label>
+                        {paymentType === "Wallet" && (
+                          <div>
+                            {userPreferredCurrency.symbol}
+                            {discountedTotal.toFixed(2)}
+                          </div>
+                        )}
+
+                        {paymentType === "CreditCard" && (
+                          <div>
+                            {convertPrice(
+                              pricePaid,
+                              "USD",
+                              userPreferredCurrency.code
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {paymentType === "Wallet" && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <Label className="text-right">New Wallet Balance:</Label>
+                        <div>{touristWallet}</div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <Label className="text-right"> Points Earned:</Label>
+
+                      {loyaltyy}
+                    </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Payment Type</Label>
-                  <RadioGroup
-                    value={paymentType}
-                    onValueChange={setPaymentType}
-                    className="col-span-3"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="CreditCard" id="CreditCard" />
-                      <Label htmlFor="CreditCard">Credit Card</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="DebitCard" id="DebitCard" />
-                      <Label htmlFor="DebitCard">Debit Card</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Wallet" id="Wallet" />
-                      <Label htmlFor="Wallet">Wallet</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                {bookingError && (
-                  <div className="text-red-500 text-sm">{bookingError}</div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={() => setShowUpdateBookingDialog(false)}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleUpdateBooking} disabled={isBooking}>
-                  {isBooking ? "Updating..." : "Confirm Update"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
 
-          <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+                <DialogFooter className="flex justify-end mt-2">
+                  <Button
+                    onClick={() => handleFinalOK()}
+                    className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
+                  >
+                    OK
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Full Comment Dialog */}
+          <Dialog
+            open={!!showFullComment}
+            onOpenChange={() => setShowFullComment(null)}
+          >
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                {/* Flexbox container to align icon and title horizontally */}
-                <div className="flex items-center">
-                  {/* Check Circle Icon */}
-                  <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-                  {/* Title */}
-                  <DialogTitle>Booking Successful</DialogTitle>
-                </div>
+                <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
               </DialogHeader>
-
-              <div className="py-4">
-                <p>
-                  You have successfully booked {numberOfTickets} ticket(s) for{" "}
-                  {activity.name}.
-                </p>
-                <div className="grid gap-4 py-4">
-                  {userPreferredCurrency && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <Label className="text-right">Amount Paid:</Label>
-                      {paymentType === "Wallet" && (
-                        <div>
-                          {userPreferredCurrency.symbol}
-                          {discountedTotal.toFixed(2)}
-                        </div>
-                      )}
-
-                      {paymentType === "CreditCard" && (
-                        <div>
-                          {convertPrice(
-                            pricePaid,
-                            "USD",
-                            userPreferredCurrency.code
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {paymentType === "Wallet" && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <Label className="text-right">New Wallet Balance:</Label>
-                      <div>{touristWallet}</div>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <Label className="text-right"> Points Earned:</Label>
-
-                    {loyaltyy}
+              <ScrollArea className="max-h-[60vh] overflow-auto">
+                <div className="space-y-4">
+                  <div>
+                    <StarRating
+                      rating={showFullComment?.rating}
+                      readOnly={true}
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      {showFullComment && formatCommentDate(showFullComment.date)}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold flex items-center">
+                      <Smile className="w-5 h-5 mr-2 text-green-500" />
+                      Liked:
+                    </h4>
+                    <p>
+                      {showFullComment?.content?.liked || "Nothing mentioned"}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold flex items-center">
+                      <Frown className="w-5 h-5 mr-2 text-red-500" />
+                      Disliked:
+                    </h4>
+                    <p>
+                      {showFullComment?.content?.disliked || "Nothing mentioned"}
+                    </p>
                   </div>
                 </div>
-              </div>
-
-              <DialogFooter className="flex justify-end mt-2">
-                <Button
-                  onClick={() => handleFinalOK()}
-                  className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
-                >
-                  OK
-                </Button>
-              </DialogFooter>
+              </ScrollArea>
             </DialogContent>
           </Dialog>
-        </div>
 
-        {/* Full Comment Dialog */}
-        <Dialog
-          open={!!showFullComment}
-          onOpenChange={() => setShowFullComment(null)}
-        >
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
-            </DialogHeader>
-            <ScrollArea className="max-h-[60vh] overflow-auto">
+          {/* Add Review Dialog */}
+          <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>
+                  {userComment ? "Edit Your Review" : "Write a Review"}
+                </DialogTitle>
+              </DialogHeader>
               <div className="space-y-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Your Rating
+                  </label>
                   <StarRating
-                    rating={showFullComment?.rating}
-                    readOnly={true}
+                    rating={newReview.rating}
+                    setRating={(rating) =>
+                      setNewReview((prev) => ({ ...prev, rating }))
+                    }
                   />
-                  <p className="text-sm text-gray-500 mt-1">
-                    {showFullComment && formatCommentDate(showFullComment.date)}
-                  </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold flex items-center">
-                    <Smile className="w-5 h-5 mr-2 text-green-500" />
-                    Liked:
-                  </h4>
-                  <p>
-                    {showFullComment?.content?.liked || "Nothing mentioned"}
-                  </p>
+                  <label
+                    htmlFor="liked"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                    Something you liked
+                  </label>
+                  <Textarea
+                    id="liked"
+                    value={newReview.liked}
+                    onChange={(e) =>
+                      setNewReview((prev) => ({ ...prev, liked: e.target.value }))
+                    }
+                    rows={3}
+                    className="mt-2"
+                  />
                 </div>
                 <div>
-                  <h4 className="font-semibold flex items-center">
-                    <Frown className="w-5 h-5 mr-2 text-red-500" />
-                    Disliked:
-                  </h4>
-                  <p>
-                    {showFullComment?.content?.disliked || "Nothing mentioned"}
-                  </p>
+                  <label
+                    htmlFor="disliked"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                    Something you didn't like
+                  </label>
+                  <Textarea
+                    id="disliked"
+                    value={newReview.disliked}
+                    onChange={(e) =>
+                      setNewReview((prev) => ({
+                        ...prev,
+                        disliked: e.target.value,
+                      }))
+                    }
+                    rows={3}
+                    className="mt-2"
+                  />
                 </div>
-              </div>
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
-
-        {/* Add Review Dialog */}
-        <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>
-                {userComment ? "Edit Your Review" : "Write a Review"}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Your Rating
-                </label>
-                <StarRating
-                  rating={newReview.rating}
-                  setRating={(rating) =>
-                    setNewReview((prev) => ({ ...prev, rating }))
-                  }
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="liked"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  <Smile className="w-5 h-5 inline mr-2 text-green-500" />
-                  Something you liked
-                </label>
-                <Textarea
-                  id="liked"
-                  value={newReview.liked}
-                  onChange={(e) =>
-                    setNewReview((prev) => ({ ...prev, liked: e.target.value }))
-                  }
-                  rows={3}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="disliked"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  <Frown className="w-5 h-5 inline mr-2 text-red-500" />
-                  Something you didn't like
-                </label>
-                <Textarea
-                  id="disliked"
-                  value={newReview.disliked}
-                  onChange={(e) =>
-                    setNewReview((prev) => ({
-                      ...prev,
-                      disliked: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                  className="mt-2"
-                />
-              </div>
-              {/* <div>
+                {/* <div>
                 <label htmlFor="visitDate" className="block text-sm font-medium text-gray-700">
                   When did you visit?
                 </label>
@@ -2332,242 +2353,267 @@ const ActivityDetail = () => {
                   <option value="holiday">Public holiday</option>
                 </select>
               </div> */}
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="anonymous-mode"
-                  checked={newReview.isAnonymous}
-                  onCheckedChange={(checked) =>
-                    setNewReview((prev) => ({ ...prev, isAnonymous: checked }))
-                  }
-                />
-                <Label htmlFor="anonymous-mode">Post anonymously</Label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                onClick={() => setShowAddReview(false)}
-                className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
-                onClick={handleAddReview}
-              >
-                {userComment ? "Update Review" : "Submit Review"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Rate Activity Dialog */}
-        <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Rate this Activity</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Your Rating
-              </label>
-              <StarRating
-                rating={activityRating}
-                setRating={setActivityRating}
-              />
-            </div>
-            <DialogFooter>
-              <Button onClick={handleActivityRating}>Submit My Rating</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirm Deletion</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete this activity? This action
-                cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleDelete}>
-                Yes, Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={deleteError} onOpenChange={setDeleteError}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cannot Delete Activity</DialogTitle>
-              <DialogDescription>
-                This activity cannot be deleted because it has active bookings.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="flex justify-end mt-2">
-              <Button
-                onClick={() => setDeleteError(false)}
-                className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
-              >
-                OK
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        <Dialog
-          open={showDeleteSuccess}
-          onOpenChange={(open) => {
-            if (!open) handleDeleteSuccess();
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Success</DialogTitle>
-              <DialogDescription>
-                The activity has been deleted successfully.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button onClick={handleDeleteSuccess} variant="default">
-                Back to All Activities
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          open={transportationBookingDialog}
-          onOpenChange={setTransportationBookingDialog}
-        >
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Book Transportation</DialogTitle>
-              <DialogDescription>
-                Please select the number of seats and payment method.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="seats" className="text-right">
-                  Seats
-                </Label>
-                <Input
-                  id="seats"
-                  type="number"
-                  className="col-span-3"
-                  value={seatsToBook}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    setSeatsToBook(
-                      Math.max(
-                        0,
-                        Math.min(
-                          value,
-                          selectedTransportation?.remainingSeats || 0
-                        )
-                      )
-                    );
-                  }}
-                  min="0"
-                  max={selectedTransportation?.remainingSeats}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Total Price</Label>
-                <div className="col-span-3">
-                  {convertPrice(
-                    (selectedTransportation?.ticketCost || 0) * seatsToBook,
-                    "USD",
-                    userPreferredCurrency?.code
-                  )}
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="anonymous-mode"
+                    checked={newReview.isAnonymous}
+                    onCheckedChange={(checked) =>
+                      setNewReview((prev) => ({ ...prev, isAnonymous: checked }))
+                    }
+                  />
+                  <Label htmlFor="anonymous-mode">Post anonymously</Label>
                 </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Payment</Label>
-                <RadioGroup
-                  defaultValue="creditCard"
-                  className="col-span-3"
-                  onValueChange={setPaymentMethod}
+              <DialogFooter>
+                <Button
+                  onClick={() => setShowAddReview(false)}
+                  className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="creditCard" id="creditCard" />
-                    <Label htmlFor="creditCard">Credit Card</Label>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
+                  onClick={handleAddReview}
+                >
+                  {userComment ? "Update Review" : "Submit Review"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Rate Activity Dialog */}
+          <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Rate this Activity</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Your Rating
+                </label>
+                <StarRating
+                  rating={activityRating}
+                  setRating={setActivityRating}
+                />
+              </div>
+              <DialogFooter>
+                <Button onClick={handleActivityRating}>Submit My Rating</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this activity? This action
+                  cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDelete}>
+                  Yes, Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={deleteError} onOpenChange={setDeleteError}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cannot Delete Activity</DialogTitle>
+                <DialogDescription>
+                  This activity cannot be deleted because it has active bookings.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex justify-end mt-2">
+                <Button
+                  onClick={() => setDeleteError(false)}
+                  className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
+                >
+                  OK
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog
+            open={showDeleteSuccess}
+            onOpenChange={(open) => {
+              if (!open) handleDeleteSuccess();
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Success</DialogTitle>
+                <DialogDescription>
+                  The activity has been deleted successfully.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button onClick={handleDeleteSuccess} variant="default">
+                  Back to All Activities
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog
+            open={transportationBookingDialog}
+            onOpenChange={setTransportationBookingDialog}
+          >
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Book Transportation</DialogTitle>
+                <DialogDescription>
+                  Please select the number of seats and payment method.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="seats" className="text-right">
+                    Seats
+                  </Label>
+                  <Input
+                    id="seats"
+                    type="number"
+                    className="col-span-3"
+                    value={seatsToBook}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      setSeatsToBook(
+                        Math.max(
+                          0,
+                          Math.min(
+                            value,
+                            selectedTransportation?.remainingSeats || 0
+                          )
+                        )
+                      );
+                    }}
+                    min="0"
+                    max={selectedTransportation?.remainingSeats}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Total Price</Label>
+                  <div className="col-span-3">
+                    {convertPrice(
+                      (selectedTransportation?.ticketCost || 0) * seatsToBook,
+                      "USD",
+                      userPreferredCurrency?.code
+                    )}
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="debitCard" id="debitCard" />
-                    <Label htmlFor="debitCard">Debit Card</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Wallet" id="wallet" />
-                    <Label htmlFor="wallet">Wallet</Label>
-                  </div>
-                </RadioGroup>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Payment</Label>
+                  <RadioGroup
+                    defaultValue="creditCard"
+                    className="col-span-3"
+                    onValueChange={setPaymentMethod}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="creditCard" id="creditCard" />
+                      <Label htmlFor="creditCard">Credit Card</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="debitCard" id="debitCard" />
+                      <Label htmlFor="debitCard">Debit Card</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Wallet" id="wallet" />
+                      <Label htmlFor="wallet">Wallet</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  onClick={() => setTransportationBookingDialog(false)}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleTransportationBooking}
+                  disabled={isBooking}
+                >
+                  {isBooking ? "Booking..." : "Confirm Booking"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog
+            open={showTransportationSuccessDialog}
+            onOpenChange={setShowTransportationSuccessDialog}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Transportation Booked Successfully</DialogTitle>
+                <DialogDescription>
+                  Your transportation has been booked. Thank you for your
+                  purchase!
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button onClick={() => setShowTransportationSuccessDialog(false)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {alertMessage && (
+          <Alert
+            className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+              } text-white`}
+          >
+            <AlertTitle>
+              {alertMessage.type === "success" ? "Success" : "Error"}
+            </AlertTitle>
+            <AlertDescription>{alertMessage.message}</AlertDescription>
+          </Alert>
+        )}
+        {(userRole === "guest" || userRole === "tourist") && (
+          <UserGuide steps={guideSteps} pageName="singleActivity" />
+        )}
+        <ToastViewport />
+        {isToastOpen2 && (
+          <Toast
+            onOpenChange={setIsToastOpen2}
+            open={isToastOpen2}
+            duration={3000} // Set duration to 3 seconds
+            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+          >
+            <div className="flex items-center">
+              {toastType === 'success' ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                <ToastDescription>
+                  {toastMessage}
+                </ToastDescription>
               </div>
             </div>
+            <ToastClose />
+          </Toast>
+        )}
 
-            <DialogFooter>
-              <Button
-                onClick={() => setTransportationBookingDialog(false)}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleTransportationBooking}
-                disabled={isBooking}
-              >
-                {isBooking ? "Booking..." : "Confirm Booking"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          open={showTransportationSuccessDialog}
-          onOpenChange={setShowTransportationSuccessDialog}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Transportation Booked Successfully</DialogTitle>
-              <DialogDescription>
-                Your transportation has been booked. Thank you for your
-                purchase!
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button onClick={() => setShowTransportationSuccessDialog(false)}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {alertMessage && (
-        <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
-        >
-          <AlertTitle>
-            {alertMessage.type === "success" ? "Success" : "Error"}
-          </AlertTitle>
-          <AlertDescription>{alertMessage.message}</AlertDescription>
-        </Alert>
-      )}
-      {(userRole === "guest" || userRole === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="singleActivity" />
-      )}
-    </div>
-  );
+      </div >
+      </ToastProvider>
+      );
 };
 
-export default ActivityDetail;
+      export default ActivityDetail;
