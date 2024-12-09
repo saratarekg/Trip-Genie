@@ -193,15 +193,14 @@ export function NotificationsDropdownAdmin({
             <TooltipTrigger asChild>
               <span
                 className="font-bold cursor-pointer text-[#1A3B47] hover:underline"
-                onClick={() => {
-                  if (!notification.seen) {
-                    markNotificationAsSeen(notification._id); // Mark as seen
-                  }
-                  const productId = notification.link.split("/").pop();
+                onClick={(e) => {
+                  e.stopPropagation();
+                  markNotificationAsSeen(notification._id);
                   console.log(`Notification clicked: ${part}`);
+                  const productId = notification.link.split("/").pop();
                   console.log(`Product ID: ${productId}`);
-                  setActiveTabNav("single-product-admin");
-                  handleNotificationClick(productId); // Use handleNotificationClick to set selectedProductId
+                  setActiveTab("manage-products");
+                  setSelectedProductId(productId); // Set selectedProductId instead of navigating
                 }}
               >
                 {part}
