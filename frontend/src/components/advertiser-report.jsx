@@ -22,7 +22,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Calendar, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
+import { Calendar, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
@@ -114,10 +114,16 @@ const AdvertiserReport = () => {
         totalRevenue: response.data.totalRevenue,
       }));
 
-      const totalRevenue = combinedData.reduce((sum, item) => sum + item.totalRevenue, 0);
+      const totalRevenue = combinedData.reduce(
+        (sum, item) => sum + item.totalRevenue,
+        0
+      );
       setInitialTotalRevenue(totalRevenue);
 
-      setSalesReport({ activityReport: combinedData, totalRevenue: totalRevenue });
+      setSalesReport({
+        activityReport: combinedData,
+        totalRevenue: totalRevenue,
+      });
       setIsDataLoaded(true);
 
       updateGraphData(combinedData, "year");
@@ -177,11 +183,13 @@ const AdvertiserReport = () => {
   }, [filters, isDataLoaded]);
 
   const filteredSales = useMemo(() => {
-    return salesReport?.activityReport.map(item => ({
-      activity: { name: item.activity?.name || "Unknown" },
-      tickets: item.tickets || 0,
-      revenue: item.revenue || 0,
-    })) || [];
+    return (
+      salesReport?.activityReport.map((item) => ({
+        activity: { name: item.activity?.name || "Unknown" },
+        tickets: item.tickets || 0,
+        revenue: item.revenue || 0,
+      })) || []
+    );
   }, [salesReport]);
 
   const updateGraphData = (salesData, period) => {
@@ -191,7 +199,7 @@ const AdvertiserReport = () => {
       setGraphData(initialGraphDataRef.current);
       return;
     }
-  
+
     switch (period) {
       case "week":
         startDate = subDays(now, 6);
@@ -221,14 +229,14 @@ const AdvertiserReport = () => {
         }));
         break;
     }
-  
+
     salesData.forEach((item) => {
       const monthIndex = parseInt(item.month) - 1;
       if (monthIndex >= 0 && monthIndex < 12) {
         data[monthIndex].revenue = item.totalRevenue;
       }
     });
-  
+
     initialGraphDataRef.current = data;
     setGraphData(data);
   };
@@ -254,7 +262,9 @@ const AdvertiserReport = () => {
         case "year":
           return (
             sum +
-            (saleDate.getFullYear() === now.getFullYear() ? item.totalRevenue : 0)
+            (saleDate.getFullYear() === now.getFullYear()
+              ? item.totalRevenue
+              : 0)
           );
         case "Filtered Total":
         default:
@@ -325,7 +335,7 @@ const AdvertiserReport = () => {
                 </CardTitle>
               </div>
             </CardHeader>
-           
+
             <CardContent className="p-3 flex flex-col justify-center items-center w-full">
               <div className="relative flex items-center justify-center w-48 h-48">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -358,17 +368,20 @@ const AdvertiserReport = () => {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                {isLoading ? (<div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>):(
-                  <span className="text-lg font-bold text-[#1A3B47]">
-                    ${totalFilteredRevenue.toFixed(2)}
-                  </span>)}
+                  {isLoading ? (
+                    <div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                  ) : (
+                    <span className="text-lg font-bold text-[#1A3B47]">
+                      ${totalFilteredRevenue.toFixed(2)}
+                    </span>
+                  )}
                   <span className="text-sm text-[#5D9297]">
-                    {selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)}
+                    {selectedPeriod.charAt(0).toUpperCase() +
+                      selectedPeriod.slice(1)}
                   </span>
                 </div>
               </div>
             </CardContent>
-                    
           </Card>
 
           {/* Sales Analytics Card */}
@@ -380,72 +393,71 @@ const AdvertiserReport = () => {
                 </CardTitle>
               </div>
             </CardHeader>
-            {isLoading ?(
-                      <div className="md:col-span-8 bg-transparent">
-                      <div className="p-3 mb-2"></div>
-                      <div className="pl-0">
-                        {/* Reduced width for the chart skeleton */}
-                        <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
-                      </div>
-                    </div>
-                    
-                    
-                    ):(
-            <CardContent className="pl-4 pr-4">
-              <div className="h-[210px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={graphData}
-                    margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
-                  >
-                    <defs>
-                      <linearGradient
-                        id="colorRevenue"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#B5D3D1"
-                      fillOpacity={1}
-                      fill="url(#colorRevenue)"
-                      strokeWidth={2}
-                      dot={{
-                        r: 3,
-                        strokeWidth: 2,
-                        stroke: "#B5D3D1",
-                        fill: "white",
-                      }}
-                      activeDot={{
-                        r: 5,
-                        strokeWidth: 2,
-                        stroke: "#B5D3D1",
-                        fill: "white",
-                      }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+            {isLoading ? (
+              <div className="md:col-span-8 bg-transparent">
+                <div className="p-3 mb-2"></div>
+                <div className="pl-0">
+                  {/* Reduced width for the chart skeleton */}
+                  <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
+                </div>
               </div>
-            </CardContent>)}
+            ) : (
+              <CardContent className="pl-4 pr-4">
+                <div className="h-[210px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={graphData}
+                      margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
+                    >
+                      <defs>
+                        <linearGradient
+                          id="colorRevenue"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#B5D3D1"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#B5D3D1"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#B5D3D1"
+                        fillOpacity={1}
+                        fill="url(#colorRevenue)"
+                        strokeWidth={2}
+                        dot={{
+                          r: 3,
+                          strokeWidth: 2,
+                          stroke: "#B5D3D1",
+                          fill: "white",
+                        }}
+                        activeDot={{
+                          r: 5,
+                          strokeWidth: 2,
+                          stroke: "#B5D3D1",
+                          fill: "white",
+                        }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            )}
           </Card>
         </div>
 
@@ -555,73 +567,71 @@ const AdvertiserReport = () => {
                   </tr>
                 </thead>
                 {isLoading ? (
-  <thead className="bg-gray-50">
-    
-
-    {/* 6 more rows of pulsing lines with more space and bigger size */}
-    {[...Array(6)].map((_, rowIndex) => (
-      <tr key={rowIndex}>
-        {[1, 2, 3].map((i) => (
-          <th key={i} className="px-6 py-3">
-            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
-          </th>
-        ))}
-      </tr>
-    ))}
-  </thead>
-) : (
-                <AnimatePresence mode="wait">
-                  <motion.tbody
-                    key="table-body"
-                    className="bg-white divide-y divide-gray-200"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {filteredSales.map((item, index) => (
+                  <thead className="bg-gray-50">
+                    {/* 6 more rows of pulsing lines with more space and bigger size */}
+                    {[...Array(6)].map((_, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {[1, 2, 3].map((i) => (
+                          <th key={i} className="px-6 py-3">
+                            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                ) : (
+                  <AnimatePresence mode="wait">
+                    <motion.tbody
+                      key="table-body"
+                      className="bg-white divide-y divide-gray-200"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {filteredSales.map((item, index) => (
+                        <motion.tr
+                          key={index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.2, delay: index * 0.05 }}
+                        >
+                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {item.activity.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {item.tickets}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${parseFloat(item.revenue).toFixed(2)}
+                          </td>
+                        </motion.tr>
+                      ))}
                       <motion.tr
-                        key={index}
+                        key="total-row"
+                        className="bg-gray-50 font-semibold"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.2, delay: index * 0.05 }}
+                        transition={{
+                          duration: 0.2,
+                          delay: filteredSales.length * 0.05,
+                        }}
                       >
-                        <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {item.activity.name}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          Total
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.tickets}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {totalAttendance}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          ${parseFloat(item.revenue).toFixed(2)}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${totalFilteredRevenue.toFixed(2)}
                         </td>
                       </motion.tr>
-                    ))}
-                    <motion.tr
-                      key="total-row"
-                      className="bg-gray-50 font-semibold"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{
-                        duration: 0.2,
-                        delay: filteredSales.length * 0.05,
-                      }}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        Total
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {totalAttendance}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${totalFilteredRevenue.toFixed(2)}
-                      </td>
-                    </motion.tr>
-                  </motion.tbody>
-                </AnimatePresence>
-)}
+                    </motion.tbody>
+                  </AnimatePresence>
+                )}
               </table>
             </div>
           </CardContent>
@@ -632,4 +642,3 @@ const AdvertiserReport = () => {
 };
 
 export default AdvertiserReport;
-

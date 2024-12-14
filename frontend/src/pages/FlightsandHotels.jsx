@@ -328,12 +328,10 @@ const BookingForm = () => {
   return (
     <div className="mx-auto px-24 mb-24">
       <div className="text-center max-w-2xl mx-auto mb-4">
-        <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">
-          Book Flights
-        </h1>
+        <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Book Flights</h1>
         <p className="text-[#1A3B47] mb-8">
-          Discover seamless travel planning with our booking options for flights.
-           Whether you're traveling for leisure or business, find the
+          Discover seamless travel planning with our booking options for
+          flights. Whether you're traveling for leisure or business, find the
           best deals, plan your perfect stay, and make your journey
           unforgettable. Start booking today!
         </p>
@@ -521,8 +519,6 @@ const BookingForm = () => {
                 {/* <Calendar size={16} style={{ position: 'absolute', right: '8px', top: '8px', pointerEvents: 'none' }} /> */}
               </div>
             </div>
-
-           
           </form>
         </div>
 

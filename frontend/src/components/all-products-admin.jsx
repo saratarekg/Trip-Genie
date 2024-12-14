@@ -326,7 +326,9 @@ export function AllProducts({ notificationId }) {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [alertMessage, setAlertMessage] = useState(null);
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState(notificationId || null); // Initialize with notificationId if available
+  const [selectedProductId, setSelectedProductId] = useState(
+    notificationId || null
+  ); // Initialize with notificationId if available
 
   const tripsPerPage = 6;
 
@@ -354,7 +356,6 @@ export function AllProducts({ notificationId }) {
 
   const handleBackToAll = () => {
     setSelectedProductId(null);
-    
   };
 
   const fetchUserInfo = useCallback(async () => {
@@ -844,7 +845,8 @@ export function AllProducts({ notificationId }) {
             <ChevronLeft className="w-5 h-5 mr-2" />
             Back to All Products
           </Button>
-          <ProductDetail id={notificationId || selectedProductId} /> {/* Use notificationId if available */}
+          <ProductDetail id={notificationId || selectedProductId} />{" "}
+          {/* Use notificationId if available */}
         </div>
       ) : (
         <div className="">

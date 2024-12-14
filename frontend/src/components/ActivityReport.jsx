@@ -23,7 +23,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Calendar, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
+import { Calendar, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
@@ -62,10 +62,11 @@ const ActivityReport = () => {
   const [initialTotalRevenue, setInitialTotalRevenue] = useState(0);
   const [thisMonthSales, setThisMonthSales] = useState(0);
   const [lastMonthSales, setLastMonthSales] = useState(0);
-  const [initialTotalCommissionRevenue, setInitialTotalCommissionRevenue] = useState(0);
+  const [initialTotalCommissionRevenue, setInitialTotalCommissionRevenue] =
+    useState(0);
   const initialGraphDataRef = useRef(null);
   const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
-  const [isloading,setisLoading]= useState(false);
+  const [isloading, setisLoading] = useState(false);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -74,7 +75,6 @@ const ActivityReport = () => {
   };
 
   const calculateTotals = () => {
-    
     return filteredSales.reduce(
       (acc, item) => {
         acc.ticketsSold += Math.round(item.totalRevenue / item.activity.price);
@@ -83,9 +83,7 @@ const ActivityReport = () => {
         return acc;
       },
       { ticketsSold: 0, revenue: 0, commissionRevenue: 0 }
-      
     );
-   
   };
 
   const loadStatistics = async () => {
@@ -107,20 +105,27 @@ const ActivityReport = () => {
       });
 
       const monthlyDataResponses = await Promise.all(monthlyDataPromises);
-      const monthlySalesData = monthlyDataResponses.map((response) => response.data.activitiesSales).flat();
+      const monthlySalesData = monthlyDataResponses
+        .map((response) => response.data.activitiesSales)
+        .flat();
 
       if (monthlySalesData.length > 0) {
         setSalesReport({ activitiesSales: monthlySalesData });
 
         const uniqueActivityNames = [
-          ...new Set(
-            monthlySalesData.map((item) => item.activity.name)
-          ),
+          ...new Set(monthlySalesData.map((item) => item.activity.name)),
         ];
         setActivityNames(uniqueActivityNames);
 
-        const totalRevenue = monthlyDataResponses.reduce((sum, response) => sum + (response.data.totalActivitiesRevenue || 0), 0);
-        const totalAppRevenue = monthlyDataResponses.reduce((sum, response) => sum + (response.data.totalActivitiesAppRevenue || 0), 0);
+        const totalRevenue = monthlyDataResponses.reduce(
+          (sum, response) => sum + (response.data.totalActivitiesRevenue || 0),
+          0
+        );
+        const totalAppRevenue = monthlyDataResponses.reduce(
+          (sum, response) =>
+            sum + (response.data.totalActivitiesAppRevenue || 0),
+          0
+        );
         setTotalRevenue(totalRevenue);
         setTotalAppRevenue(totalAppRevenue);
         setInitialTotalRevenue(totalAppRevenue);
@@ -132,7 +137,10 @@ const ActivityReport = () => {
         setFilteredSales(monthlySalesData);
 
         // Calculate this month and last month sales
-        const thisMonthSales = calculatePeriodRevenue(monthlySalesData, "month");
+        const thisMonthSales = calculatePeriodRevenue(
+          monthlySalesData,
+          "month"
+        );
         const lastMonthSales = calculateLastMonthSales(monthlySalesData);
         setThisMonthSales(thisMonthSales);
         setLastMonthSales(lastMonthSales);
@@ -169,18 +177,21 @@ const ActivityReport = () => {
       if (response.data && response.data.activitiesSales) {
         setSalesReport(response.data);
         let filteredData = response.data.activitiesSales;
-        
+
         // Apply activity filter in the front-end
         if (newFilters.activity) {
           filteredData = filteredData.filter(
-            (item) => item.activity && item.activity.name === newFilters.activity
+            (item) =>
+              item.activity && item.activity.name === newFilters.activity
           );
         }
-        
+
         setFilteredSales(filteredData);
         // updateGraphData(filteredData, graphPeriod);
       } else {
-        setError("Invalid data structure received from the server: activitiesSales missing");
+        setError(
+          "Invalid data structure received from the server: activitiesSales missing"
+        );
       }
       setisLoading(false);
     } catch (error) {
@@ -251,7 +262,6 @@ const ActivityReport = () => {
   };
 
   const calculatePeriodRevenue = (salesData, period) => {
-   
     if (!Array.isArray(salesData)) return 0;
     const now = new Date();
     return salesData.reduce((sum, item) => {
@@ -334,7 +344,7 @@ const ActivityReport = () => {
               </div>
             </CardContent>
           </Card>
-  
+
           {/* Sales Analytics Skeleton */}
           <Card className="md:col-span-8">
             <CardHeader className="p-3 mb-2">
@@ -347,7 +357,7 @@ const ActivityReport = () => {
             </CardContent>
           </Card>
         </div>
-  
+
         {/* Sales Report Skeleton */}
         <Card>
           <CardHeader className="p-4">
@@ -358,7 +368,10 @@ const ActivityReport = () => {
           <CardContent>
             <div className="flex flex-wrap gap-4 mb-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="w-full sm:w-[200px] h-10 bg-gray-200 rounded"></div>
+                <div
+                  key={i}
+                  className="w-full sm:w-[200px] h-10 bg-gray-200 rounded"
+                ></div>
               ))}
             </div>
             <div className="overflow-hidden">
@@ -390,10 +403,10 @@ const ActivityReport = () => {
       </div>
     );
   };
-  
+
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   //if (!salesReport) return <div className="p-6 text-center">{ActivityReportSkeleton}</div>;
-    //if(isloading) return <div className="p-6 text-center">{ActivityReportSkeleton}</div>;
+  //if(isloading) return <div className="p-6 text-center">{ActivityReportSkeleton}</div>;
   const thisMonthChange =
     lastMonthSales === 0
       ? 100
@@ -435,7 +448,10 @@ const ActivityReport = () => {
                     strokeDashoffset="283"
                     initial={{ strokeDashoffset: 283 }}
                     animate={{
-                      strokeDashoffset: 283 - (283 * calculateTotals().commissionRevenue) / initialTotalCommissionRevenue,
+                      strokeDashoffset:
+                        283 -
+                        (283 * calculateTotals().commissionRevenue) /
+                          initialTotalCommissionRevenue,
                     }}
                     transition={{
                       duration: 1,
@@ -444,24 +460,27 @@ const ActivityReport = () => {
                   />
                 </svg>
                 {isloading ? (
-  <>
-   
-    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  
-    <div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>
-                 
-                  <span className="text-sm text-[#5D9297]">Filtered Total</span>
-                </div>
-  </>
-) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-bold text-[#1A3B47]">
-                    ${calculateTotals().commissionRevenue.toFixed(2)}
-                  </span>
-                  <span className="text-sm text-[#5D9297]">Filtered Total</span>
-                </div>)}
+                  <>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>
+
+                      <span className="text-sm text-[#5D9297]">
+                        Filtered Total
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-lg font-bold text-[#1A3B47]">
+                      ${calculateTotals().commissionRevenue.toFixed(2)}
+                    </span>
+                    <span className="text-sm text-[#5D9297]">
+                      Filtered Total
+                    </span>
+                  </div>
+                )}
               </div>
-              
+
               <div className="text-center mt-4">
                 <p className="text-base font-semibold text-[#1A3B47]">
                   Total Commission Revenue
@@ -479,79 +498,71 @@ const ActivityReport = () => {
                 </CardTitle>
               </div>
             </CardHeader>
-            {isloading ?(
-                      <div className="md:col-span-8 bg-transparent">
-                      <div className="p-3 mb-2"></div>
-                      <div className="pl-0">
-                        {/* Reduced width for the chart skeleton */}
-                        <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
-                      </div>
-                    </div>
-                    
-                    
-                    ):(
-            <CardContent className="pl-0">
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={graphData}
-                    margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
-                    
-                  >
-                    
-                    <defs>
-                      <linearGradient
-                        id="colorRevenue"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#B5D3D1"
-                      fillOpacity={1}
-                      fill="url(#colorRevenue)"
-                      strokeWidth={2}
-                      dot={{
-                        r: 3,
-                        strokeWidth: 2,
-                        stroke: "#B5D3D1",
-                        fill: "white",
-                      }}
-                      activeDot={{
-                        r: 5,
-                        strokeWidth: 2,
-                        stroke: "#B5D3D1",
-                        fill: "white",
-                      }}
-                    />
-                    
-                  </AreaChart>
-                    
-                </ResponsiveContainer>
-                    
+            {isloading ? (
+              <div className="md:col-span-8 bg-transparent">
+                <div className="p-3 mb-2"></div>
+                <div className="pl-0">
+                  {/* Reduced width for the chart skeleton */}
+                  <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
+                </div>
               </div>
-            </CardContent>
-                    )}
-                  
+            ) : (
+              <CardContent className="pl-0">
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={graphData}
+                      margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
+                    >
+                      <defs>
+                        <linearGradient
+                          id="colorRevenue"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#B5D3D1"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#B5D3D1"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#B5D3D1"
+                        fillOpacity={1}
+                        fill="url(#colorRevenue)"
+                        strokeWidth={2}
+                        dot={{
+                          r: 3,
+                          strokeWidth: 2,
+                          stroke: "#B5D3D1",
+                          fill: "white",
+                        }}
+                        activeDot={{
+                          r: 5,
+                          strokeWidth: 2,
+                          stroke: "#B5D3D1",
+                          fill: "white",
+                        }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            )}
           </Card>
         </div>
 
@@ -573,9 +584,7 @@ const ActivityReport = () => {
             <div className="flex flex-wrap gap-4 mb-4">
               <Select
                 value={filters.activity}
-                onValueChange={(value) =>
-                  handleFilterChange("activity", value)
-                }
+                onValueChange={(value) => handleFilterChange("activity", value)}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Select activity" />
@@ -590,9 +599,7 @@ const ActivityReport = () => {
               </Select>
               <Select
                 value={filters.year}
-                onValueChange={(value) =>
-                  handleFilterChange("year", value)
-                }
+                onValueChange={(value) => handleFilterChange("year", value)}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Select year" />
@@ -610,9 +617,7 @@ const ActivityReport = () => {
               </Select>
               <Select
                 value={filters.month}
-                onValueChange={(value) =>
-                  handleFilterChange("month", value)
-                }
+                onValueChange={(value) => handleFilterChange("month", value)}
                 disabled={!filters.year}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -646,86 +651,84 @@ const ActivityReport = () => {
                   </tr>
                 </thead>
                 {isloading ? (
-  <thead className="bg-gray-50">
-    
-
-    {/* 6 more rows of pulsing lines with more space and bigger size */}
-    {[...Array(6)].map((_, rowIndex) => (
-      <tr key={rowIndex}>
-        {[1, 2, 3,4].map((i) => (
-          <th key={i} className="px-6 py-3">
-            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
-          </th>
-        ))}
-      </tr>
-    ))}
-  </thead>
-) : (
-                <AnimatePresence mode="wait">
-                  {!isFiltering && (
-                    <motion.tbody
-                      key="table-body"
-                      className="bg-white divide-y divide-gray-200"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {filteredSales.map((item, index) => (
-                        <motion.tr
-                          key={index}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.2, delay: index * 0.05 }}
-                        >
-                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {item.activity.name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {Math.round(
-                              item.totalRevenue / item.activity.price
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${parseFloat(item.totalRevenue).toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${parseFloat(item.appRevenue).toFixed(2)}
-                          </td>
-                        </motion.tr>
-                      ))}
-                      {filteredSales.length > 0 && (
-                        <motion.tr
-                          key="total-row"
-                          className="bg-gray-50 font-semibold"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{
-                            duration: 0.2,
-                            delay: filteredSales.length * 0.05,
-                          }}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            -
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Total {calculateTotals().ticketsSold}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Total ${calculateTotals().revenue.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Total $
-                            {calculateTotals().commissionRevenue.toFixed(2)}
-                          </td>
-                        </motion.tr>
-                      )}
-                    </motion.tbody>
-                  )}
-                </AnimatePresence>
-)}
+                  <thead className="bg-gray-50">
+                    {/* 6 more rows of pulsing lines with more space and bigger size */}
+                    {[...Array(6)].map((_, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {[1, 2, 3, 4].map((i) => (
+                          <th key={i} className="px-6 py-3">
+                            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                ) : (
+                  <AnimatePresence mode="wait">
+                    {!isFiltering && (
+                      <motion.tbody
+                        key="table-body"
+                        className="bg-white divide-y divide-gray-200"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {filteredSales.map((item, index) => (
+                          <motion.tr
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.2, delay: index * 0.05 }}
+                          >
+                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {item.activity.name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {Math.round(
+                                item.totalRevenue / item.activity.price
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              ${parseFloat(item.totalRevenue).toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              ${parseFloat(item.appRevenue).toFixed(2)}
+                            </td>
+                          </motion.tr>
+                        ))}
+                        {filteredSales.length > 0 && (
+                          <motion.tr
+                            key="total-row"
+                            className="bg-gray-50 font-semibold"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{
+                              duration: 0.2,
+                              delay: filteredSales.length * 0.05,
+                            }}
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              -
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              Total {calculateTotals().ticketsSold}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              Total ${calculateTotals().revenue.toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              Total $
+                              {calculateTotals().commissionRevenue.toFixed(2)}
+                            </td>
+                          </motion.tr>
+                        )}
+                      </motion.tbody>
+                    )}
+                  </AnimatePresence>
+                )}
               </table>
             </div>
           </CardContent>
@@ -736,4 +739,3 @@ const ActivityReport = () => {
 };
 
 export default ActivityReport;
-

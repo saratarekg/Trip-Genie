@@ -16,7 +16,12 @@ export function HistoricalPlaces() {
         const token = Cookies.get("jwt");
         let role = Cookies.get("role");
         if (role === undefined) role = "guest";
-        if (role !== "tourist" && role !== "tourism-governor" && role != "guest") return
+        if (
+          role !== "tourist" &&
+          role !== "tourism-governor" &&
+          role != "guest"
+        )
+          return;
         const api = `http://localhost:4000/${role}/historical-places`;
         const response = await axios.get(api, {
           headers: {
@@ -40,9 +45,14 @@ export function HistoricalPlaces() {
     <div className="container mx-auto px-4 py-2 bg-[#E6DCCF]">
       {/* Centered header section */}
       <div className="text-center max-w-2xl mx-auto mb-4">
-        <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Historical Places</h1>
+        <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">
+          Historical Places
+        </h1>
         <p className="text-[#1A3B47] mb-4">
-          Explore the world's most captivating historical landmarks, where rich cultural heritage and architectural wonders come to life. Each destination tells a story of the past, offering a unique journey through history. Plan your adventure today!
+          Explore the world's most captivating historical landmarks, where rich
+          cultural heritage and architectural wonders come to life. Each
+          destination tells a story of the past, offering a unique journey
+          through history. Plan your adventure today!
         </p>
         <Link to="/all-historical-places">
           <Button
@@ -56,7 +66,6 @@ export function HistoricalPlaces() {
 
       {/* Grid layout for places */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 px-8 md:px-12 lg:px-16">
-
         {places.length > 0 && (
           <>
             {/* Large card */}
@@ -66,9 +75,12 @@ export function HistoricalPlaces() {
             >
               <div className="absolute inset-0 rounded-2xl overflow-hidden">
                 <img
-                  src={Array.isArray(places[0].pictures) && places[0].pictures.length > 0
-                    ? places[0].pictures[0].url
-                    : defaultImage}
+                  src={
+                    Array.isArray(places[0].pictures) &&
+                    places[0].pictures.length > 0
+                      ? places[0].pictures[0].url
+                      : defaultImage
+                  }
                   alt={places[0].title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
@@ -89,13 +101,18 @@ export function HistoricalPlaces() {
                 <Link
                   to={`/historical-place/${place._id}`}
                   key={place._id}
-                  className={`relative group aspect-[4/3] ${index === 2 ? 'col-span-2 max-h-[300px] w-full' : ''}`}
+                  className={`relative group aspect-[4/3] ${
+                    index === 2 ? "col-span-2 max-h-[300px] w-full" : ""
+                  }`}
                 >
                   <div className="absolute inset-0 rounded-2xl overflow-hidden">
                     <img
-                      src={Array.isArray(place.pictures) && place.pictures.length > 0
-                        ? place.pictures[0].url
-                        : defaultImage}
+                      src={
+                        Array.isArray(place.pictures) &&
+                        place.pictures.length > 0
+                          ? place.pictures[0].url
+                          : defaultImage
+                      }
                       alt={place.title}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />

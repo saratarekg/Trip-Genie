@@ -13,10 +13,29 @@ import { Modal } from "@/components/Modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastTitle,
+  ToastProvider,
+  ToastViewport,
+} from "@/components/ui/toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import PasswordChanger from "@/components/Passwords";
 
 const convertUrlToBase64 = async (url) => {
@@ -33,7 +52,9 @@ const SkeletonLoader = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">Account</h1>
-      <p className="text-sm text-gray-500 mb-2">Settings and Privacy / Account</p>
+      <p className="text-sm text-gray-500 mb-2">
+        Settings and Privacy / Account
+      </p>
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
           <div className="grid grid-cols-12 gap-6">
@@ -94,8 +115,10 @@ const SkeletonLoader = () => {
                 <div className="flex flex-col max-h-[230px] overflow-y-auto">
                   <div className="space-y-4 p-4">
                     {[...Array(5)].map((_, index) => (
-                      <div key={index} className="flex items-center gap-4 animate-pulse">
-
+                      <div
+                        key={index}
+                        className="flex items-center gap-4 animate-pulse"
+                      >
                         <div className="flex flex-col gap-2">
                           <div className="w-40 h-4 bg-gray-200 rounded-md"></div>
                           <div className="w-24 h-3 bg-gray-200 rounded-md"></div>
@@ -127,8 +150,8 @@ export function AdvertiserProfileComponent() {
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [base64Image, setBase64Image] = useState(null);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState('success');
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
   const [notifications, setNotifications] = useState([]);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -150,7 +173,7 @@ export function AdvertiserProfileComponent() {
 
         if (response.data.logo && response.data.logo.url) {
           convertUrlToBase64(response.data.logo.url).then((base64) => {
-            setBase64Image(base64)
+            setBase64Image(base64);
           });
         }
       } catch (err) {
@@ -290,7 +313,7 @@ export function AdvertiserProfileComponent() {
         setValidationMessages({ username: "Username already exists" });
       } else {
         setError(err.message);
-        showToast("An error occurred while updating profile", 'error');
+        showToast("An error occurred while updating profile", "error");
       }
     }
   };
@@ -306,7 +329,7 @@ export function AdvertiserProfileComponent() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = "success") => {
     setToastMessage(message);
     setToastType(type);
     setIsToastOpen(true);
@@ -314,7 +337,7 @@ export function AdvertiserProfileComponent() {
 
   const handlePasswordChangeSuccess = (message) => {
     setIsPasswordModalOpen(false);
-    showToast(message, 'success');
+    showToast(message, "success");
   };
 
   if (loading) {
@@ -343,7 +366,9 @@ export function AdvertiserProfileComponent() {
     <ToastProvider>
       <div>
         <h1 className="text-3xl font-bold mb-2">Account</h1>
-        <p className="text-sm text-gray-500 mb-2">Settings and Privacy / Account</p>
+        <p className="text-sm text-gray-500 mb-2">
+          Settings and Privacy / Account
+        </p>
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-12 gap-6">
             {/* Profile Picture and Info Card - 8 columns */}
@@ -427,10 +452,16 @@ export function AdvertiserProfileComponent() {
                               name="username"
                               value={editedAdvertiser.username}
                               onChange={handleInputChange}
-                              className={validationMessages.username ? "border-red-500" : ""}
+                              className={
+                                validationMessages.username
+                                  ? "border-red-500"
+                                  : ""
+                              }
                             />
                             {validationMessages.username && (
-                              <p className="text-red-500 text-xs mt-1">{validationMessages.username}</p>
+                              <p className="text-red-500 text-xs mt-1">
+                                {validationMessages.username}
+                              </p>
                             )}
                           </div>
                         ) : (
@@ -441,7 +472,9 @@ export function AdvertiserProfileComponent() {
                               ) : (
                                 <X className="w-5 h-5 text-[#F88C33]" />
                               )}
-                              <h2 className="text-xl font-bold ml-1">{advertiser.username}</h2>
+                              <h2 className="text-xl font-bold ml-1">
+                                {advertiser.username}
+                              </h2>
                             </div>
                           </div>
                         )}
@@ -453,14 +486,20 @@ export function AdvertiserProfileComponent() {
                             name="email"
                             value={editedAdvertiser.email}
                             onChange={handleInputChange}
-                            className={validationMessages.email ? "border-red-500" : ""}
+                            className={
+                              validationMessages.email ? "border-red-500" : ""
+                            }
                           />
                           {validationMessages.email && (
-                            <p className="text-red-500 text-xs mt-1">{validationMessages.email}</p>
+                            <p className="text-red-500 text-xs mt-1">
+                              {validationMessages.email}
+                            </p>
                           )}
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-500 mt-1">{advertiser.email}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {advertiser.email}
+                        </p>
                       )}
                     </div>
                     <Separator />
@@ -510,14 +549,20 @@ export function AdvertiserProfileComponent() {
                               name="name"
                               value={editedAdvertiser.name}
                               onChange={handleInputChange}
-                              className={validationMessages.name ? "border-red-500" : ""}
+                              className={
+                                validationMessages.name ? "border-red-500" : ""
+                              }
                             />
                             {validationMessages.name && (
-                              <p className="text-red-500 text-xs mt-1">{validationMessages.name}</p>
+                              <p className="text-red-500 text-xs mt-1">
+                                {validationMessages.name}
+                              </p>
                             )}
                           </div>
                         ) : (
-                          <p className="text-sm font-medium">{advertiser.name}</p>
+                          <p className="text-sm font-medium">
+                            {advertiser.name}
+                          </p>
                         )}
                       </div>
                       <div>
@@ -529,15 +574,23 @@ export function AdvertiserProfileComponent() {
                               name="hotline"
                               value={editedAdvertiser.hotline}
                               onChange={handleInputChange}
-                              className={validationMessages.hotline ? "border-red-500" : ""}
+                              className={
+                                validationMessages.hotline
+                                  ? "border-red-500"
+                                  : ""
+                              }
                               maxLength={5}
                             />
                             {validationMessages.hotline && (
-                              <p className="text-red-500 text-xs mt-1">{validationMessages.hotline}</p>
+                              <p className="text-red-500 text-xs mt-1">
+                                {validationMessages.hotline}
+                              </p>
                             )}
                           </div>
                         ) : (
-                          <p className="text-sm font-medium">{advertiser.hotline}</p>
+                          <p className="text-sm font-medium">
+                            {advertiser.hotline}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -551,14 +604,20 @@ export function AdvertiserProfileComponent() {
                             name="website"
                             value={editedAdvertiser.website}
                             onChange={handleInputChange}
-                            className={validationMessages.website ? "border-red-500" : ""}
+                            className={
+                              validationMessages.website ? "border-red-500" : ""
+                            }
                           />
                           {validationMessages.website && (
-                            <p className="text-red-500 text-xs mt-1">{validationMessages.website}</p>
+                            <p className="text-red-500 text-xs mt-1">
+                              {validationMessages.website}
+                            </p>
                           )}
                         </div>
                       ) : (
-                        <p className="text-sm font-medium">{advertiser.website}</p>
+                        <p className="text-sm font-medium">
+                          {advertiser.website}
+                        </p>
                       )}
                     </div>
                     <Separator />
@@ -574,7 +633,9 @@ export function AdvertiserProfileComponent() {
                           placeholder="Introduce your agency, share your values, and highlight your expertise."
                         />
                       ) : (
-                        <p className="text-sm font-medium">{advertiser.description}</p>
+                        <p className="text-sm font-medium">
+                          {advertiser.description}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -589,7 +650,9 @@ export function AdvertiserProfileComponent() {
                     <Button
                       variant="ghost"
                       className="text-sm text-[#388A94] p-2"
-                      onClick={() => (window.location.href = "/account/notifications")}
+                      onClick={() =>
+                        (window.location.href = "/account/notifications")
+                      }
                     >
                       View All
                     </Button>
@@ -601,7 +664,10 @@ export function AdvertiserProfileComponent() {
                   {loadingNotifications ? (
                     <div className="space-y-4 p-4">
                       {[...Array(5)].map((_, index) => (
-                        <div key={index} className="flex items-center gap-4 animate-pulse">
+                        <div
+                          key={index}
+                          className="flex items-center gap-4 animate-pulse"
+                        >
                           <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
                           <div className="flex flex-col gap-2">
                             <div className="w-40 h-4 bg-gray-200 rounded-md"></div>
@@ -620,7 +686,9 @@ export function AdvertiserProfileComponent() {
                         <li
                           key={index}
                           className="p-2 hover:bg-gray-50 transition-colors relative cursor-pointer flex flex-col gap-1"
-                          onClick={() => (window.location.href = "/account/notifications")}
+                          onClick={() =>
+                            (window.location.href = "/account/notifications")
+                          }
                         >
                           <div
                             className="text-[#1A3B47] text-sm truncate"
@@ -628,7 +696,9 @@ export function AdvertiserProfileComponent() {
                               __html: notification.body.slice(0, 30) + "...",
                             }}
                           ></div>
-                          <p className="text-xs text-gray-500">{formatDate(notification.date)}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatDate(notification.date)}
+                          </p>
                         </li>
                       ))}
                     </ul>
@@ -647,15 +717,20 @@ export function AdvertiserProfileComponent() {
           currentImage={logo ? (logo.public_id ? base64Image : logo) : null}
         />
         <div className="mt-4 flex justify-end space-x-2">
-          <Button onClick={handleFirstSave} className="bg-[#1A3B47] hover:bg-[#142B36] text-white px-4 py-2 rounded">
+          <Button
+            onClick={handleFirstSave}
+            className="bg-[#1A3B47] hover:bg-[#142B36] text-white px-4 py-2 rounded"
+          >
             Save
           </Button>
-          <Button onClick={closeModal} variant="destructive" className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white px-4 py-2 rounded">
+          <Button
+            onClick={closeModal}
+            variant="destructive"
+            className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white px-4 py-2 rounded"
+          >
             Close
           </Button>
         </div>
-
-
       </Modal>
       <Modal
         show={isImageViewerOpen}
@@ -663,7 +738,10 @@ export function AdvertiserProfileComponent() {
         isImageViewer={true}
         imageUrl={logo?.url || logo}
       />
-      <Modal show={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)}>
+      <Modal
+        show={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+      >
         <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
       </Modal>
       {isToastOpen && (
@@ -671,16 +749,18 @@ export function AdvertiserProfileComponent() {
           onOpenChange={setIsToastOpen}
           open={isToastOpen}
           duration={1500}
-          className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+          className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
         >
           <div className="flex items-center">
-            {toastType === 'success' ? (
+            {toastType === "success" ? (
               <CheckCircle className="text-green-500 mr-2" />
             ) : (
               <X className="text-red-500 mr-2" />
             )}
             <div>
-              <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+              <ToastTitle>
+                {toastType === "success" ? "Success" : "Error"}
+              </ToastTitle>
               <ToastDescription>{toastMessage}</ToastDescription>
             </div>
           </div>

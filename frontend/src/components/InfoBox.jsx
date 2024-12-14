@@ -5,13 +5,17 @@ import { UInfoCircle } from "./UInfoCircle"; // Ensure this path is correct base
 // InfoBox Component
 export const InfoBox = ({
   className = "",
-  icon = <UInfoCircle className="!relative !w-[45px] !h-[45px]" color="#262626" />,
+  icon = (
+    <UInfoCircle className="!relative !w-[45px] !h-[45px]" color="#262626" />
+  ),
   text = "Total sales",
   text1 = "$320 K",
   divClassName = "",
 }) => {
   return (
-    <div className={`flex w-[265px] items-start gap-2.5 p-5 relative bg-white rounded-[10px] ${className}`}>
+    <div
+      className={`flex w-[265px] items-start gap-2.5 p-5 relative bg-white rounded-[10px] ${className}`}
+    >
       {icon}
       <div className="flex flex-col items-start relative flex-1 grow">
         <div

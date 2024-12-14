@@ -263,9 +263,7 @@ const ItineraryCard = ({
           )}
           {!itinerary.appropriate && (
             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-              {role === "tour-guide"
-                ? "inappropriate"
-                : "Unavailable"}
+              {role === "tour-guide" ? "inappropriate" : "Unavailable"}
             </span>
           )}
         </div>
