@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="frontend/src/assets/images/TGlogo.svg" alt="Trip Genie Logo" width="300" height="300">
+  <img src="frontend/src/assets/images/TGlogoBG.png" alt="Trip Genie Logo" width=1012>
 </p>
 
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira+Code&pause=1000&width=435&lines=Making+your+wishes+come+true!)](https://git.io/typing-svg)
