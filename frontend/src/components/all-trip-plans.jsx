@@ -1,18 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
-  Bookmark,
-  ArrowUpDown,
-  Heart,
-} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Edit, Trash2, CheckCircle, XCircle, Bookmark, ArrowUpDown, Heart } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import FilterComponent from "./Filter.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
@@ -1121,42 +1110,37 @@ export function AllItinerariesComponent() {
                 </div>
               </div>
               {error && (
-                <div className="text-[#F88C33] text-center mb-4">{error}</div>
+                <div className="text-[#F88C33] text-center mb-4">{error.message}</div>
               )}
               {/* Itineraries Grid */}
 
               {isLoading ? (
                 <AllProductsSkeleton />
+              ) : error ? (
+                <div className="text-[#F88C33] text-center mb-4">{error.message}</div>
               ) : (
-                // <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {itineraries
-                    .slice(
-                      (currentPage - 1) * tripsPerPage,
-                      currentPage * tripsPerPage
-                    )
-                    .map((itinerary) => (
-                      <ItineraryCard
-                        key={itinerary._id}
-                        itinerary={itinerary}
-                        onSelect={handleItinerarySelect}
-                        role={getUserRole()}
-                        userInfo={userInfo}
-                        canModify={canModify}
-                        setShowDeleteConfirm={setShowDeleteConfirm}
-                        setSelectedItinerary={setSelectedItinerary}
-                        onDeleteConfirm={handleDeleteConfirm}
-                        savedItineraries={savedItineraries}
-                        onItinerarySaved={handleItinerarySaved}
-                      />
-                    ))}
+                  {itineraries.map((itinerary) => (
+                    <ItineraryCard
+                      key={itinerary._id}
+                      itinerary={itinerary}
+                      onSelect={handleItinerarySelect}
+                      role={getUserRole()}
+                      userInfo={userInfo}
+                      canModify={canModify}
+                      setShowDeleteConfirm={setShowDeleteConfirm}
+                      setSelectedItinerary={setSelectedItinerary}
+                      onDeleteConfirm={handleDeleteConfirm}
+                      savedItineraries={savedItineraries}
+                      onItinerarySaved={handleItinerarySaved}
+                    />
+                  ))}
                 </div>
-                // </div>
               )}
               {/* Pagination */}
               <div className="mt-8 flex justify-center items-center space-x-4">
                 <Button
-                  onClick={() => handlePageChange(currentPage - 1)}
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                   variant="outline"
                   size="icon"
@@ -1289,3 +1273,4 @@ export function AllItinerariesComponent() {
 }
 
 export default AllItinerariesComponent;
+
