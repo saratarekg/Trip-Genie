@@ -318,7 +318,9 @@ VITE_STRIPE_PUBLISHABLE_KEY = ...
 ```bash
 cd Trip-Genie/frontend
 npm run dev
-cd ../backend
+```
+```bash
+cd Trip-Genie/backend
 npm run dev 
 ```
 
@@ -447,11 +449,15 @@ test('GET /itinerary', async () => {
 
 - Design inspiration from modern travel platforms
 - Icons from Lucide React
-- UI Components from shadcn/ui
+- UI Components from shadcn/ui:   https://trip-genie.atlassian.net/
 - Maps integration powered by Google Maps
 - Payment powered by Stripe
 - Hotels search and booking powered by Booking
-- Flights search and booking powered by Amadeus 
+- Flights search and booking powered by Amadeus
+- JIRA for agile workflow: https://trip-genie.atlassian.net/
+- React crash course: https://youtu.be/LDB4uaJ87e0?si=boGVQOcsJ4tcpYkK
+- Node JS with express + mongo crash course: https://www.youtube.com/playlist?list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU
+- MERN stack crash course: https://www.youtube.com/playlist?list=PL4cUxeGkcC9iJ_KkrkBZWZRHVwnzLIoUE
 
 ## License
 
