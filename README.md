@@ -1,3 +1,5 @@
+# Trip Genie 🧞‍♂️
+
 <p align="center">
   <img src="frontend/src/assets/images/TGlogoBG.png" alt="Trip Genie Logo" width=1012>
 </p>
@@ -38,6 +40,43 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 - ✅ Development: Active
 - 🚀 Current Version: 1.0.0
 - 💻 Platform: Web Application
+
+<details>
+  <summary>Current issues and problems</summary>
+- Constant refreshing of the cards in activities and itineraries and they keep refreshing even after the loading ends </br>
+- Some notifications return visible HTML tags in the body  </br>
+- Add an option to copy the promocode directly from the notifications  </br>
+- Cancel button for updating any activity/itinerary so that the user doesn't rely on the browser's back button  </br>
+- Update notifications enum and remove outdated notification types  </br>
+- Promocode is forced to be entered in the checkout process but sometimes the user may not want to use the promo code  </br>
+- If the wallet isn't enough, don't remove the product from the cart  </br>
+- Cash on delivery funds are refunded to wallet when canceled, we should not refund the amount </br>
+- Add "add to wishlist" toast at the bottom in all views  </br>
+- Wallet history is not updating  </br>
+- Skeleton loading in hotel details needs to be added </br>
+- "Currently unavailable" looks bad in the card, we need to modify the badge</br>
+- Delete account toast does not have consistent styling with the other toasts and needs a proper readable error message </br>
+- Comments and reviews are too wide with white spaces in between them </br>
+- Add recommendations in the single activity, itinerary and product views or extra info  </br>
+- My bookings should be easier to access or have a link directly from the confirmation pop up </br>
+- Drop-downs and the cart should close when clicking outside  </br>
+- Any white space, we can add quick access to items in settings  </br>
+- Adjust the capitalization in the genie helper messages</br>
+- Too many popups, unnecessary if something already indicates change   </br>
+- Adding to cart after checkout should remove it from the wishlist  </br>
+- In the checkout the wallet sometimes glitches and doesn't update the wallet to the user properly and may even show negative balance (FE only) </br>
+- Find a different approach for sorting by preferences as it increases the loading per page as it is not done efficiently </br>
+- Advertiser cannot delete/update their activity from outside (all activities).
+- The admin should be able to delete any itinerary even if they were not theirs. 
+- Booking confirmation pop-ups are not consistent.
+- No popup for flagging inappropriate itineraries.
+- All toast messages should be top right instead of having some being bottom right
+- Adding an image to a product when updating sometimes causes the product to lag and not update
+- Flights, hotels, and transport should be in one component on the homepage.
+- Graph in admin dashboard takes a long time to load.
+- The color of the 'flag inappropriate' in admin activities is different from itineraries.
+
+</details>
 
 ## Code Examples
 
@@ -103,6 +142,38 @@ The project follows modern web development practices and conventions:
 - ESLint + Prettier for code formatting
 - Component-based architecture
 - Role-based access control
+
+- **Indentation:** The code is formatted to use 4 spaces for indentation. No tabs.
+- **Line Length:** The code is limited to 80 characters per line.
+- **Function and Variable Names:** Function and variable names are written in `camelCase`.
+- **Class Names:** Class names use `PascalCase`.
+- **Constants:** Constants are written in `UPPERCASE_WITH_UNDERSCORES`.
+- **Imports:** Imports are organized into three sections in this order: standard libraries, third-party libraries, local imports.
+- **Comments:** Comments are written clearly and concisely, using full sentences and providing meaningful descriptions. All functions are documented with JSDoc.
+- **Whitespace:**
+  - Trailing whitespaces are avoided.
+  - A single blank line is used to separate functions.
+  - Two blank lines are used to separate classes.
+- **Braces:** Opening braces for blocks are placed on the same line as the statement.
+- **Self-Closing Tags:** Self-closing tags are used for components without children.
+- **Error Handling:** Exceptions and errors are handled gracefully using `try-catch` blocks where necessary.
+- **Naming Conventions:** Consistent naming conventions are followed for functions, variables, classes, and files.
+- **Prettier Configuration:** Prettier is set up with default settings to automatically format the code.
+
+
+### Prettier Configuration 
+
+```json
+{
+  "printWidth": 80,
+  "tabWidth": 4,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "jsxBracketSameLine": true,
+  "semi": true
+}
+```
 
 ## Screenshots
 
