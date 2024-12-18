@@ -336,6 +336,9 @@ https://developers.booking.com/metasearch/connect-api
 
 Local APIs 
 
+You can view all our APIs from the [routes](./backend/routes) folder in the backend.
+
+
 ## Common Routes for All Roles
 
 Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, admin
