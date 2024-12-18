@@ -6,14 +6,10 @@
 
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira+Code&pause=1000&width=435&lines=Making+all+your+wishes+come+true!)](https://git.io/typing-svg)
 
-
 A comprehensive travel and tourism platform that enables users to book flights, hotels, transportation, activities, and explore historical places while also providing a marketplace for travel-related products.
 
-
-
-
-
 ## Table of Contents
+
 - [Motivation](#motivation)
 - [Build Status](#build-status)
 - [Code Examples](#code-examples)
@@ -29,7 +25,6 @@ A comprehensive travel and tourism platform that enables users to book flights, 
 - [Contributors](#contributors)
 - [Credits](#credits)
 - [License](#license)
-
 
 ## Motivation
 
@@ -83,8 +78,8 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 ### Frontend Example (React)
 
 ```jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 function ItineraryList() {
   const [itineraries, setItineraries] = useState([]);
@@ -92,10 +87,10 @@ function ItineraryList() {
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
-        const response = await axios.get('/tourist/itineraries');
+        const response = await axios.get("/tourist/itineraries");
         setItineraries(response.data);
       } catch (error) {
-        console.error('Error fetching itineraries:', error);
+        console.error("Error fetching itineraries:", error);
       }
     };
 
@@ -120,15 +115,277 @@ export default ItineraryList;
 ### Backend Example (Express.js)
 
 ```javascript
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const itineraryController = require('../controllers/itineraryController');
+const itineraryController = require("../controllers/itineraryController");
 
-router.get('/itineraries', itineraryController.getAllItineraries);
-router.get('/itineraries/:id', itineraryController.getItineraryById);
-router.post('/itineraries', itineraryController.createItinerary);
-router.put('/itineraries/:id', itineraryController.updateItinerary);
-router.delete('/itineraries/:id', itineraryController.deleteItinerary);
+router.get("/itineraries", itineraryController.getAllItineraries);
+router.get("/itineraries/:id", itineraryController.getItineraryById);
+router.post("/itineraries", itineraryController.createItinerary);
+router.put("/itineraries/:id", itineraryController.updateItinerary);
+router.delete("/itineraries/:id", itineraryController.deleteItinerary);
+
+module.exports = router;
+```
+
+### Frontend Example (React)
+
+```jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const Login = () => {
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!isValid) {
+      setLoginErrorMessage("Please fix the errors before submitting.");
+      return;
+    }
+
+    const requestBody = {
+      username: identifier,
+      password,
+    };
+
+    try {
+      const response = await fetch("http://localhost:4000/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        role = data.role;
+
+        if (role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+        console.log("Login successful!");
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+
+        if (errorData.message === "Your account is not accepted yet") {
+          setLoginErrorMessage(
+            "Login failed. Your account is not accepted yet."
+          );
+        } else {
+          setLoginErrorMessage("Login failed. Please check your credentials.");
+        }
+      }
+    } catch (error) {
+      setLoginErrorMessage("An error occurred during login. Please try again.");
+    }
+  };
+
+  return (
+    <div>
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <div>
+          <label
+            htmlFor="identifier"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Email/Username
+          </label>
+          <div className="mt-1">
+            <input
+              id="identifier"
+              name="identifier"
+              type="text"
+              autoComplete="identifier"
+              placeholder="Email/Username"
+              required
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              value={identifier}
+              onChange={(e) => {
+                setIdentifier(e.target.value);
+                validateIdentifier(e.target.value);
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Password
+          </label>
+          <div className="mt-1 relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              placeholder="Password"
+              required
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {password.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOffIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            )}
+          </div>
+          <div className="mt-1 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setForgotPasswordStep(1)}
+              className="text-sm font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+            >
+              Forgot password?
+            </button>
+          </div>
+          {loginErrorMessage && (
+            <p
+              className={`text-sm mt-1 ${
+                loginErrorMessage ===
+                "Password reset successfully. Please log in with your new password."
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {loginErrorMessage}
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col items-center justify-between">
+          <button
+            type="submit"
+            className={`w-full flex justify-center mb-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] text-white hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 ${
+              !isValid ? "cursor-not-allowed hover:bg-[#5D9297]" : ""
+            }`}
+            disabled={!isValid}
+          >
+            Log in
+          </button>
+          <p className="text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/sign-up"
+              className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+            >
+              Sign up now!
+            </Link>
+          </p>
+          <button
+            className="w-full flex justify-center px-4 rounded-md font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+            onClick={() => {
+              console.log("Logging out...");
+              logOut();
+              navigate("/");
+            }}
+          >
+            Continue as guest
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default ItineraryList;
+```
+
+### Backend Example (Express.js)
+
+```javascript
+const express = require("express");
+const router = express.Router();
+const authController = require("../controllers/authController");
+
+router.post("/login", authController.login);
+
+const login = async (req, res) => {
+  let { username, password } = req.body;
+  username = username.toLowerCase();
+
+  try {
+    let role = "";
+    let user = null;
+    if (
+      (await Tourist.findOne({ email: username })) ||
+      (await Tourist.findOne({ username }))
+    ) {
+      role = "tourist";
+      user = await Tourist.login(username, password);
+    } else if (
+      (await TourGuide.findOne({ email: username })) ||
+      (await TourGuide.findOne({ username }))
+    ) {
+      role = "tour-guide";
+      user = await TourGuide.login(username, password);
+    } else if (
+      (await Advertiser.findOne({ email: username })) ||
+      (await Advertiser.findOne({ username }))
+    ) {
+      role = "advertiser";
+      user = await Advertiser.login(username, password);
+    } else if (
+      (await Seller.findOne({ email: username })) ||
+      (await Seller.findOne({ username }))
+    ) {
+      role = "seller";
+      user = await Seller.login(username, password);
+    } else if (
+      (await Admin.findOne({ email: username })) ||
+      (await Admin.findOne({ username }))
+    ) {
+      role = "admin";
+      user = await Admin.login(username, password);
+    } else if (
+      (await TourismGovernor.findOne({ email: username })) ||
+      (await TourismGovernor.findOne({ username }))
+    ) {
+      role = "tourism-governor";
+      user = await TourismGovernor.login(username, password);
+    } else {
+      res.cookie("jwt", "", { maxAge: 1 });
+      res.cookie("role", "", { maxAge: 1 });
+      throw new Error("Email not found");
+    }
+
+    const token = createToken(user._id, role);
+    res.cookie("jwt", token, {
+      httpOnly: false,
+      maxAge: process.env.MAX_AGE * 1000,
+    });
+    res.cookie("role", role, {
+      httpOnly: false,
+      maxAge: process.env.MAX_AGE * 1000,
+    });
+    res.setHeader("Authorization", `Bearer ${token}`);
+    res.status(200).json({ message: "Login succesful", role });
+  } catch (error) {
+    res.cookie("jwt", "", { maxAge: 1 });
+    res.cookie("role", "", { maxAge: 1 });
+    res.status(400).json({ message: error.message });
+  }
+};
 
 module.exports = router;
 ```
@@ -160,8 +417,7 @@ The project follows modern web development practices and conventions:
 - **Naming Conventions:** Consistent naming conventions are followed for functions, variables, classes, and files.
 - **Prettier Configuration:** Prettier is set up with default settings to automatically format the code.
 
-
-### Prettier Configuration 
+### Prettier Configuration
 
 ```json
 {
@@ -300,10 +556,10 @@ The project follows modern web development practices and conventions:
 </p>
 </details>
 
-
 ## Tech/Framework Used
 
 ### Built With
+
 - React 18 with Vite
 - JavaScript
 - Tailwind CSS
@@ -312,6 +568,7 @@ The project follows modern web development practices and conventions:
 - Express.js
 
 ### Key Libraries
+
 - js-cookie for authentication
 - axios for API requests
 - lucide-react for icons
@@ -321,6 +578,7 @@ The project follows modern web development practices and conventions:
 ## Features
 
 ### For Tourists
+
 - Book flights, hotels, and transportation
 - Explore and book activities and itineraries
 - Visit historical places
@@ -329,18 +587,21 @@ The project follows modern web development practices and conventions:
 - Personalized recommendations
 
 ### For Tour Guides
+
 - Create and manage itineraries
 - Track bookings and revenue
 - Manage profile and credentials
 - Receive ratings and reviews
 
 ### For Sellers
+
 - Product management
 - Order processing
 - Inventory tracking
 - Sales analytics
 
 ### For Advertisers
+
 - Create and manage activities
 - Set up transportation options
 - Track bookings and revenue
@@ -348,11 +609,13 @@ The project follows modern web development practices and conventions:
 - Access analytics and performance reports
 
 ### For Tourism Governors
+
 - Manage historical places
 - Create and manage tags
 - Monitor tourism activities
 
 ### For Admins
+
 - Manage user accounts
 - Monitor and moderate content
 - Generate sales reports
@@ -363,21 +626,24 @@ The project follows modern web development practices and conventions:
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/Advanced-computer-lab-2024/Trip-Genie.git
 ```
 
 2. Install dependencies:
+
 ```bash
 cd TripGenie
 cd frontend
 npm install
 cd ..
 cd backend
-npm install 
+npm install
 ```
 
 3. Set up environment variables:
+
 ```
 MONGODB_URI= ...
 JWT_SECRET= ...
@@ -390,18 +656,20 @@ VITE_STRIPE_PUBLISHABLE_KEY = ...
 ```
 
 4. Run the development server:
+
 ```bash
 cd Trip-Genie/frontend
 npm run dev
 ```
+
 ```bash
 cd Trip-Genie/backend
-npm run dev 
+npm run dev
 ```
 
 ## API Reference
 
-External APIs used: 
+External APIs used:
 
 https://developers.amadeus.com/self-service/category/flights
 
@@ -409,48 +677,56 @@ https://docs.stripe.com/api
 
 https://developers.booking.com/metasearch/connect-api
 
-Local APIs 
+Local APIs
 
 You can view all our APIs from the [routes](./backend/routes) folder in the backend.
-
 
 ## Common Routes for All Roles
 
 Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, admin
 
 1. Get Supported Currencies
+
    - Endpoint: GET /{role}/currencies
    - Description: Returns a list of supported currencies.
 
 2. Get Currency by ID
+
    - Endpoint: GET /{role}/getCurrency/:id
    - Description: Returns currency details by ID.
 
 3. Get Profile
+
    - Endpoint: GET /{role}/
    - Description: Returns the profile of the logged-in {role}.
 
 4. Update Profile (Where applicable)
+
    - Endpoint: PUT /{role}/
    - Description: Updates the profile of the logged-in {role}.
 
 5. Get All Activities/Products/Historical Places
+
    - Endpoint: GET /{role}/activities (or equivalent resource name for each role)
    - Description: Returns a list of all activities/products/historical places for the logged-in {role}.
 
 6. Get Activity/Product/Place by ID
+
    - Endpoint: GET /{role}/activities/:id (or equivalent resource name for each role)
    - Description: Returns details of a specific activity/product/place by ID.
 
 7. Get Notifications
+
    - Endpoint: GET /{role}/notifications
    - Description: Returns a list of notifications for the {role}.
 
 8. Get Unseen Notifications
+
    - Endpoint: GET /{role}/unseen-notifications
    - Description: Returns a list of unseen notifications for the {role}.
 
 9. Mark Notification as Seen
+
    - Endpoint: PUT /{role}/notifications/markAsSeen/:id
    - Description: Marks a specific notification as seen for the {role}.
 
@@ -463,154 +739,192 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 ### Tourist Routes
 
 11. Cancel Flight Booking
+
     - Endpoint: POST /tourist/cancel-flight/:id
     - Description: Cancels a flight booking and returns the refunded amount and new wallet balance.
 
 12. Get All Products
+
     - Endpoint: GET /tourist/products
     - Description: Returns a list of all products.
 
 13. Get Product by ID
+
     - Endpoint: GET /tourist/products/:id
     - Description: Returns details of a specific product by ID.
 
 14. Add Product to Cart
+
     - Endpoint: POST /tourist/product/addToCart
     - Description: Adds a product to the cart.
 
 15. Add Product to Wishlist
+
     - Endpoint: POST /tourist/product/addToWishlist/:id
     - Description: Adds a product to the wishlist.
 
 16. Rate Product
+
     - Endpoint: POST /tourist/product/rate/:id
     - Description: Rates a product.
 
 17. Comment on Product
+
     - Endpoint: POST /tourist/product/comment/:id
     - Description: Adds a comment to a product.
 
 18. Update Comment on Product
+
     - Endpoint: PUT /tourist/product/updateComment/:id
     - Description: Updates a comment on a product.
 
 19. Get All Activities
+
     - Endpoint: GET /tourist/activities
     - Description: Returns a list of all activities.
 
 20. Get Activity by ID
+
     - Endpoint: GET /tourist/activities/:id
     - Description: Returns details of a specific activity by ID.
 
 21. Rate Activity
+
     - Endpoint: POST /tourist/activities/rate/:id
     - Description: Rates an activity.
 
 22. Comment on Activity
+
     - Endpoint: POST /tourist/activities/comment/:id
     - Description: Adds a comment to an activity.
 
 23. Update Comment on Activity
+
     - Endpoint: PUT /tourist/activities/updateComment/:id
     - Description: Updates a comment on an activity.
 
 24. Get All Itineraries
+
     - Endpoint: GET /tourist/itineraries
     - Description: Returns a list of all itineraries.
 
 25. Get Itinerary by ID
+
     - Endpoint: GET /tourist/itineraries/:id
     - Description: Returns details of a specific itinerary by ID.
 
 26. Rate Itinerary
+
     - Endpoint: POST /tourist/itinerary/rate/:id
     - Description: Rates an itinerary.
 
 27. Comment on Itinerary
+
     - Endpoint: POST /tourist/itinerary/comment/:id
     - Description: Adds a comment to an itinerary.
 
 28. Update Comment on Itinerary
+
     - Endpoint: PUT /tourist/itinerary/updateComment/:id
     - Description: Updates a comment on an itinerary.
 
 29. Get All Historical Places
+
     - Endpoint: GET /tourist/historical-places
     - Description: Returns a list of all historical places.
 
 30. Get Historical Place by ID
+
     - Endpoint: GET /tourist/historical-places/:id
     - Description: Returns details of a specific historical place by ID.
 
 31. Book Transportation
+
     - Endpoint: POST /tourist/book-transportation
     - Description: Books transportation.
 
 32. Get Upcoming Transportation Bookings
+
     - Endpoint: GET /tourist/upcoming-transportation
     - Description: Returns a list of upcoming transportation bookings.
 
 33. Get Previous Transportation Bookings
+
     - Endpoint: GET /tourist/history-transportation
     - Description: Returns a list of previous transportation bookings.
 
 34. Delete Transportation Booking
+
     - Endpoint: DELETE /tourist/transportation-booking/:id
     - Description: Deletes a transportation booking.
 
 35. Book Flight
+
     - Endpoint: POST /tourist/book-flight
     - Description: Books a flight.
 
 36. Cancel Flight Booking
+
     - Endpoint: POST /tourist/cancel-flight/:id
     - Description: Cancels a flight booking.
 
 37. Get My Flights
+
     - Endpoint: GET /tourist/my-flights
     - Description: Returns a list of the tourist's flights.
 
 38. Book Hotel
+
     - Endpoint: POST /tourist/book-hotel
     - Description: Books a hotel.
 
 39. Cancel Hotel Booking
+
     - Endpoint: POST /tourist/cancel-hotel/:id
     - Description: Cancels a hotel booking.
 
 40. Get My Hotels
+
     - Endpoint: GET /tourist/my-hotels
     - Description: Returns a list of the tourist's hotels.
 
 41. Apply Promo Code
+
     - Endpoint: POST /tourist/promo-code
     - Description: Applies a promo code.
 
 42. Get Promo Code
+
     - Endpoint: POST /tourist/get/promo-code
     - Description: Retrieves a promo code.
 
 43. Get Promo Codes
+
     - Endpoint: GET /tourist/promo-codes
     - Description: Returns a list of promo codes.
 
 44. Save Activity
+
     - Endpoint: POST /tourist/save-activity/:id
     - Description: Saves an activity.
 
 45. Save Itinerary
+
     - Endpoint: POST /tourist/save-itinerary/:id
     - Description: Saves an itinerary.
 
 46. Get Saved Activities
+
     - Endpoint: GET /tourist/saved-activities
     - Description: Returns a list of saved activities.
 
 47. Get Saved Itineraries
+
     - Endpoint: GET /tourist/saved-itineraries
     - Description: Returns a list of saved itineraries.
 
 48. Get Visited Pages
+
     - Endpoint: GET /tourist/visited-pages
     - Description: Returns a list of visited pages.
 
@@ -621,50 +935,62 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 ### Advertiser Routes
 
 50. Create Activity
+
     - Endpoint: POST /advertiser/activities
     - Description: Creates a new activity.
 
 51. Get All Activities
+
     - Endpoint: GET /advertiser/activities
     - Description: Returns a list of all activities.
 
 52. Get Activity by ID
+
     - Endpoint: GET /advertiser/activities/:id
     - Description: Returns details of a specific activity by ID.
 
 53. Update Activity
+
     - Endpoint: PUT /advertiser/activities/:id
     - Description: Updates an existing activity by ID. Supports file uploads.
 
 54. Delete Activity
+
     - Endpoint: DELETE /advertiser/activities/:id
     - Description: Deletes an activity by ID.
 
 55. Get Max Price Activities
+
     - Endpoint: GET /advertiser/maxPriceActivities
     - Description: Returns the maximum price of activities.
 
 56. Get Max Price Activities (My)
+
     - Endpoint: GET /advertiser/max-price-activities-my
     - Description: Returns the maximum price of the advertiser's activities.
 
 57. Get All Transportations
+
     - Endpoint: GET /advertiser/transportations
     - Description: Returns a list of all transportations.
 
 58. Get Transportation by ID
+
     - Endpoint: GET /advertiser/transportations/:id
     - Description: Returns details of a specific transportation by ID.
 
 59. Create Transportation
+
     - Endpoint: POST /advertiser/transportations
     - Description: Creates a new transportation.
 
 60. Update Transportation
+
     - Endpoint: PUT /advertiser/transportations/:id
     - Description: Updates an existing transportation by ID.
 
 61. Delete Transportation
+
     - Endpoint: DELETE /advertiser/transportations/:id
     - Description: Deletes a transportation by ID.
 
@@ -675,30 +1001,37 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 ### Seller Routes
 
 63. Get All Products
+
     - Endpoint: GET /seller/products
     - Description: Returns a list of all products.
 
 64. Get Product by ID
+
     - Endpoint: GET /seller/products/:id
     - Description: Returns details of a specific product by ID.
 
 65. Add New Product
+
     - Endpoint: POST /seller/products
     - Description: Adds a new product. Supports file uploads.
 
 66. Edit Product
+
     - Endpoint: PUT /seller/products/:id
     - Description: Edits an existing product by ID. Supports file uploads.
 
 67. Delete Product
+
     - Endpoint: DELETE /seller/products/:id
     - Description: Deletes a product by ID.
 
 68. Archive Product
+
     - Endpoint: PUT /seller/archiveproducts/:id
     - Description: Archives a product by ID.
 
 69. Get Sales Report
+
     - Endpoint: GET /seller/sales-report
     - Description: Retrieves the sales report for the seller.
 
@@ -709,10 +1042,12 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 ### Tourism Governor Routes
 
 71. Create Historical Place
+
     - Endpoint: POST /tourism-governor/historical-places
     - Description: Creates a new historical place.
 
 72. Get Historical Tags
+
     - Endpoint: GET /tourism-governor/historical-tag
     - Description: Returns a list of all historical tags.
 
@@ -725,31 +1060,38 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 ## Auth Routes
 
 74. Tourist Signup
+
     - Endpoint: POST /auth/sign-up/tourist
     - Description: Registers a new tourist.
 
 75. Advertiser Signup
+
     - Endpoint: POST /auth/sign-up/advertiser
     - Description: Registers a new advertiser.
 
 76. Tour Guide Signup
+
     - Endpoint: POST /auth/sign-up/tour-guide
     - Description: Registers a new tour guide.
 
 77. Seller Signup
+
     - Endpoint: POST /auth/sign-up/seller
     - Description: Registers a new seller.
 
 78. Check Unique
+
     - Endpoint: POST /auth/check-unique
     - Description: Checks if a username or email is unique.
 
 79. Login/Logout
+
     - Endpoints:
       - POST: /auth/login (Login the user)
       - POST: /auth/logout (Logout the user)
 
 80. Forgot/Reset Password
+
     - Endpoints:
       - POST: /auth/forgot-password (Sends a password reset link to the user's email)
       - POST: /auth/reset-password (Resets the user's password)
@@ -771,6 +1113,7 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 ## Admin Routes
 
 83. Promo Code Management
+
     - Endpoints:
       - POST: /admin/promo-code (Add promo code)
       - GET: /admin/promo-code (Get all promo codes)
@@ -779,6 +1122,7 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
       - DELETE: /admin/promo-code/:id (Delete promo code by ID)
 
 84. Get Max Price Activities
+
     - Endpoint: GET /admin/maxPriceActivities
     - Description: Returns the maximum price of activities.
 
@@ -798,15 +1142,14 @@ npm run test
 Here's an example of how to test the `GET /itinerary` endpoint:
 
 ```javascript
-test('GET /itinerary', async () => {
-    const response = await request(app).get('/itinerary');
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual([]);
+test("GET /itinerary", async () => {
+  const response = await request(app).get("/itinerary");
+  expect(response.statusCode).toBe(200);
+  expect(response.body).toStrictEqual([]);
 });
 ```
 
-here are our test cases: 
-
+here are our test cases:
 
 Test 1: Get Tourist Profile
 
@@ -814,11 +1157,12 @@ Description:
 This test verifies that a tourist can successfully retrieve their profile information.
 
 Code:
+
 ```javascript
-test('GET /tourist - should get tourist profile', async () => {
-  const res = await request(app).get('/tourist').set('user_id', testTouristId);
+test("GET /tourist - should get tourist profile", async () => {
+  const res = await request(app).get("/tourist").set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
-  expect(res.body.username).toBe('testuser');
+  expect(res.body.username).toBe("testuser");
 });
 ```
 
@@ -828,20 +1172,21 @@ Description:
 This test ensures that a tourist can update their profile information successfully.
 
 Code:
+
 ```javascript
-test('PUT /tourist - should update tourist profile', async () => {
+test("PUT /tourist - should update tourist profile", async () => {
   const res = await request(app)
-    .put('/tourist')
-    .set('user_id', testTouristId)
-    .send({ 
-      username: 'updateduser', 
-      email: 'updated@example.com',
-      jobOrStudent: 'Professional',
+    .put("/tourist")
+    .set("user_id", testTouristId)
+    .send({
+      username: "updateduser",
+      email: "updated@example.com",
+      jobOrStudent: "Professional",
       nationality: testNationalityId,
-      mobile: '+9876543210987'
+      mobile: "+9876543210987",
     });
   expect(res.statusCode).toBe(200);
-  expect(res.body.username).toBe('updateduser');
+  expect(res.body.username).toBe("updateduser");
 });
 ```
 
@@ -851,12 +1196,13 @@ Description:
 This test verifies that a tourist can update their preferences successfully.
 
 Code:
+
 ```javascript
-test('PUT /tourist/preferences - should update tourist preferences', async () => {
+test("PUT /tourist/preferences - should update tourist preferences", async () => {
   const res = await request(app)
-    .put('/tourist/preferences')
-    .set('user_id', testTouristId)
-    .send({ budget: 1000, categories: ['adventure', 'culture'] });
+    .put("/tourist/preferences")
+    .set("user_id", testTouristId)
+    .send({ budget: 1000, categories: ["adventure", "culture"] });
   expect(res.statusCode).toBe(200);
   expect(res.body.preference.budget).toBe(1000);
 });
@@ -868,9 +1214,12 @@ Description:
 This test ensures that a tourist can retrieve their cart contents successfully.
 
 Code:
+
 ```javascript
-test('GET /tourist/cart - should get tourist cart', async () => {
-  const res = await request(app).get('/tourist/cart').set('user_id', testTouristId);
+test("GET /tourist/cart - should get tourist cart", async () => {
+  const res = await request(app)
+    .get("/tourist/cart")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
   expect(Array.isArray(res.body)).toBeTruthy();
 });
@@ -882,11 +1231,14 @@ Description:
 This test verifies that a tourist can empty their cart successfully.
 
 Code:
+
 ```javascript
-test('DELETE /tourist/empty/cart - should empty tourist cart', async () => {
-  const res = await request(app).delete('/tourist/empty/cart').set('user_id', testTouristId);
+test("DELETE /tourist/empty/cart - should empty tourist cart", async () => {
+  const res = await request(app)
+    .delete("/tourist/empty/cart")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Cart emptied');
+  expect(res.body.message).toBe("Cart emptied");
 });
 ```
 
@@ -896,9 +1248,12 @@ Description:
 This test ensures that a tourist can retrieve their wishlist successfully.
 
 Code:
+
 ```javascript
-test('GET /tourist/wishlist - should get tourist wishlist', async () => {
-  const res = await request(app).get('/tourist/wishlist').set('user_id', testTouristId);
+test("GET /tourist/wishlist - should get tourist wishlist", async () => {
+  const res = await request(app)
+    .get("/tourist/wishlist")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
   expect(Array.isArray(res.body)).toBeTruthy();
 });
@@ -910,15 +1265,20 @@ Description:
 This test verifies that a tourist can remove a product from their wishlist successfully.
 
 Code:
-```javascript
-test('DELETE /tourist/remove/wishlist/:id - should remove product from wishlist', async () => {
-  const product = new Product({ name: 'Test Product', price: 100 });
-  await product.save();
-  await Tourist.findByIdAndUpdate(testTouristId, { $push: { wishlist: { product: product._id } } });
 
-  const res = await request(app).delete(`/tourist/remove/wishlist/${product._id}`).set('user_id', testTouristId);
+```javascript
+test("DELETE /tourist/remove/wishlist/:id - should remove product from wishlist", async () => {
+  const product = new Product({ name: "Test Product", price: 100 });
+  await product.save();
+  await Tourist.findByIdAndUpdate(testTouristId, {
+    $push: { wishlist: { product: product._id } },
+  });
+
+  const res = await request(app)
+    .delete(`/tourist/remove/wishlist/${product._id}`)
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Product removed from wishlist');
+  expect(res.body.message).toBe("Product removed from wishlist");
 });
 ```
 
@@ -928,15 +1288,20 @@ Description:
 This test ensures that a tourist can move a product from their wishlist to their cart successfully.
 
 Code:
-```javascript
-test('PUT /tourist/move/wishlist/:id - should move product from wishlist to cart', async () => {
-  const product = new Product({ name: 'Test Product', price: 100 });
-  await product.save();
-  await Tourist.findByIdAndUpdate(testTouristId, { $push: { wishlist: { product: product._id } } });
 
-  const res = await request(app).put(`/tourist/move/wishlist/${product._id}`).set('user_id', testTouristId);
+```javascript
+test("PUT /tourist/move/wishlist/:id - should move product from wishlist to cart", async () => {
+  const product = new Product({ name: "Test Product", price: 100 });
+  await product.save();
+  await Tourist.findByIdAndUpdate(testTouristId, {
+    $push: { wishlist: { product: product._id } },
+  });
+
+  const res = await request(app)
+    .put(`/tourist/move/wishlist/${product._id}`)
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Product moved to cart');
+  expect(res.body.message).toBe("Product moved to cart");
 });
 ```
 
@@ -946,15 +1311,20 @@ Description:
 This test verifies that a tourist can retrieve their preferred currency code successfully.
 
 Code:
-```javascript
-test('GET /tourist/currencies/code - should get currency code', async () => {
-  const currency = new Currency({ code: 'USD', name: 'US Dollar' });
-  await currency.save();
-  await Tourist.findByIdAndUpdate(testTouristId, { preferredCurrency: currency._id });
 
-  const res = await request(app).get('/tourist/currencies/code').set('user_id', testTouristId);
+```javascript
+test("GET /tourist/currencies/code - should get currency code", async () => {
+  const currency = new Currency({ code: "USD", name: "US Dollar" });
+  await currency.save();
+  await Tourist.findByIdAndUpdate(testTouristId, {
+    preferredCurrency: currency._id,
+  });
+
+  const res = await request(app)
+    .get("/tourist/currencies/code")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
-  expect(res.body).toBe('USD');
+  expect(res.body).toBe("USD");
 });
 ```
 
@@ -964,17 +1334,18 @@ Description:
 This test ensures that a tourist can set their preferred currency successfully.
 
 Code:
+
 ```javascript
-test('POST /tourist/currencies/set - should set currency code', async () => {
-  const currency = new Currency({ code: 'EUR', name: 'Euro' });
+test("POST /tourist/currencies/set - should set currency code", async () => {
+  const currency = new Currency({ code: "EUR", name: "Euro" });
   await currency.save();
 
   const res = await request(app)
-    .post('/tourist/currencies/set')
-    .set('user_id', testTouristId)
+    .post("/tourist/currencies/set")
+    .set("user_id", testTouristId)
     .send({ currencyId: currency._id });
   expect(res.statusCode).toBe(200);
-  expect(res.body.currencyCode).toBe('EUR');
+  expect(res.body.currencyCode).toBe("EUR");
 });
 ```
 
@@ -984,20 +1355,21 @@ Description:
 This test verifies that a tourist can add a new payment card successfully.
 
 Code:
+
 ```javascript
-test('PUT /tourist/add-card - should add a new card', async () => {
+test("PUT /tourist/add-card - should add a new card", async () => {
   const res = await request(app)
-    .put('/tourist/add-card')
-    .set('user_id', testTouristId)
+    .put("/tourist/add-card")
+    .set("user_id", testTouristId)
     .send({
-      cardType: 'Credit Card',
-      cardNumber: '1234567890123456',
-      expiryDate: '12/25',
-      holderName: 'Test User',
-      cvv: '123'
+      cardType: "Credit Card",
+      cardNumber: "1234567890123456",
+      expiryDate: "12/25",
+      holderName: "Test User",
+      cvv: "123",
     });
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Card added successfully');
+  expect(res.body.message).toBe("Card added successfully");
 });
 ```
 
@@ -1007,9 +1379,12 @@ Description:
 This test ensures that a tourist can retrieve all their saved cards successfully.
 
 Code:
+
 ```javascript
-test('GET /tourist/cards - should get all cards', async () => {
-  const res = await request(app).get('/tourist/cards').set('user_id', testTouristId);
+test("GET /tourist/cards - should get all cards", async () => {
+  const res = await request(app)
+    .get("/tourist/cards")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
   expect(Array.isArray(res.body.cards)).toBeTruthy();
 });
@@ -1021,20 +1396,21 @@ Description:
 This test verifies that a tourist can add a new shipping address successfully.
 
 Code:
+
 ```javascript
-test('PUT /tourist/add-shippingAdd - should add a new shipping address', async () => {
+test("PUT /tourist/add-shippingAdd - should add a new shipping address", async () => {
   const res = await request(app)
-    .put('/tourist/add-shippingAdd')
-    .set('user_id', testTouristId)
+    .put("/tourist/add-shippingAdd")
+    .set("user_id", testTouristId)
     .send({
-      streetName: 'Test Street',
-      streetNumber: '123',
-      city: 'Test City',
-      state: 'Test State',
-      country: 'Test Country'
+      streetName: "Test Street",
+      streetNumber: "123",
+      city: "Test City",
+      state: "Test State",
+      country: "Test Country",
     });
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Address added successfully');
+  expect(res.body.message).toBe("Address added successfully");
 });
 ```
 
@@ -1044,9 +1420,12 @@ Description:
 This test ensures that a tourist can retrieve all their saved shipping addresses successfully.
 
 Code:
+
 ```javascript
-test('GET /tourist/shippingAdds - should get all shipping addresses', async () => {
-  const res = await request(app).get('/tourist/shippingAdds').set('user_id', testTouristId);
+test("GET /tourist/shippingAdds - should get all shipping addresses", async () => {
+  const res = await request(app)
+    .get("/tourist/shippingAdds")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
   expect(Array.isArray(res.body.shippingAddresses)).toBeTruthy();
 });
@@ -1058,13 +1437,16 @@ Description:
 This test verifies that a tourist can redeem their loyalty points successfully.
 
 Code:
+
 ```javascript
-test('POST /tourist/redeem-points - should redeem loyalty points', async () => {
+test("POST /tourist/redeem-points - should redeem loyalty points", async () => {
   await Tourist.findByIdAndUpdate(testTouristId, { loyaltyPoints: 10000 });
 
-  const res = await request(app).post('/tourist/redeem-points').set('user_id', testTouristId);
+  const res = await request(app)
+    .post("/tourist/redeem-points")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toContain('Successfully redeemed');
+  expect(res.body.message).toContain("Successfully redeemed");
 });
 ```
 
@@ -1074,14 +1456,15 @@ Description:
 This test ensures that a tourist can change their password successfully.
 
 Code:
+
 ```javascript
-test('POST /tourist/password - should change password', async () => {
+test("POST /tourist/password - should change password", async () => {
   const res = await request(app)
-    .post('/tourist/password')
-    .set('user_id', testTouristId)
-    .send({ oldPassword: 'Password123!', newPassword: 'NewPassword123!' });
+    .post("/tourist/password")
+    .set("user_id", testTouristId)
+    .send({ oldPassword: "Password123!", newPassword: "NewPassword123!" });
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Password updated successfully');
+  expect(res.body.message).toBe("Password updated successfully");
 });
 ```
 
@@ -1091,14 +1474,15 @@ Description:
 This test verifies that a tourist can submit a new complaint successfully.
 
 Code:
+
 ```javascript
-test('POST /tourist/complaint - should add a new complaint', async () => {
+test("POST /tourist/complaint - should add a new complaint", async () => {
   const res = await request(app)
-    .post('/tourist/complaint')
-    .set('user_id', testTouristId)
-    .send({ title: 'Test Complaint', description: 'This is a test complaint' });
+    .post("/tourist/complaint")
+    .set("user_id", testTouristId)
+    .send({ title: "Test Complaint", description: "This is a test complaint" });
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Complaint added successfully');
+  expect(res.body.message).toBe("Complaint added successfully");
 });
 ```
 
@@ -1108,9 +1492,12 @@ Description:
 This test ensures that a tourist can retrieve all their submitted complaints successfully.
 
 Code:
+
 ```javascript
-test('GET /tourist/complaints - should get all complaints', async () => {
-  const res = await request(app).get('/tourist/complaints').set('user_id', testTouristId);
+test("GET /tourist/complaints - should get all complaints", async () => {
+  const res = await request(app)
+    .get("/tourist/complaints")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
   expect(Array.isArray(res.body)).toBeTruthy();
 });
@@ -1122,14 +1509,16 @@ Description:
 This test verifies that a tourist can delete their account successfully.
 
 Code:
+
 ```javascript
-test('DELETE /tourist/delete-account - should delete tourist account', async () => {
-  const res = await request(app).delete('/tourist/delete-account').set('user_id', testTouristId);
+test("DELETE /tourist/delete-account - should delete tourist account", async () => {
+  const res = await request(app)
+    .delete("/tourist/delete-account")
+    .set("user_id", testTouristId);
   expect(res.statusCode).toBe(200);
-  expect(res.body.message).toBe('Account deleted successfully');
+  expect(res.body.message).toBe("Account deleted successfully");
 });
 ```
-
 
 ## How to Use
 
@@ -1140,7 +1529,7 @@ test('DELETE /tourist/delete-account - should delete tourist account', async () 
    - Tour Guides can create itineraries
    - Sellers can list products
    - Tourism Governors can manage historical places
-   - Advertisers can create activities 
+   - Advertisers can create activities
 
 ## Contribute
 
@@ -1220,12 +1609,11 @@ test('DELETE /tourist/delete-account - should delete tourist account', async () 
 </tr>
 </table>
 
-
 ## Credits
 
 - Design inspiration from modern travel platforms
 - Icons from Lucide React
-- UI Components from shadcn/ui:   https://ui.shadcn.com/
+- UI Components from shadcn/ui: https://ui.shadcn.com/
 - Maps integration powered by Google Maps
 - Payment powered by Stripe
 - Hotels search and booking powered by Booking
@@ -1248,5 +1636,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-
