@@ -335,10 +335,176 @@ https://docs.stripe.com/api
 https://developers.booking.com/metasearch/connect-api
 
 Local APIs 
-You can view all our APIs from the [routes](./backend/routes) folder in the backend.
 
+## Common Routes for All Roles
 
+Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, admin
 
+1. Get Supported Currencies
+   - Endpoint: GET /{role}/currencies
+   - Description: Returns a list of supported currencies.
+
+2. Get Currency by ID
+   - Endpoint: GET /{role}/getCurrency/:id
+   - Description: Returns currency details by ID.
+
+3. Get Profile
+   - Endpoint: GET /{role}/
+   - Description: Returns the profile of the logged-in {role}.
+
+4. Update Profile (Where applicable)
+   - Endpoint: PUT /{role}/
+   - Description: Updates the profile of the logged-in {role}.
+
+5. Get All Activities/Products/Historical Places
+   - Endpoint: GET /{role}/activities (or equivalent resource name for each role)
+   - Description: Returns a list of all activities/products/historical places for the logged-in {role}.
+
+6. Get Activity/Product/Place by ID
+   - Endpoint: GET /{role}/activities/:id (or equivalent resource name for each role)
+   - Description: Returns details of a specific activity/product/place by ID.
+
+7. Get Notifications
+   - Endpoint: GET /{role}/notifications
+   - Description: Returns a list of notifications for the {role}.
+
+8. Get Unseen Notifications
+   - Endpoint: GET /{role}/unseen-notifications
+   - Description: Returns a list of unseen notifications for the {role}.
+
+9. Mark Notification as Seen
+   - Endpoint: PUT /{role}/notifications/markAsSeen/:id
+   - Description: Marks a specific notification as seen for the {role}.
+
+10. Mark Dropdown as Opened
+    - Endpoint: PUT /{role}/mark-dropdown-opened
+    - Description: Marks the notification dropdown as opened for the {role}.
+
+## Role-Specific Routes
+
+### Tourist Routes
+
+11. Cancel Flight Booking
+    - Endpoint: POST /tourist/cancel-flight/:id
+    - Description: Cancels a flight booking and returns the refunded amount and new wallet balance.
+
+### Advertiser Routes
+
+12. Create Activity
+    - Endpoint: POST /advertiser/activities
+    - Description: Creates a new activity.
+
+### Tour Guide Routes
+
+13. Create Itinerary
+    - Endpoint: POST /tour-guide/itineraries
+    - Description: Creates a new itinerary. Supports file uploads.
+
+14. Update Itinerary
+    - Endpoint: PUT /tour-guide/itineraries/:id
+    - Description: Updates an existing itinerary by ID. Supports file uploads.
+
+15. Delete Itinerary
+    - Endpoint: DELETE /tour-guide/itineraries/:id
+    - Description: Deletes an itinerary by ID.
+
+16. Toggle Itinerary Activation Status
+    - Endpoint: PUT /tour-guide/itineraries-activation/:id
+    - Description: Toggles the activation status of an itinerary.
+
+17. Get Itineraries Report
+    - Endpoint: GET /tour-guide/itineraries-report
+    - Description: Retrieves a report of itineraries and their bookings.
+
+### Seller Routes
+
+18. Get All Products
+    - Endpoint: GET /seller/products
+    - Description: Returns a list of all products.
+
+19. Get Product by ID
+    - Endpoint: GET /seller/products/:id
+    - Description: Returns details of a specific product by ID.
+
+### Tourism Governor Routes
+
+20. Create Historical Place
+    - Endpoint: POST /tourism-governor/historical-places
+    - Description: Creates a new historical place.
+
+21. Get Historical Tags
+    - Endpoint: GET /tourism-governor/historical-tag
+    - Description: Returns a list of all historical tags.
+
+22. Add/Update/Delete Historical Tag
+    - Endpoints:
+      - POST: /tourism-governor/historical-tag (Add a tag)
+      - PUT: /tourism-governor/historical-tag/:id (Update a tag by ID)
+      - DELETE: /tourism-governor/historical-tag/:id (Delete a tag by ID)
+
+## Auth Routes
+
+23. Tourist Signup
+    - Endpoint: POST /auth/sign-up/tourist
+    - Description: Registers a new tourist.
+
+24. Advertiser Signup
+    - Endpoint: POST /auth/sign-up/advertiser
+    - Description: Registers a new advertiser.
+
+25. Tour Guide Signup
+    - Endpoint: POST /auth/sign-up/tour-guide
+    - Description: Registers a new tour guide.
+
+26. Seller Signup
+    - Endpoint: POST /auth/sign-up/seller
+    - Description: Registers a new seller.
+
+27. Check Unique
+    - Endpoint: POST /auth/check-unique
+    - Description: Checks if a username or email is unique.
+
+28. Login/Logout
+    - Endpoints:
+      - POST: /auth/login (Login the user)
+      - POST: /auth/logout (Logout the user)
+
+29. Forgot/Reset Password
+    - Endpoints:
+      - POST: /auth/forgot-password (Sends a password reset link to the user's email)
+      - POST: /auth/reset-password (Resets the user's password)
+
+30. Verify OTP
+    - Endpoint: POST /auth/verify-otp
+    - Description: Verifies the OTP sent to the user's email.
+
+## API Routes
+
+31. Get All Nationalities/Tags/Categories/Historical Types/Languages
+    - Endpoints:
+      - GET: /api/nationalities (All nationalities)
+      - GET: /api/getAllTags (All tags)
+      - GET: /api/getAllCategories (All categories)
+      - GET: /api/getAllHistoricalTypes (All historical types)
+      - GET: /api/getAllLanguages (All languages)
+
+## Admin Routes
+
+32. Promo Code Management
+    - Endpoints:
+      - POST: /admin/promo-code (Add promo code)
+      - GET: /admin/promo-code (Get all promo codes)
+      - GET: /admin/promo-code/:id (Get promo code by ID)
+      - PUT: /admin/promo-code/:id (Update promo code by ID)
+      - DELETE: /admin/promo-code/:id (Delete promo code by ID)
+
+33. Get Max Price Activities
+    - Endpoint: GET /admin/maxPriceActivities
+    - Description: Returns the maximum price of activities.
+
+34. Admin Info
+    - Endpoint: GET /admin/admin-info
+    - Description: Returns the profile of the logged-in admin.
 ## Tests
 
 Run the test suite:
@@ -358,15 +524,342 @@ test('GET /itinerary', async () => {
 });
 ```
 
+here are our test cases: 
+
+
+Test 1: Get Tourist Profile
+
+Description:
+This test verifies that a tourist can successfully retrieve their profile information.
+
+Code:
+```javascript
+test('GET /tourist - should get tourist profile', async () => {
+  const res = await request(app).get('/tourist').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.username).toBe('testuser');
+});
+```
+
+Test 2: Update Tourist Profile
+
+Description:
+This test ensures that a tourist can update their profile information successfully.
+
+Code:
+```javascript
+test('PUT /tourist - should update tourist profile', async () => {
+  const res = await request(app)
+    .put('/tourist')
+    .set('user_id', testTouristId)
+    .send({ 
+      username: 'updateduser', 
+      email: 'updated@example.com',
+      jobOrStudent: 'Professional',
+      nationality: testNationalityId,
+      mobile: '+9876543210987'
+    });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.username).toBe('updateduser');
+});
+```
+
+Test 3: Update Tourist Preferences
+
+Description:
+This test verifies that a tourist can update their preferences successfully.
+
+Code:
+```javascript
+test('PUT /tourist/preferences - should update tourist preferences', async () => {
+  const res = await request(app)
+    .put('/tourist/preferences')
+    .set('user_id', testTouristId)
+    .send({ budget: 1000, categories: ['adventure', 'culture'] });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.preference.budget).toBe(1000);
+});
+```
+
+Test 4: Get Tourist Cart
+
+Description:
+This test ensures that a tourist can retrieve their cart contents successfully.
+
+Code:
+```javascript
+test('GET /tourist/cart - should get tourist cart', async () => {
+  const res = await request(app).get('/tourist/cart').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(Array.isArray(res.body)).toBeTruthy();
+});
+```
+
+Test 5: Empty Tourist Cart
+
+Description:
+This test verifies that a tourist can empty their cart successfully.
+
+Code:
+```javascript
+test('DELETE /tourist/empty/cart - should empty tourist cart', async () => {
+  const res = await request(app).delete('/tourist/empty/cart').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Cart emptied');
+});
+```
+
+Test 6: Get Tourist Wishlist
+
+Description:
+This test ensures that a tourist can retrieve their wishlist successfully.
+
+Code:
+```javascript
+test('GET /tourist/wishlist - should get tourist wishlist', async () => {
+  const res = await request(app).get('/tourist/wishlist').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(Array.isArray(res.body)).toBeTruthy();
+});
+```
+
+Test 7: Remove Product from Wishlist
+
+Description:
+This test verifies that a tourist can remove a product from their wishlist successfully.
+
+Code:
+```javascript
+test('DELETE /tourist/remove/wishlist/:id - should remove product from wishlist', async () => {
+  const product = new Product({ name: 'Test Product', price: 100 });
+  await product.save();
+  await Tourist.findByIdAndUpdate(testTouristId, { $push: { wishlist: { product: product._id } } });
+
+  const res = await request(app).delete(`/tourist/remove/wishlist/${product._id}`).set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Product removed from wishlist');
+});
+```
+
+Test 8: Move Product from Wishlist to Cart
+
+Description:
+This test ensures that a tourist can move a product from their wishlist to their cart successfully.
+
+Code:
+```javascript
+test('PUT /tourist/move/wishlist/:id - should move product from wishlist to cart', async () => {
+  const product = new Product({ name: 'Test Product', price: 100 });
+  await product.save();
+  await Tourist.findByIdAndUpdate(testTouristId, { $push: { wishlist: { product: product._id } } });
+
+  const res = await request(app).put(`/tourist/move/wishlist/${product._id}`).set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Product moved to cart');
+});
+```
+
+Test 9: Get Currency Code
+
+Description:
+This test verifies that a tourist can retrieve their preferred currency code successfully.
+
+Code:
+```javascript
+test('GET /tourist/currencies/code - should get currency code', async () => {
+  const currency = new Currency({ code: 'USD', name: 'US Dollar' });
+  await currency.save();
+  await Tourist.findByIdAndUpdate(testTouristId, { preferredCurrency: currency._id });
+
+  const res = await request(app).get('/tourist/currencies/code').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toBe('USD');
+});
+```
+
+Test 10: Set Currency Code
+
+Description:
+This test ensures that a tourist can set their preferred currency successfully.
+
+Code:
+```javascript
+test('POST /tourist/currencies/set - should set currency code', async () => {
+  const currency = new Currency({ code: 'EUR', name: 'Euro' });
+  await currency.save();
+
+  const res = await request(app)
+    .post('/tourist/currencies/set')
+    .set('user_id', testTouristId)
+    .send({ currencyId: currency._id });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.currencyCode).toBe('EUR');
+});
+```
+
+Test 11: Add New Card
+
+Description:
+This test verifies that a tourist can add a new payment card successfully.
+
+Code:
+```javascript
+test('PUT /tourist/add-card - should add a new card', async () => {
+  const res = await request(app)
+    .put('/tourist/add-card')
+    .set('user_id', testTouristId)
+    .send({
+      cardType: 'Credit Card',
+      cardNumber: '1234567890123456',
+      expiryDate: '12/25',
+      holderName: 'Test User',
+      cvv: '123'
+    });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Card added successfully');
+});
+```
+
+Test 12: Get All Cards
+
+Description:
+This test ensures that a tourist can retrieve all their saved cards successfully.
+
+Code:
+```javascript
+test('GET /tourist/cards - should get all cards', async () => {
+  const res = await request(app).get('/tourist/cards').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(Array.isArray(res.body.cards)).toBeTruthy();
+});
+```
+
+Test 13: Add New Shipping Address
+
+Description:
+This test verifies that a tourist can add a new shipping address successfully.
+
+Code:
+```javascript
+test('PUT /tourist/add-shippingAdd - should add a new shipping address', async () => {
+  const res = await request(app)
+    .put('/tourist/add-shippingAdd')
+    .set('user_id', testTouristId)
+    .send({
+      streetName: 'Test Street',
+      streetNumber: '123',
+      city: 'Test City',
+      state: 'Test State',
+      country: 'Test Country'
+    });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Address added successfully');
+});
+```
+
+Test 14: Get All Shipping Addresses
+
+Description:
+This test ensures that a tourist can retrieve all their saved shipping addresses successfully.
+
+Code:
+```javascript
+test('GET /tourist/shippingAdds - should get all shipping addresses', async () => {
+  const res = await request(app).get('/tourist/shippingAdds').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(Array.isArray(res.body.shippingAddresses)).toBeTruthy();
+});
+```
+
+Test 15: Redeem Loyalty Points
+
+Description:
+This test verifies that a tourist can redeem their loyalty points successfully.
+
+Code:
+```javascript
+test('POST /tourist/redeem-points - should redeem loyalty points', async () => {
+  await Tourist.findByIdAndUpdate(testTouristId, { loyaltyPoints: 10000 });
+
+  const res = await request(app).post('/tourist/redeem-points').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toContain('Successfully redeemed');
+});
+```
+
+Test 16: Change Password
+
+Description:
+This test ensures that a tourist can change their password successfully.
+
+Code:
+```javascript
+test('POST /tourist/password - should change password', async () => {
+  const res = await request(app)
+    .post('/tourist/password')
+    .set('user_id', testTouristId)
+    .send({ oldPassword: 'Password123!', newPassword: 'NewPassword123!' });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Password updated successfully');
+});
+```
+
+Test 17: Add New Complaint
+
+Description:
+This test verifies that a tourist can submit a new complaint successfully.
+
+Code:
+```javascript
+test('POST /tourist/complaint - should add a new complaint', async () => {
+  const res = await request(app)
+    .post('/tourist/complaint')
+    .set('user_id', testTouristId)
+    .send({ title: 'Test Complaint', description: 'This is a test complaint' });
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Complaint added successfully');
+});
+```
+
+Test 18: Get All Complaints
+
+Description:
+This test ensures that a tourist can retrieve all their submitted complaints successfully.
+
+Code:
+```javascript
+test('GET /tourist/complaints - should get all complaints', async () => {
+  const res = await request(app).get('/tourist/complaints').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(Array.isArray(res.body)).toBeTruthy();
+});
+```
+
+Test 19: Delete Tourist Account
+
+Description:
+This test verifies that a tourist can delete their account successfully.
+
+Code:
+```javascript
+test('DELETE /tourist/delete-account - should delete tourist account', async () => {
+  const res = await request(app).delete('/tourist/delete-account').set('user_id', testTouristId);
+  expect(res.statusCode).toBe(200);
+  expect(res.body.message).toBe('Account deleted successfully');
+});
+```
+
+
 ## How to Use
 
-1. Sign up for an account based on your role (Tourist, Tour Guide, Seller, etc.)
+1. Sign up for an account based on your role (Tourist, Tour Guide, Seller, etc.) or browse as a guest
 2. Complete your profile and verify your account
 3. Explore the platform features based on your role:
    - Tourists can browse and book activities
    - Tour Guides can create itineraries
    - Sellers can list products
    - Tourism Governors can manage historical places
+   - Advertisers can create activities 
 
 ## Contribute
 
@@ -375,6 +868,8 @@ test('GET /itinerary', async () => {
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+6. Review Process: Your pull request will be reviewed by our team. Please be open to feedback and make necessary adjustments.
+7. Merge: Once approved, your changes will be merged into the main branch.
 
 ## Contributors
 
@@ -449,7 +944,7 @@ test('GET /itinerary', async () => {
 
 - Design inspiration from modern travel platforms
 - Icons from Lucide React
-- UI Components from shadcn/ui:   https://trip-genie.atlassian.net/
+- UI Components from shadcn/ui:   https://ui.shadcn.com/
 - Maps integration powered by Google Maps
 - Payment powered by Stripe
 - Hotels search and booking powered by Booking
