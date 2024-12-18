@@ -255,4 +255,7 @@ router.post("/save-itinerary/:id", touristController.saveItinerary);
 
 router.get("/visited-pages", touristController.getVisitedPages);
 router.post("/visited-pages", touristController.updateVisitedPages);
+
+router.post("/popcurrency", currencyController.populateCurrencies);
+
 module.exports = router;
