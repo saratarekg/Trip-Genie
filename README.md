@@ -873,10 +873,39 @@ The project follows modern web development practices and conventions:
 </p>
 </details>
 
+
+<details>
+<summary>Wallet Balance Overview</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot20.png" alt="Wallet Balance Overview" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Booking Receipt for Completed Itineraries</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot21.png" alt="Booking Receipt for Completed Itineraries" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Tourist Orders Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot22.png" alt="Tourist Orders Page" width="90%" style="margin: 10px;">
+</p>
+</details>
+
 <details>
 <summary>Shopping Cart</summary>
 <p align="center">
-  <img src="frontend/public/images/screenshot19.png" alt="Shopping Cart" width="90%" style="margin: 10px;">
+  <img src="frontend/public/images/screenshot23.png" alt="Cart" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Checkout Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot24.png" alt="Checkout" width="90%" style="margin: 10px;">
 </p>
 </details>
 

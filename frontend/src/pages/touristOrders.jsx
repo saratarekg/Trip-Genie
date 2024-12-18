@@ -298,7 +298,7 @@ export default function OrdersPage() {
       </div>
       <Toaster />
 
-      <div className="container bg-white rounded-lg mx-auto px-4 py-8">
+      <div className=" bg-white rounded-lg mx-auto px-4 py-8">
         <div className="flex w-full  justify-between  items-center mb-6">
           <div className="flex-[2]">
             <Tabs defaultValue="all" onValueChange={setFilter}>

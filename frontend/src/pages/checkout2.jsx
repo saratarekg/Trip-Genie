@@ -822,7 +822,7 @@ export default function CheckoutPage() {
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
       </div>
-      <div className="max-w-7xl mx-auto py-8">
+      <div className=" mx-auto py-8 px-5">
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] max-h-[500px] overflow-y-auto">
 
