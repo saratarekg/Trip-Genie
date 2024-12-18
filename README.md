@@ -66,15 +66,15 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 - Adding to cart after checkout should remove it from the wishlist  </br>
 - In the checkout the wallet sometimes glitches and doesn't update the wallet to the user properly and may even show negative balance (FE only) </br>
 - Find a different approach for sorting by preferences as it increases the loading per page as it is not done efficiently </br>
-- Advertiser cannot delete/update their activity from outside (all activities).
-- The admin should be able to delete any itinerary even if they were not theirs. 
-- Booking confirmation pop-ups are not consistent.
+- Advertiser cannot delete/update their activity from outside (all activities). </br>
+- The admin should be able to delete any itinerary even if they were not theirs. </br>
+- Booking confirmation pop-ups are not consistent. </br>
 - No popup for flagging inappropriate itineraries.
-- All toast messages should be top right instead of having some being bottom right
-- Adding an image to a product when updating sometimes causes the product to lag and not update
-- Flights, hotels, and transport should be in one component on the homepage.
-- Graph in admin dashboard takes a long time to load.
-- The color of the 'flag inappropriate' in admin activities is different from itineraries.
+- All toast messages should be top right instead of having some being bottom right. </br>
+- Adding an image to a product when updating sometimes causes the product to lag and not update. </br>
+- Flights, hotels, and transport should be in one component on the homepage. </br>
+- Graph in admin dashboard takes a long time to load. </br>
+- The color of the 'flag inappropriate' in admin activities is different from itineraries. </br>
 
 </details>
 
@@ -319,6 +319,26 @@ The project follows modern web development practices and conventions:
 - stripe for payment handling
 
 ## Features
+
+### For Guests / Tourists
+- **View Activities**: Browse all activities along with their prices, ratings, current offers, and discounts.
+- **Advertiser Details**: See information about the activity advertiser, including their reviews and ratings.
+- **Filter Activities**: Narrow down activities by price, date range, ratings, categories, or by searching within activities.
+- **Sort Activities**: Organize activities by ratings, price, or personal preferences (especially useful for tourists).
+
+- **View Itineraries**: Explore all itineraries, including available dates, ratings, and reviews.
+- **Tour Guide Info**: Access details about the tour guide, such as their ratings and reviews.
+- **Filter Itineraries**: Refine itineraries based on price, date range, type, language, or by searching within itineraries.
+- **Sort Itineraries**: Arrange itineraries by ratings, price, or personal preferences (especially useful for tourists).
+
+- **View Historical Places**: Discover historical places and their entry prices.
+- **Filter Historical Places**: Filter historical places by type or by searching within them.
+
+- **Browse Gift Shop**: Explore the gift shop with a range of travel-related products, filtering by price or rating.
+- **Sort Products**: Sort products by rating, price, or search for specific items.
+
+- **View Legal Information**: Access the FAQ, Terms and Conditions, and Privacy Policy.
+- **Contact Us**: Reach out using the information provided in the contact section.
 
 ### For Tourists
 - Book flights, hotels, and transportation
@@ -1133,6 +1153,8 @@ test('DELETE /tourist/delete-account - should delete tourist account', async () 
 
 ## How to Use
 
+### General summary of how to use the website
+
 1. Sign up for an account based on your role (Tourist, Tour Guide, Seller, etc.) or browse as a guest
 2. Complete your profile and verify your account
 3. Explore the platform features based on your role:
@@ -1140,7 +1162,27 @@ test('DELETE /tourist/delete-account - should delete tourist account', async () 
    - Tour Guides can create itineraries
    - Sellers can list products
    - Tourism Governors can manage historical places
-   - Advertisers can create activities 
+   - Advertisers can create activities
+
+### Detailed steps for each role 
+
+#### For Tourists
+
+
+#### For Tour Guides
+
+
+#### For Sellers
+
+
+#### For Advertisers
+
+
+#### For Tourism Governors
+
+
+#### For Admins
+
 
 ## Contribute
 
