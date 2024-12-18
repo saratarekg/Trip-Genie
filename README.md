@@ -466,55 +466,257 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
     - Endpoint: POST /tourist/cancel-flight/:id
     - Description: Cancels a flight booking and returns the refunded amount and new wallet balance.
 
+12. Get All Products
+    - Endpoint: GET /tourist/products
+    - Description: Returns a list of all products.
+
+13. Get Product by ID
+    - Endpoint: GET /tourist/products/:id
+    - Description: Returns details of a specific product by ID.
+
+14. Add Product to Cart
+    - Endpoint: POST /tourist/product/addToCart
+    - Description: Adds a product to the cart.
+
+15. Add Product to Wishlist
+    - Endpoint: POST /tourist/product/addToWishlist/:id
+    - Description: Adds a product to the wishlist.
+
+16. Rate Product
+    - Endpoint: POST /tourist/product/rate/:id
+    - Description: Rates a product.
+
+17. Comment on Product
+    - Endpoint: POST /tourist/product/comment/:id
+    - Description: Adds a comment to a product.
+
+18. Update Comment on Product
+    - Endpoint: PUT /tourist/product/updateComment/:id
+    - Description: Updates a comment on a product.
+
+19. Get All Activities
+    - Endpoint: GET /tourist/activities
+    - Description: Returns a list of all activities.
+
+20. Get Activity by ID
+    - Endpoint: GET /tourist/activities/:id
+    - Description: Returns details of a specific activity by ID.
+
+21. Rate Activity
+    - Endpoint: POST /tourist/activities/rate/:id
+    - Description: Rates an activity.
+
+22. Comment on Activity
+    - Endpoint: POST /tourist/activities/comment/:id
+    - Description: Adds a comment to an activity.
+
+23. Update Comment on Activity
+    - Endpoint: PUT /tourist/activities/updateComment/:id
+    - Description: Updates a comment on an activity.
+
+24. Get All Itineraries
+    - Endpoint: GET /tourist/itineraries
+    - Description: Returns a list of all itineraries.
+
+25. Get Itinerary by ID
+    - Endpoint: GET /tourist/itineraries/:id
+    - Description: Returns details of a specific itinerary by ID.
+
+26. Rate Itinerary
+    - Endpoint: POST /tourist/itinerary/rate/:id
+    - Description: Rates an itinerary.
+
+27. Comment on Itinerary
+    - Endpoint: POST /tourist/itinerary/comment/:id
+    - Description: Adds a comment to an itinerary.
+
+28. Update Comment on Itinerary
+    - Endpoint: PUT /tourist/itinerary/updateComment/:id
+    - Description: Updates a comment on an itinerary.
+
+29. Get All Historical Places
+    - Endpoint: GET /tourist/historical-places
+    - Description: Returns a list of all historical places.
+
+30. Get Historical Place by ID
+    - Endpoint: GET /tourist/historical-places/:id
+    - Description: Returns details of a specific historical place by ID.
+
+31. Book Transportation
+    - Endpoint: POST /tourist/book-transportation
+    - Description: Books transportation.
+
+32. Get Upcoming Transportation Bookings
+    - Endpoint: GET /tourist/upcoming-transportation
+    - Description: Returns a list of upcoming transportation bookings.
+
+33. Get Previous Transportation Bookings
+    - Endpoint: GET /tourist/history-transportation
+    - Description: Returns a list of previous transportation bookings.
+
+34. Delete Transportation Booking
+    - Endpoint: DELETE /tourist/transportation-booking/:id
+    - Description: Deletes a transportation booking.
+
+35. Book Flight
+    - Endpoint: POST /tourist/book-flight
+    - Description: Books a flight.
+
+36. Cancel Flight Booking
+    - Endpoint: POST /tourist/cancel-flight/:id
+    - Description: Cancels a flight booking.
+
+37. Get My Flights
+    - Endpoint: GET /tourist/my-flights
+    - Description: Returns a list of the tourist's flights.
+
+38. Book Hotel
+    - Endpoint: POST /tourist/book-hotel
+    - Description: Books a hotel.
+
+39. Cancel Hotel Booking
+    - Endpoint: POST /tourist/cancel-hotel/:id
+    - Description: Cancels a hotel booking.
+
+40. Get My Hotels
+    - Endpoint: GET /tourist/my-hotels
+    - Description: Returns a list of the tourist's hotels.
+
+41. Apply Promo Code
+    - Endpoint: POST /tourist/promo-code
+    - Description: Applies a promo code.
+
+42. Get Promo Code
+    - Endpoint: POST /tourist/get/promo-code
+    - Description: Retrieves a promo code.
+
+43. Get Promo Codes
+    - Endpoint: GET /tourist/promo-codes
+    - Description: Returns a list of promo codes.
+
+44. Save Activity
+    - Endpoint: POST /tourist/save-activity/:id
+    - Description: Saves an activity.
+
+45. Save Itinerary
+    - Endpoint: POST /tourist/save-itinerary/:id
+    - Description: Saves an itinerary.
+
+46. Get Saved Activities
+    - Endpoint: GET /tourist/saved-activities
+    - Description: Returns a list of saved activities.
+
+47. Get Saved Itineraries
+    - Endpoint: GET /tourist/saved-itineraries
+    - Description: Returns a list of saved itineraries.
+
+48. Get Visited Pages
+    - Endpoint: GET /tourist/visited-pages
+    - Description: Returns a list of visited pages.
+
+49. Update Visited Pages
+    - Endpoint: POST /tourist/visited-pages
+    - Description: Updates the list of visited pages.
+
 ### Advertiser Routes
 
-12. Create Activity
+50. Create Activity
     - Endpoint: POST /advertiser/activities
     - Description: Creates a new activity.
 
-### Tour Guide Routes
+51. Get All Activities
+    - Endpoint: GET /advertiser/activities
+    - Description: Returns a list of all activities.
 
-13. Create Itinerary
-    - Endpoint: POST /tour-guide/itineraries
-    - Description: Creates a new itinerary. Supports file uploads.
+52. Get Activity by ID
+    - Endpoint: GET /advertiser/activities/:id
+    - Description: Returns details of a specific activity by ID.
 
-14. Update Itinerary
-    - Endpoint: PUT /tour-guide/itineraries/:id
-    - Description: Updates an existing itinerary by ID. Supports file uploads.
+53. Update Activity
+    - Endpoint: PUT /advertiser/activities/:id
+    - Description: Updates an existing activity by ID. Supports file uploads.
 
-15. Delete Itinerary
-    - Endpoint: DELETE /tour-guide/itineraries/:id
-    - Description: Deletes an itinerary by ID.
+54. Delete Activity
+    - Endpoint: DELETE /advertiser/activities/:id
+    - Description: Deletes an activity by ID.
 
-16. Toggle Itinerary Activation Status
-    - Endpoint: PUT /tour-guide/itineraries-activation/:id
-    - Description: Toggles the activation status of an itinerary.
+55. Get Max Price Activities
+    - Endpoint: GET /advertiser/maxPriceActivities
+    - Description: Returns the maximum price of activities.
 
-17. Get Itineraries Report
-    - Endpoint: GET /tour-guide/itineraries-report
-    - Description: Retrieves a report of itineraries and their bookings.
+56. Get Max Price Activities (My)
+    - Endpoint: GET /advertiser/max-price-activities-my
+    - Description: Returns the maximum price of the advertiser's activities.
+
+57. Get All Transportations
+    - Endpoint: GET /advertiser/transportations
+    - Description: Returns a list of all transportations.
+
+58. Get Transportation by ID
+    - Endpoint: GET /advertiser/transportations/:id
+    - Description: Returns details of a specific transportation by ID.
+
+59. Create Transportation
+    - Endpoint: POST /advertiser/transportations
+    - Description: Creates a new transportation.
+
+60. Update Transportation
+    - Endpoint: PUT /advertiser/transportations/:id
+    - Description: Updates an existing transportation by ID.
+
+61. Delete Transportation
+    - Endpoint: DELETE /advertiser/transportations/:id
+    - Description: Deletes a transportation by ID.
+
+62. Get Activities Report
+    - Endpoint: GET /advertiser/activities-report
+    - Description: Retrieves a report of activities and their bookings.
 
 ### Seller Routes
 
-18. Get All Products
+63. Get All Products
     - Endpoint: GET /seller/products
     - Description: Returns a list of all products.
 
-19. Get Product by ID
+64. Get Product by ID
     - Endpoint: GET /seller/products/:id
     - Description: Returns details of a specific product by ID.
 
+65. Add New Product
+    - Endpoint: POST /seller/products
+    - Description: Adds a new product. Supports file uploads.
+
+66. Edit Product
+    - Endpoint: PUT /seller/products/:id
+    - Description: Edits an existing product by ID. Supports file uploads.
+
+67. Delete Product
+    - Endpoint: DELETE /seller/products/:id
+    - Description: Deletes a product by ID.
+
+68. Archive Product
+    - Endpoint: PUT /seller/archiveproducts/:id
+    - Description: Archives a product by ID.
+
+69. Get Sales Report
+    - Endpoint: GET /seller/sales-report
+    - Description: Retrieves the sales report for the seller.
+
+70. Get Stock Report
+    - Endpoint: GET /seller/stock-report
+    - Description: Retrieves the stock report for the seller.
+
 ### Tourism Governor Routes
 
-20. Create Historical Place
+71. Create Historical Place
     - Endpoint: POST /tourism-governor/historical-places
     - Description: Creates a new historical place.
 
-21. Get Historical Tags
+72. Get Historical Tags
     - Endpoint: GET /tourism-governor/historical-tag
     - Description: Returns a list of all historical tags.
 
-22. Add/Update/Delete Historical Tag
+73. Add/Update/Delete Historical Tag
     - Endpoints:
       - POST: /tourism-governor/historical-tag (Add a tag)
       - PUT: /tourism-governor/historical-tag/:id (Update a tag by ID)
@@ -522,43 +724,43 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 
 ## Auth Routes
 
-23. Tourist Signup
+74. Tourist Signup
     - Endpoint: POST /auth/sign-up/tourist
     - Description: Registers a new tourist.
 
-24. Advertiser Signup
+75. Advertiser Signup
     - Endpoint: POST /auth/sign-up/advertiser
     - Description: Registers a new advertiser.
 
-25. Tour Guide Signup
+76. Tour Guide Signup
     - Endpoint: POST /auth/sign-up/tour-guide
     - Description: Registers a new tour guide.
 
-26. Seller Signup
+77. Seller Signup
     - Endpoint: POST /auth/sign-up/seller
     - Description: Registers a new seller.
 
-27. Check Unique
+78. Check Unique
     - Endpoint: POST /auth/check-unique
     - Description: Checks if a username or email is unique.
 
-28. Login/Logout
+79. Login/Logout
     - Endpoints:
       - POST: /auth/login (Login the user)
       - POST: /auth/logout (Logout the user)
 
-29. Forgot/Reset Password
+80. Forgot/Reset Password
     - Endpoints:
       - POST: /auth/forgot-password (Sends a password reset link to the user's email)
       - POST: /auth/reset-password (Resets the user's password)
 
-30. Verify OTP
+81. Verify OTP
     - Endpoint: POST /auth/verify-otp
     - Description: Verifies the OTP sent to the user's email.
 
 ## API Routes
 
-31. Get All Nationalities/Tags/Categories/Historical Types/Languages
+82. Get All Nationalities/Tags/Categories/Historical Types/Languages
     - Endpoints:
       - GET: /api/nationalities (All nationalities)
       - GET: /api/getAllTags (All tags)
@@ -568,7 +770,7 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
 
 ## Admin Routes
 
-32. Promo Code Management
+83. Promo Code Management
     - Endpoints:
       - POST: /admin/promo-code (Add promo code)
       - GET: /admin/promo-code (Get all promo codes)
@@ -576,13 +778,14 @@ Note: {role} can be: tourist, advertiser, tour-guide, tourism-governor, seller, 
       - PUT: /admin/promo-code/:id (Update promo code by ID)
       - DELETE: /admin/promo-code/:id (Delete promo code by ID)
 
-33. Get Max Price Activities
+84. Get Max Price Activities
     - Endpoint: GET /admin/maxPriceActivities
     - Description: Returns the maximum price of activities.
 
-34. Admin Info
+85. Admin Info
     - Endpoint: GET /admin/admin-info
     - Description: Returns the profile of the logged-in admin.
+
 ## Tests
 
 Run the test suite:
