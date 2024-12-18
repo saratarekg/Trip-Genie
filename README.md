@@ -185,6 +185,13 @@ The project follows modern web development practices and conventions:
 </details>
 
 <details>
+<summary>Home Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot18.png" alt="Home Page" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
 <summary>View your Bookings</summary>
 <p align="center">
   <img src="frontend/public/images/screenshot2.png" alt="Home Page" width="90%" style="margin: 10px;">
@@ -205,8 +212,6 @@ The project follows modern web development practices and conventions:
 </p>
 </details>
 
-
-
 <details>
 <summary>Book a Hotel</summary>
     <p align="center">
@@ -222,6 +227,76 @@ The project follows modern web development practices and conventions:
 <summary>View your Profile</summary>
 <p align="center">
   <img src="frontend/public/images/screenshot6.png" alt="Taxi Home" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Transportation Booking</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot9.png" alt="Transportation Booking" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Sign-Up Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot10.png" alt="Sign-Up" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Create Itinerary Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot11.png" alt="Create Itinerary" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Tour Guide Profile</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot12.png" alt="TourGuide Profile" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Notifications Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot13.png" alt="Notifications" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Admin Dashboard</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot14.png" alt="Admin Dashboard" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>User Statistics</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot15.png" alt="User Statistics" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Change Password Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot16.png" alt="Change Password" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Customer Support Page</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot17.png" alt="Customer Support" width="90%" style="margin: 10px;">
+</p>
+</details>
+
+<details>
+<summary>Shopping Cart</summary>
+<p align="center">
+  <img src="frontend/public/images/screenshot19.png" alt="Shopping Cart" width="90%" style="margin: 10px;">
 </p>
 </details>
 
