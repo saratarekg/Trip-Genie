@@ -959,23 +959,30 @@ The project follows modern web development practices and conventions:
 
 ### For Tour Guides
 
-- Create and manage itineraries
-- Track bookings and revenue
-- Manage profile and credentials
-- Receive ratings and reviews
+- **View All Itineraries**: View all itinerary details including price, description, duration, and rating.
+- **Filter All Itineraries**: Filter itineraries by price, duration, and rating to ease navigation.
+- **Search for a specific itinerary**: Search for an itinerary by its title, destination, or description.
+- **Sort itineraries**: Sort itineraries by price, duration, or rating to ease navigation.
+- **Manage my itineraries**: Create, update, delete, activate, and deactivate my itineraries.
+- **View bookings and revenue of itineraries**: View a detailed report including each itinerary, its bookings, and revenue after commission.
+- **Filter itineraries in reports**: Filter itineraries by title, and dates to ease navigation.
+- **Manage my profile**: View my profile, edit my profile details, delete account, and change my password.
+- **Manage my notifications**: View my notifications and mark them as read.
+- **View my reviews**: Access and review feedback provided by tourists, including ratings and detailed comments, after they have attended a trip.
+- **View Legal Information**: Access the FAQ, Terms and Conditions, and Privacy Policy.
 
 ### For Sellers
 
-- **View All products**: View all products detials including price , description , quantity and rating
-- **Filter All products**: Filter products avaialble by price and rating to ease my navigation
-- **Search for a specific product**: Search for a product by its name or description
-- **Sort products**: Sort products by rating and price to ease my navigation
-- **Manage my products**: update , delete , archive, unarchive my products
-- **View Sales and revenue of products**: view a detailed sales report including each product , its sales , revenue and revenue after commission
-- **View products stock report**: View a detailed stock report including each product , its sales , and quantity left in stock
-- **Filter products in reports**: Filter the products by product name and year to ease navigation
-- **Manage my profile**: View my profile , edit my profile details , delete account , change my password
-- **Manage my notifications** View my notifications and mark them as read
+- **View All products**: View all products detials including price , description , quantity and rating.
+- **Filter All products**: Filter products avaialble by price and rating to ease my navigation.
+- **Search for a specific product**: Search for a product by its name or description.
+- **Sort products**: Sort products by rating and price to ease my navigation.
+- **Manage my products**: update , delete , archive, unarchive my products.
+- **View Sales and revenue of products**: view a detailed sales report including each product , its sales , revenue and revenue after commission.
+- **View products stock report**: View a detailed stock report including each product , its sales , and quantity left in stock.
+- **Filter products in reports**: Filter the products by product name and year to ease navigation.
+- **Manage my profile**: View my profile , edit my profile details , delete account , change my password.
+- **Manage my notifications** View my notifications and mark them as read.
 - **View Legal Information**: Access the FAQ, Terms and Conditions, and Privacy Policy.
 - **Contact Us**: Reach out using the information provided in the contact section.
 
