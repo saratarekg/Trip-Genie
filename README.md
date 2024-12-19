@@ -1055,12 +1055,33 @@ The project follows modern web development practices and conventions:
 
 ### For Admins
 
-- Manage user accounts
-- Monitor and moderate content
-- Generate sales reports
-- Handle complaints and support tickets
-- Create and manage promo codes
-- Oversee overall platform operations
+- **View Registration Documents**: Browse documents uploaded by tour guides, advertisers, and sellers during registration.  
+- **Approve/Reject Registrations**: Accept or reject tour guides, advertisers, and sellers based on their uploaded documents.  
+
+- **Delete Accounts**: Remove accounts from the system.  
+- **Add Admin or Tourism Governor**: Create a new Admin or Tourism Governor account
+
+- **View Sales Report**: Access detailed revenue reports from events, itineraries, and gift shop sales.  
+- **Filter Sales Reports**: Narrow down reports by product, date, or month.  
+- **Manage Activity Categories**: Manage categories for activities.
+
+- **Manage Preference Tags**: Manage tags like beaches or family-friendly options.
+- **Flag Events/Itineraries**: Mark events or itineraries as inappropriate.  
+- **View User Statistics**: See total users and page visits per day.
+- **View Complaints**: Browse all complaints with their statuses (pending/resolved).  
+- **Complaint Details**: Access detailed information about selected complaints.  
+- **Manage Complaints**: Mark complaints as pending or resolved, reply to complaints, and sort/filter them by date or status.  
+
+- **View Products**: See product details, including available quantity, sales, and ratings.  
+- **Search Products**: Find products by name.  
+- **Filter and Sort Products**: Narrow down products by price or ratings.  
+- **Add New Products**: Add products with details, price, quantity, and images.  
+- **Manage Product Details**: Manage product details, price, or quantity.  
+- **Archive/Unarchive Products**: Temporarily hide or restore products.  
+
+- **Stock Notifications**: Receive system and email alerts when a product is out of stock.  
+
+- **Create Promo Codes**: Generate discount codes for use in the system.  
 
 ## Installation
 
@@ -2121,7 +2142,61 @@ Link to the exported collections with the test scripts: [Exported Collection](./
      - Filter by historical place type
      - Search by name or location
 
-#### For Admins
+#### For Admins  
+
+1. **Login:**  
+   - Access the admin portal by logging in with your credentials.  
+   - Use the navbar to access account settings, view notifications, and update your password if needed.  
+
+2. **Dashboard Overview:**  
+   - The first page displays a dashboard with an overview of total users, new registrations, total revenue, and sales.  
+
+3. **Accounts Management:**  
+   - Navigate to the "Accounts" section in the sidebar to:  
+     - **Review Registrations**: Approve or reject user registrations.  
+     - **Manage Accounts**: Delete existing accounts.  
+     - **Add Admin/Governor**: Create accounts with unique credentials.  
+
+4. **Product Management:**  
+   - Click on "Product Management" in the sidebar to:  
+     - View **My Products**, **All Products**, and **Archived Products**.  
+     - **Create Product**: Add new products with details, pricing, and images.  
+
+5. **Activity Management:**  
+   - Access "Activity Management" from the sidebar to:  
+     - View **All Activities** available on the platform.  
+     - **Manage Categories**: Create, update, or delete activity categories.  
+     - **Manage Tags**: Add or modify preference tags like family-friendly or historic areas.  
+
+6. **Itinerary Management:**  
+   - Use the "Itineraries" tab to:  
+     - View all itineraries.  
+     - Flag itineraries as appropriate or inappropriate.  
+
+7. **Historical Places:**  
+   - Access the "Historical Places" tab to view all listed historical sites.  
+
+8. **Promo Codes:**  
+   - Go to the "Promo Codes" tab to:  
+     - View **All Promo Codes**.  
+     - **Create Promo Code**: Generate new discount codes.  
+
+9. **Reports:**  
+   - Navigate to the "Reports" tab to access:  
+     - **Itineraries Report**: Performance and revenue of itineraries.  
+     - **Activities Report**: Insights on activities booked.  
+     - **My Products Sales Report**: Revenue from your products.  
+     - **My Products Stock Report**: Stock levels of your products.  
+     - **Seller's Products Report**: Performance of products from sellers.  
+     - **User Statistics**: Data on total users and new registrations.  
+
+10. **Complaints Management:**  
+    - Open the "Complaints" tab to:  
+      - View, manage, and reply to user complaints.  
+      - Mark complaints as resolved or pending.  
+
+11. **Notifications:**  
+    - Use the "Notifications" tab to view all system alerts, including stock updates and flagged events.  
 
 ## Contribute
 
