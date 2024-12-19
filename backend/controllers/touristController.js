@@ -65,26 +65,38 @@ const updateTourist = async (req, res) => {
     );
     console.log(email);
     console.log(username);
-    email = email.toLowerCase();
-    username = username.toLowerCase();
-
-    if (username !== tourist1.username && (await usernameExists(username))) {
-      return res.status(400).json({ message: "Username already exists" });
-    }
-    if (email !== tourist1.email && (await emailExists(email))) {
-      return res.status(400).json({ message: "Email already exists" });
+    if (email !== undefined) {
+      email = email.toLowerCase();
+      if (email !== tourist1.email && (await emailExists(email))) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
     }
 
-    if (profilePicture === null) {
+    if (username !== undefined) {
+      username = username.toLowerCase();
+
+      if (username !== tourist1.username && (await usernameExists(username))) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+    }
+
+    if (profilePicture === null || profilePicture === undefined) {
       picture = null;
-      if (tourist1.profilePicture !== null) {
+      if (
+        tourist1.profilePicture !== null &&
+        tourist1.profilePicture !== undefined
+      ) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
       }
     } else if (profilePicture.public_id === undefined) {
+      console.log("here");
       const result = await cloudinary.uploader.upload(profilePicture, {
         folder: "tourist-profile-pictures",
       });
-      if (tourist1.profilePicture !== null) {
+      if (
+        tourist1.profilePicture !== null ||
+        tourist1.profilePicture !== undefined
+      ) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
       }
       picture = {
@@ -201,19 +213,26 @@ const updateTouristProfile = async (req, res) => {
     console.log("hereweeeeeeeeeeeeeeeeee");
     console.log(email);
     console.log(username);
-    email = email.toLowerCase();
-    username = username.toLowerCase();
-
-    if (username !== tourist1.username && (await usernameExists(username))) {
-      return res.status(400).json({ message: "Username already exists" });
+    if (email !== undefined) {
+      email = email.toLowerCase();
+      if (email !== tourist1.email && (await emailExists(email))) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
     }
-    if (email !== tourist1.email && (await emailExists(email))) {
-      return res.status(400).json({ message: "Email already exists" });
+    if (username !== undefined) {
+      username = username.toLowerCase();
+
+      if (username !== tourist1.username && (await usernameExists(username))) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
     }
 
-    if (profilePicture === null) {
+    if (profilePicture === null || profilePicture === undefined) {
       picture = null;
-      if (tourist1.profilePicture !== null) {
+      if (
+        tourist1.profilePicture !== null &&
+        tourist1.profilePicture !== undefined
+      ) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
       }
     } else if (profilePicture.public_id === undefined) {
@@ -451,8 +470,8 @@ const bookHotel = async (req, res) => {
   let walletBalance = 0;
   let usedPromoCode = null;
   let totalCost = price;
-   // Apply promo code if provided
-   if (promoCode) {
+  // Apply promo code if provided
+  if (promoCode) {
     try {
       usedPromoCode = await PromoCode.usePromoCode(promoCode);
       const discount = (totalCost * usedPromoCode.percentOff) / 100;
@@ -472,7 +491,6 @@ const bookHotel = async (req, res) => {
 
     walletBalance = user.wallet - totalCost;
   }
-
 
   try {
     const booking = new TouristHotel({
@@ -671,7 +689,7 @@ const bookTransportation = async (req, res) => {
       seatsBooked: seatsToBook,
       totalCost,
       paymentMethod,
-      promoCode: usedPromoCode ? usedPromoCode : null
+      promoCode: usedPromoCode ? usedPromoCode : null,
     });
 
     const savedBooking = await booking.save();
