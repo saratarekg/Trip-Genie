@@ -2066,14 +2066,13 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 #### For Tourism Governors
 
 
-1. **Sign Up:**
+1. **Request Joining from An Admin:**
 
-   - Create an account as a Tourism Governor by providing your details.
-   - Ensure you upload the required documents: ID and Government Authorization Letter.
+   - Requesting to Join Trip Genie by Contacting an admin.
 
 2. **Account Approval:**
 
-   - Wait for an Admin to review your submitted documents. Once verified, your account will be approved, and you can start using the platform.
+   - Wait for an Admin to create an account for You.
 
 3. **As a Trip Genie Tourism Governor, you gain access to the following features:**
 
