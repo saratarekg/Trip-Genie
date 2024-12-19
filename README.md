@@ -947,20 +947,35 @@ The project follows modern web development practices and conventions:
 ### For Tourists
 
 - **Login**: Login using username and password.
+  
 - **Forget password**: Forget password using an OTP sent to email.
-- **Manage my profile**: View my profile, edit my profile details, delete account, change password and currency.
+  
+- **Manage profile**: View my profile, edit my profile details, delete account, change password and currency.
+  
 - **Delete account**: Request account to be deleted off the system.
+  
 - **Joyride**: View a step-by-step guide on the steps I must take in order to begin a vacation.
-- **Select preferences**: Select preferences for a vacation in terms of historic areas, beaches, family-friendly, shopping, budget, etc...
+  
+- **Select preferences**: Select preferences for a vacation.
+  
 - **Booking**: Book flights, hotels, transportation, itineraries or activities.
+  
 - **Share events**: Share an acitivity, historical places or itinerary via copy link or email.
+  
 - **Rate/comment**: Rate/comment on tourguides, itineraries and activities attended or products purchased.
+  
 - **Payment**: Pay online for an event using credit card/debit card or from wallet.
+  
 - **Save**: Bookmark events so to view them later.
+  
 - **Manage wishlist**: View, add and remove from my wishlist of products.
+  
 - **Manage cart**: Add, remove and change number of items of a product in cart.
-- **Manage my notifications**: View notifications and mark them as read.
+  
+- **Manage notifications**: View notifications and mark them as read.
+  
 - **Complaints**: File a complaint and view a list of my complaints.
+  
 - **Checkout**: Checkout order and choose delivery address and payment type and use promocode if applicable.
 
 ### For Tour Guides
