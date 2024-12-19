@@ -1035,9 +1035,23 @@ The project follows modern web development practices and conventions:
 
 ### For Tourism Governors
 
-- Manage historical places
-- Create and manage tags
-- Monitor tourism activities
+- **View All Historical Places:** Navigate to the "Historical Places" dropdown in the navbar and select "All Historical Places" to explore all the historical places available on the platform.
+
+- **Create New Historical Places:** Add new historical places by selecting "Create Historical Place" from the Historical Places dropdown in the navbar.
+
+- **Manage Historical Places:** Access "My Historical Places" from the Historical Places dropdown in the navbar where you can:
+
+  - Edit existing places
+  - Update information
+  - Delete outdated entries
+
+- **Create Historical Tags:** Create and maintain historical tags through the "Historical Tags" section in the navbar to add new tags
+
+- **Search and Filtering:** Utilize the platform's advanced search features:
+  - Filter by historical place type
+  - Search by name or location
+  - Filter by ticket price range
+
 
 ### For Admins
 
@@ -2050,6 +2064,49 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
     - **Enhanced Search and Filtering:** Utilize the platform’s Search, Filter, and Sort features to quickly find and manage the information you need.
 
 #### For Tourism Governors
+
+
+1. **Sign Up:**
+
+   - Create an account as a Tourism Governor by providing your details.
+   - Ensure you upload the required documents: ID and Government Authorization Letter.
+
+2. **Account Approval:**
+
+   - Wait for an Admin to review your submitted documents. Once verified, your account will be approved, and you can start using the platform.
+
+3. **As a Trip Genie Tourism Governor, you gain access to the following features:**
+
+   - **View All Historical Places:** Navigate to the "Historical Places" dropdown in the navbar and select "All Historical Places" to explore all the historical places available on the platform.
+
+   - **Create New Historical Places:** Add new historical places by selecting "Create Historical Place" from the Historical Places dropdown in the navbar. Include details such as:
+
+     - Name and description
+     - Location (country, city, address)
+     - Historical tags and type
+     - Opening hours
+     - Ticket prices
+     - Pictures and media
+
+   - **Manage Historical Places:** Access "My Historical Places" from the Historical Places dropdown in the navbar where you can:
+
+     - Edit existing places
+     - Update information
+     - Delete outdated entries
+
+   - **Manage Historical Tags:** Create and maintain historical tags through the "Historical Tags" section in the navbar to:
+
+     - Add new tags
+
+   - **View your Account status:** Manage your account through the my account tab in the navbar:
+
+     - Change password
+     - Access Help and Support
+     - View FAQs
+
+   - **Enhanced Search and Filtering:** Utilize the platform's advanced search features:
+     - Filter by historical place type
+     - Search by name or location
 
 #### For Admins
 
