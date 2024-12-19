@@ -2021,7 +2021,7 @@ Link to the exported collections with the test scripts: [Exported Collection](./
 
    - **View All Itineraries:** Select "Itineraries" in the navbar to explore all the Itineraries available on the platform.
 
-   - **View All Historical PLaces:** Select "Historical PLaces" in the navbar to explore all the Historical PLaces available on the platform.
+   - **View All Historical Places:** Select "Historical Places" in the navbar to explore all the Historical Places available on the platform.
 
    - **View All Products:** Select "Products" in the navbar to explore all the Products available on the platform.
 
@@ -2037,7 +2037,7 @@ Link to the exported collections with the test scripts: [Exported Collection](./
 
    - **View your Wishlist:** Quickly view and manage the items you’ve added by clicking the heart icon located in the top-right of the navbar
 
-   - **View your Account status:** To view and manage your preferences, wallet history and notifications, click on the burger button (☰) at the top right corner of the navbar. Once clicked, select the 'My Account' tab.
+   - **Manage profile settings:** To view and manage your preferences, wallet, wallet history, redeem loyalty points and notifications, click on the burger button (☰) at the top right corner of the navbar. Once clicked, select the 'My Account' tab.
    
    - **Get Assistance and Resolve Issues:** Under the 'Help and Support' tab, accessible by clicking the burger button (☰) at the top right corner of the navbar, you can view the FAQs for common queries or submit complaints for further assistance.
 
@@ -2056,6 +2056,13 @@ Link to the exported collections with the test scripts: [Exported Collection](./
    - **Add to Wishlist:** To add a product to your Wishlist, access the product details page and click the 'Add to Wishlist' button.
 
    - **Rate and Review a Product:** You can Rate and Review a purchased Product by accessing the Product deailed page then pressing the Rate and Review button.
+
+   - **Proceed to checkout:** To proceed to checkout, access your cart and click the 'Proceed to Checkout' button.
+
+   - **Access and Rate past bookings:** You can view and rate your past bookings by clicking the burger button (☰) at the top right corner, then selecting 'My Account' and then pressing 'My Bookings'.
+
+
+
 
 
 
