@@ -1964,6 +1964,11 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 
 </details>
 
+Test examples using postman: 
+![Screenshot 2024-12-19 190307](https://github.com/user-attachments/assets/ed9ff080-5e22-4d38-b3d6-26f388a9a6c0)
+![Screenshot 2024-12-19 190506](https://github.com/user-attachments/assets/5b334787-a2a1-4295-97de-92b57221d36f)
+
+
 Postman Collection link with 20 more tests: [Postman Collection Link](https://sam-and-aby.postman.co/workspace/Sam-and-Aby-Workspace~71afcd01-1885-4c49-8c9e-9f419f489cae/collection/38513772-4b45eeb0-aff2-457b-aa8e-8c278217d4bd?action=share&creator=38513772)
 
 Link to the exported collections with the test scripts: [Exported Collection](./Tests.postman_collection.json)
