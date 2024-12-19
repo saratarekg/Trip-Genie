@@ -2025,13 +2025,13 @@ Link to the exported collections with the test scripts: [Exported Collection](./
 
    - **View All Products:** Select "Products" in the navbar to explore all the Products available on the platform.
 
-   - **View Available Vehicles:** Navigate to the "Transportation" dropdown in the navbar and select "Vehicles" to explore all the Activities Vehicles that you could book.
+   - **View Available Vehicles:** Navigate to the "Transportation" dropdown in the navbar and select "Vehicles" to explore all the available Vehicles that you could book.
 
    - **View Flights:** Navigate to the "Transportation" dropdown in the navbar and select "Flights" to be able to access available flights.
 
    - **View Hotels:** Select "Hotels" in the navbar to explore all the Hotels available on the platform.
 
-   - **View your notifications:** You can view your notifications from the bell icon in the navbar which alert you about different situations like successful booking and you can mark them as read, you can navigate to all notificaions page to view all notifications.
+   - **View your notifications:** You can view your notifications from the bell icon in the navbar which alert you about different situations like successful booking and you can mark them as read, you can navigate to all notifications page to view all notifications.
 
    - **View your Cart:** Quickly view and manage the items you’ve added by clicking the cart icon located in the top-right of the navbar
 
@@ -2045,31 +2045,21 @@ Link to the exported collections with the test scripts: [Exported Collection](./
 
    - **View Details of Itinerary/Activity/Historical Place/Products:** You can easily access all details about by pressing its card from its corresponding General page.
 
-   - **Book an Itinerary/Activity:** You can book an Itinerary/Activity by accessing the Itinerary/Activity deailed page then pressing the book button.
+   - **Book an Itinerary/Activity:** You can book an Itinerary/Activity by accessing the Itinerary/Activity detailed page then pressing the book button.
 
-   - **Save/Unsave an Itinerary/Activity:** You can Save/Unsave an Itinerary/Activity by accessing the Itinerary/Activity deailed page then pressing the Save/Unsave button.
+   - **Save/Unsave an Itinerary/Activity:** You can Save/Unsave an Itinerary/Activity by accessing the Itinerary/Activity detailed page then pressing the Save/Unsave button.
 
-   - **Rate and Review an Itinerary/Activity:** You can Rate and Review an attended Itinerary/Activity by accessing the Itinerary/Activity deailed page then pressing the Rate and Review button.
+   - **Rate and Review an Itinerary/Activity:** You can Rate and Review an attended Itinerary/Activity by accessing the Itinerary/Activity detailed page then pressing the Rate and Review button.
 
    - **Add to Cart:** To add a product to your cart, access the product details page and click the 'Add to Cart' button.
 
    - **Add to Wishlist:** To add a product to your Wishlist, access the product details page and click the 'Add to Wishlist' button.
 
-   - **Rate and Review a Product:** You can Rate and Review a purchased Product by accessing the Product deailed page then pressing the Rate and Review button.
+   - **Rate and Review a Product:** You can Rate and Review a purchased Product by accessing the Product detailed page then pressing the Rate and Review button.
 
    - **Proceed to checkout:** To proceed to checkout, access your cart and click the 'Proceed to Checkout' button.
 
    - **Access and Rate past bookings:** You can view and rate your past bookings by clicking the burger button (☰) at the top right corner, then selecting 'My Account' and then pressing 'My Bookings'.
-
-
-
-
-
-
-
-
-
-
 
    - **Enhanced Search and Filtering:** Utilize the platform’s Search, Filter, and Sort features to quickly find and manage the information you need.
 
