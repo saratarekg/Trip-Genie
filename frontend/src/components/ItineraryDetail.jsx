@@ -1727,13 +1727,13 @@ const ItineraryDetail = () => {
     {
       target: "body",
       content:
-        "Now you can explore the details of this Itinerary, including its available dates, cost, and pictures. Press next for more information or to make a booking!",
+        "Now you can explore the details of this itinerary, including its available dates, cost, and pictures. Press next for more information or to make a booking!",
       placement: "center",
     },
     {
       target: ".ItineraryDetail",
       content:
-        "This section provides a detailed overview of the itinerary, including its name, Price, and language.",
+        "This section provides a detailed overview of the itinerary, including its name, price, and language.",
       placement: "left",
     },
     // Conditionally add the Save step based on user role

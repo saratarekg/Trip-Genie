@@ -448,7 +448,7 @@ export default function AllHistoricalPlacesComponent() {
     {
       target: "body",
       content:
-        "Welcome to the Historical Places page! Here you can find a list of all the historical places available.",
+        "Welcome to the 'Historical Places' page! Here you can find a list of all the historical places available.",
       placement: "center",
     },
     {

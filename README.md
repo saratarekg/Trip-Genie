@@ -56,7 +56,6 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 - My bookings should be easier to access or have a link directly from the confirmation pop up </br>
 - Drop-downs and the cart should close when clicking outside  </br>
 - Any white space, we can add quick access to items in settings  </br>
-- Adjust the capitalization in the genie helper messages</br>
 - Too many popups, unnecessary if something already indicates change   </br>
 - Adding to cart after checkout should remove it from the wishlist  </br>
 - In the checkout the wallet sometimes glitches and doesn't update the wallet to the user properly and may even show negative balance (FE only) </br>
@@ -70,6 +69,7 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 - Flights, hotels, and transport should be in one component on the homepage. </br>
 - Graph in admin dashboard takes a long time to load. </br>
 - The color of the 'flag inappropriate' in admin activities is different from itineraries. </br>
+- You can still see the booking screen for  an Itinerary even if the booking is closed if you select the date from the calendar </br>
 
 </details>
 
@@ -2043,7 +2043,7 @@ Link to the exported collections with the test scripts: [Exported Collection](./
 
    - **Manage your orders:** You can access your orders (pending, delivered, cancelled) by clicking the burger button (☰) at the top right corner of the navbar, then selecting 'Orders' from the menu.
 
-   - **View Details of Itinerary/Activity/Historical Place/Products:** You can easily access all details about by pressing its card from its corresponding General page.
+   - **View Details of Itinerary/Activity/Historical Place/Products:** You can easily access all details about a certain itinerary/activity/historical place by pressing its card from its corresponding general page.
 
    - **Book an Itinerary/Activity:** You can book an Itinerary/Activity by accessing the Itinerary/Activity detailed page then pressing the book button.
 
@@ -2343,6 +2343,9 @@ Link to the exported collections with the test scripts: [Exported Collection](./
 - MERN stack crash course: https://www.youtube.com/playlist?list=PL4cUxeGkcC9iJ_KkrkBZWZRHVwnzLIoUE
 
 ## License
+
+[TRIP_GENIE_LICENSE](./LICENSE)
+
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
