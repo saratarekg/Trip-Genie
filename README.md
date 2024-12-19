@@ -1921,7 +1921,6 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 
 #### For Tour Guides
 
-
 1. **Sign Up:**
 
    - Create an account as a Tour Guide by providing your details.
