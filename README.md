@@ -951,6 +951,10 @@ The project follows modern web development practices and conventions:
 - **Forget password**: Forget password using an OTP sent to email.
   
 - **Manage profile**: View my profile, edit my profile details, delete account, change password and currency.
+
+- **Manage wallet**: View my wallet, previous wallet transactions and redeem loyalty points for wallet money.
+
+- **Loyalty points**: Receive loyalty points upon payment for any event/itinerary.
   
 - **Delete account**: Request account to be deleted off the system.
   
@@ -959,6 +963,8 @@ The project follows modern web development practices and conventions:
 - **Select preferences**: Select preferences for a vacation.
   
 - **Booking**: Book flights, hotels, transportation, itineraries or activities.
+
+- **Cancel booking**: Cancel booking and view refunded money in wallet.
   
 - **Share events**: Share an acitivity, historical places or itinerary via copy link or email.
   
@@ -977,6 +983,11 @@ The project follows modern web development practices and conventions:
 - **Complaints**: File a complaint and view a list of my complaints.
   
 - **Checkout**: Checkout order and choose delivery address and payment type and use promocode if applicable.
+
+- **View orders**: View a list of orders and each order details and status.
+  
+- **Cancel order**: Cancel order and view refunded money in wallet.
+
 
 ### For Tour Guides
 
