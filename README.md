@@ -760,11 +760,7 @@ The project follows modern web development practices and conventions:
 <p align="center">
   <img src="frontend/public/images/screenshot1.png" alt="Tourist Sign Up" width="90%" style="margin: 10px;">
 </p>
-</details>
-
-<details>
-<summary>Home Page</summary>
-<p align="center">
+  <p align="center">
   <img src="frontend/public/images/screenshot18.png" alt="Home Page" width="90%" style="margin: 10px;">
 </p>
 </details>
