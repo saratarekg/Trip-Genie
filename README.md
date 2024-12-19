@@ -75,7 +75,7 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 
 ## Code Examples
 
-### Frontend Example (React)
+### Displaying Itineraries Frontend Example (React)
 
 ```jsx
 import React, { useState, useEffect } from "react";
@@ -112,7 +112,7 @@ function ItineraryList() {
 export default ItineraryList;
 ```
 
-### Backend Example (Express.js)
+### Displaying Itineraries Backend Example (Express.js)
 
 ```javascript
 const express = require("express");
@@ -128,7 +128,7 @@ router.delete("/itineraries/:id", itineraryController.deleteItinerary);
 module.exports = router;
 ```
 
-### Frontend Example (React)
+### Login Frontend Example (React)
 
 ```jsx
 import React, { useState, useEffect } from "react";
@@ -311,7 +311,7 @@ const Login = () => {
 export default ItineraryList;
 ```
 
-### Backend Example (Express.js)
+### Login Backend Example (Express.js)
 
 ```javascript
 const express = require("express");
@@ -390,7 +390,7 @@ const login = async (req, res) => {
 module.exports = router;
 ```
 
-### Frontend Example (React)
+### Creating a Product Frontend Example (React)
 
 ```jsx
 import React, { useState, useEffect } from "react";
@@ -670,7 +670,7 @@ const CreateProductForm = () => {
 export default CreateProductForm;
 ```
 
-### Backend Example (Express.js)
+### Creating a Product Backend Example (Express.js)
 
 ```javascript
 const addProduct = async (req, res) => {
@@ -1588,7 +1588,10 @@ test("GET /itinerary", async () => {
 });
 ```
 
-here are our test cases:
+
+<details><summary>
+  Here are our test cases that will run with npm run test:
+</summary>
 
 Test 1: Get Tourist Profile
 
@@ -1959,6 +1962,12 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 });
 ```
 
+</details>
+
+Postman Collection link with 20 more tests: [Postman Collection Link](https://sam-and-aby.postman.co/workspace/Sam-and-Aby-Workspace~71afcd01-1885-4c49-8c9e-9f419f489cae/collection/38513772-4b45eeb0-aff2-457b-aa8e-8c278217d4bd?action=share&creator=38513772)
+
+Link to the exported collections with the test scripts: [Exported Collection](./Tests.postman_collection.json)
+
 ## How to Use
 
 ### General summary of how to use the website
@@ -2001,7 +2010,7 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 
    - **View your Account status:** you can view your account details, edit your profile and change your password from the settings and privacy tab in my account, also you can click on Help and Support to view the FAQs.
 
-   - **View FeedBack:** you can access and review feedback provided by tourists, including ratings and detailed comments from the settings and privacy tab in my account.
+   - **View Feedback:** you can access and review feedback provided by tourists, including ratings and detailed comments from the settings and privacy tab in my account.
 
    - **Delete your Account:** you can permanently delete your account from the settings and privacy tab in delete account, all your booked itineraries will be deactivated and can no longer be booked.
 
