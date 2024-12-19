@@ -1009,11 +1009,18 @@ The project follows modern web development practices and conventions:
 
 ### For Advertisers
 
-- Create and manage activities
-- Set up transportation options
-- Track bookings and revenue
-- Manage advertising campaigns
-- Access analytics and performance reports
+- **View All Activities:** View all activity details, including price, description, location, and rating.
+- **Filter All Activities:** Filter activities by price, date, rating and category to ease navigation.
+- **Search for a Specific Activity:** Search for an activity by its title or description.
+- **Sort Activities:** Sort activities by price or/and rating ease navigation.
+- **Manage My Activities:** Create, update, delete, activate, and deactivate my activities.
+- **View Bookings and Revenue of Activities:** View a detailed report including each activity, its bookings, and revenue after commission.
+- **Filter Activities in Reports:** Filter activities by title and dates to ease navigation.
+- **Manage My Profile:** View my profile, edit my profile details, delete account, and change my password.
+- **Manage My Notifications:** View my notifications and mark them as read.
+- **View My Reviews:** Access and review feedback provided by users, including ratings and detailed comments, after attending an activity.
+- **View Legal Information:** Access the FAQ, Terms and Conditions, and Privacy Policy.
+
 
 ### For Tourism Governors
 
