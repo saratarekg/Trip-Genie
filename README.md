@@ -966,10 +966,18 @@ The project follows modern web development practices and conventions:
 
 ### For Sellers
 
-- Product management
-- Order processing
-- Inventory tracking
-- Sales analytics
+- **View All products**: View all products detials including price , description , quantity and rating
+- **Filter All products**: Filter products avaialble by price and rating to ease my navigation
+- **Search for a specific product**: Search for a product by its name or description
+- **Sort products**: Sort products by rating and price to ease my navigation
+- **Manage my products**: update , delete , archive, unarchive my products
+- **View Sales and revenue of products**: view a detailed sales report including each product , its sales , revenue and revenue after commission
+- **View products stock report**: View a detailed stock report including each product , its sales , and quantity left in stock
+- **Filter products in reports**: Filter the products by product name and year to ease navigation
+- **Manage my profile**: View my profile , edit my profile details , delete account , change my password
+- **Manage my notifications** View my notifications and mark them as read
+- **View Legal Information**: Access the FAQ, Terms and Conditions, and Privacy Policy.
+- **Contact Us**: Reach out using the information provided in the contact section.
 
 ### For Advertisers
 
