@@ -56,7 +56,6 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 - My bookings should be easier to access or have a link directly from the confirmation pop up </br>
 - Drop-downs and the cart should close when clicking outside  </br>
 - Any white space, we can add quick access to items in settings  </br>
-- Adjust the capitalization in the genie helper messages</br>
 - Too many popups, unnecessary if something already indicates change   </br>
 - Adding to cart after checkout should remove it from the wishlist  </br>
 - In the checkout the wallet sometimes glitches and doesn't update the wallet to the user properly and may even show negative balance (FE only) </br>
@@ -70,12 +69,13 @@ Trip Genie was created to revolutionize the travel planning experience by provid
 - Flights, hotels, and transport should be in one component on the homepage. </br>
 - Graph in admin dashboard takes a long time to load. </br>
 - The color of the 'flag inappropriate' in admin activities is different from itineraries. </br>
+- You can still see the booking screen for  an Itinerary even if the booking is closed if you select the date from the calendar </br>
 
 </details>
 
 ## Code Examples
 
-### Frontend Example (React)
+### Displaying Itineraries Frontend Example (React)
 
 ```jsx
 import React, { useState, useEffect } from "react";
@@ -112,7 +112,7 @@ function ItineraryList() {
 export default ItineraryList;
 ```
 
-### Backend Example (Express.js)
+### Displaying Itineraries Backend Example (Express.js)
 
 ```javascript
 const express = require("express");
@@ -128,7 +128,7 @@ router.delete("/itineraries/:id", itineraryController.deleteItinerary);
 module.exports = router;
 ```
 
-### Frontend Example (React)
+### Login Frontend Example (React)
 
 ```jsx
 import React, { useState, useEffect } from "react";
@@ -311,7 +311,7 @@ const Login = () => {
 export default ItineraryList;
 ```
 
-### Backend Example (Express.js)
+### Login Backend Example (Express.js)
 
 ```javascript
 const express = require("express");
@@ -390,7 +390,7 @@ const login = async (req, res) => {
 module.exports = router;
 ```
 
-### Frontend Example (React)
+### Creating a Product Frontend Example (React)
 
 ```jsx
 import React, { useState, useEffect } from "react";
@@ -670,7 +670,7 @@ const CreateProductForm = () => {
 export default CreateProductForm;
 ```
 
-### Backend Example (Express.js)
+### Creating a Product Backend Example (Express.js)
 
 ```javascript
 const addProduct = async (req, res) => {
@@ -1055,12 +1055,33 @@ The project follows modern web development practices and conventions:
 
 ### For Admins
 
-- Manage user accounts
-- Monitor and moderate content
-- Generate sales reports
-- Handle complaints and support tickets
-- Create and manage promo codes
-- Oversee overall platform operations
+- **View Registration Documents**: Browse documents uploaded by tour guides, advertisers, and sellers during registration.  
+- **Approve/Reject Registrations**: Accept or reject tour guides, advertisers, and sellers based on their uploaded documents.  
+
+- **Delete Accounts**: Remove accounts from the system.  
+- **Add Admin or Tourism Governor**: Create a new Admin or Tourism Governor account
+
+- **View Sales Report**: Access detailed revenue reports from events, itineraries, and gift shop sales.  
+- **Filter Sales Reports**: Narrow down reports by product, date, or month.  
+- **Manage Activity Categories**: Manage categories for activities.
+
+- **Manage Preference Tags**: Manage tags like beaches or family-friendly options.
+- **Flag Events/Itineraries**: Mark events or itineraries as inappropriate.  
+- **View User Statistics**: See total users and page visits per day.
+- **View Complaints**: Browse all complaints with their statuses (pending/resolved).  
+- **Complaint Details**: Access detailed information about selected complaints.  
+- **Manage Complaints**: Mark complaints as pending or resolved, reply to complaints, and sort/filter them by date or status.  
+
+- **View Products**: See product details, including available quantity, sales, and ratings.  
+- **Search Products**: Find products by name.  
+- **Filter and Sort Products**: Narrow down products by price or ratings.  
+- **Add New Products**: Add products with details, price, quantity, and images.  
+- **Manage Product Details**: Manage product details, price, or quantity.  
+- **Archive/Unarchive Products**: Temporarily hide or restore products.  
+
+- **Stock Notifications**: Receive system and email alerts when a product is out of stock.  
+
+- **Create Promo Codes**: Generate discount codes for use in the system.  
 
 ## Installation
 
@@ -1588,7 +1609,10 @@ test("GET /itinerary", async () => {
 });
 ```
 
-here are our test cases:
+
+<details><summary>
+  Here are our test cases that will run with npm run test:
+</summary>
 
 Test 1: Get Tourist Profile
 
@@ -1959,6 +1983,17 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 });
 ```
 
+</details>
+
+Test examples using postman: 
+![Screenshot 2024-12-19 190307](https://github.com/user-attachments/assets/ed9ff080-5e22-4d38-b3d6-26f388a9a6c0)
+![Screenshot 2024-12-19 190506](https://github.com/user-attachments/assets/5b334787-a2a1-4295-97de-92b57221d36f)
+
+
+Postman Collection link with 20 more tests: [Postman Collection Link](https://sam-and-aby.postman.co/workspace/Sam-and-Aby-Workspace~71afcd01-1885-4c49-8c9e-9f419f489cae/collection/38513772-4b45eeb0-aff2-457b-aa8e-8c278217d4bd?action=share&creator=38513772)
+
+Link to the exported collections with the test scripts: [Exported Collection](./Tests.postman_collection.json)
+
 ## How to Use
 
 ### General summary of how to use the website
@@ -1975,6 +2010,58 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 ### Detailed steps for each role
 
 #### For Tourists
+
+1. **Sign Up:**
+
+   - Create an account as a Tourist by providing your details.
+
+2. **As a Trip Genie Tourist, you gain access to the following features:**
+
+   - **View All Activities:** Select "Activities" in the navbar to explore all the Activities available on the platform.
+
+   - **View All Itineraries:** Select "Itineraries" in the navbar to explore all the Itineraries available on the platform.
+
+   - **View All Historical Places:** Select "Historical Places" in the navbar to explore all the Historical Places available on the platform.
+
+   - **View All Products:** Select "Products" in the navbar to explore all the Products available on the platform.
+
+   - **View Available Vehicles:** Navigate to the "Transportation" dropdown in the navbar and select "Vehicles" to explore all the available Vehicles that you could book.
+
+   - **View Flights:** Navigate to the "Transportation" dropdown in the navbar and select "Flights" to be able to access available flights.
+
+   - **View Hotels:** Select "Hotels" in the navbar to explore all the Hotels available on the platform.
+
+   - **View your notifications:** You can view your notifications from the bell icon in the navbar which alert you about different situations like successful booking and you can mark them as read, you can navigate to all notifications page to view all notifications.
+
+   - **View your Cart:** Quickly view and manage the items you’ve added by clicking the cart icon located in the top-right of the navbar
+
+   - **View your Wishlist:** Quickly view and manage the items you’ve added by clicking the heart icon located in the top-right of the navbar
+
+   - **Manage profile settings:** To view and manage your preferences, wallet, wallet history, redeem loyalty points and notifications, click on the burger button (☰) at the top right corner of the navbar. Once clicked, select the 'My Account' tab.
+   
+   - **Get Assistance and Resolve Issues:** Under the 'Help and Support' tab, accessible by clicking the burger button (☰) at the top right corner of the navbar, you can view the FAQs for common queries or submit complaints for further assistance.
+
+   - **Manage your orders:** You can access your orders (pending, delivered, cancelled) by clicking the burger button (☰) at the top right corner of the navbar, then selecting 'Orders' from the menu.
+
+   - **View Details of Itinerary/Activity/Historical Place/Products:** You can easily access all details about a certain itinerary/activity/historical place by pressing its card from its corresponding general page.
+
+   - **Book an Itinerary/Activity:** You can book an Itinerary/Activity by accessing the Itinerary/Activity detailed page then pressing the book button.
+
+   - **Save/Unsave an Itinerary/Activity:** You can Save/Unsave an Itinerary/Activity by accessing the Itinerary/Activity detailed page then pressing the Save/Unsave button.
+
+   - **Rate and Review an Itinerary/Activity:** You can Rate and Review an attended Itinerary/Activity by accessing the Itinerary/Activity detailed page then pressing the Rate and Review button.
+
+   - **Add to Cart:** To add a product to your cart, access the product details page and click the 'Add to Cart' button.
+
+   - **Add to Wishlist:** To add a product to your Wishlist, access the product details page and click the 'Add to Wishlist' button.
+
+   - **Rate and Review a Product:** You can Rate and Review a purchased Product by accessing the Product detailed page then pressing the Rate and Review button.
+
+   - **Proceed to checkout:** To proceed to checkout, access your cart and click the 'Proceed to Checkout' button.
+
+   - **Access and Rate past bookings:** You can view and rate your past bookings by clicking the burger button (☰) at the top right corner, then selecting 'My Account' and then pressing 'My Bookings'.
+
+   - **Enhanced Search and Filtering:** Utilize the platform’s Search, Filter, and Sort features to quickly find and manage the information you need.
 
 #### For Tour Guides
 
@@ -2001,7 +2088,7 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 
    - **View your Account status:** you can view your account details, edit your profile and change your password from the settings and privacy tab in my account, also you can click on Help and Support to view the FAQs.
 
-   - **View FeedBack:** you can access and review feedback provided by tourists, including ratings and detailed comments from the settings and privacy tab in my account.
+   - **View Feedback:** you can access and review feedback provided by tourists, including ratings and detailed comments from the settings and privacy tab in my account.
 
    - **Delete your Account:** you can permanently delete your account from the settings and privacy tab in delete account, all your booked itineraries will be deactivated and can no longer be booked.
 
@@ -2107,7 +2194,61 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
      - Filter by historical place type
      - Search by name or location
 
-#### For Admins
+#### For Admins  
+
+1. **Login:**  
+   - Access the admin portal by logging in with your credentials.  
+   - Use the navbar to access account settings, view notifications, and update your password if needed.  
+
+2. **Dashboard Overview:**  
+   - The first page displays a dashboard with an overview of total users, new registrations, total revenue, and sales.  
+
+3. **Accounts Management:**  
+   - Navigate to the "Accounts" section in the sidebar to:  
+     - **Review Registrations**: Approve or reject user registrations.  
+     - **Manage Accounts**: Delete existing accounts.  
+     - **Add Admin/Governor**: Create accounts with unique credentials.  
+
+4. **Product Management:**  
+   - Click on "Product Management" in the sidebar to:  
+     - View **My Products**, **All Products**, and **Archived Products**.  
+     - **Create Product**: Add new products with details, pricing, and images.  
+
+5. **Activity Management:**  
+   - Access "Activity Management" from the sidebar to:  
+     - View **All Activities** available on the platform.  
+     - **Manage Categories**: Create, update, or delete activity categories.  
+     - **Manage Tags**: Add or modify preference tags like family-friendly or historic areas.  
+
+6. **Itinerary Management:**  
+   - Use the "Itineraries" tab to:  
+     - View all itineraries.  
+     - Flag itineraries as appropriate or inappropriate.  
+
+7. **Historical Places:**  
+   - Access the "Historical Places" tab to view all listed historical sites.  
+
+8. **Promo Codes:**  
+   - Go to the "Promo Codes" tab to:  
+     - View **All Promo Codes**.  
+     - **Create Promo Code**: Generate new discount codes.  
+
+9. **Reports:**  
+   - Navigate to the "Reports" tab to access:  
+     - **Itineraries Report**: Performance and revenue of itineraries.  
+     - **Activities Report**: Insights on activities booked.  
+     - **My Products Sales Report**: Revenue from your products.  
+     - **My Products Stock Report**: Stock levels of your products.  
+     - **Seller's Products Report**: Performance of products from sellers.  
+     - **User Statistics**: Data on total users and new registrations.  
+
+10. **Complaints Management:**  
+    - Open the "Complaints" tab to:  
+      - View, manage, and reply to user complaints.  
+      - Mark complaints as resolved or pending.  
+
+11. **Notifications:**  
+    - Use the "Notifications" tab to view all system alerts, including stock updates and flagged events.  
 
 ## Contribute
 
@@ -2202,6 +2343,9 @@ test("DELETE /tourist/delete-account - should delete tourist account", async () 
 - MERN stack crash course: https://www.youtube.com/playlist?list=PL4cUxeGkcC9iJ_KkrkBZWZRHVwnzLIoUE
 
 ## License
+
+[TRIP_GENIE_LICENSE](./LICENSE)
+
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

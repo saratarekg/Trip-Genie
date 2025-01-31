@@ -709,7 +709,7 @@ export function AllProducts() {
     {
       target: ".product-card",
       content:
-        "Each card represents a unique Product. Click on a card to learn more about it.",
+        "Each card represents a unique product. Click on a card to learn more about it.",
       placement: "bottom",
     },
   ];
