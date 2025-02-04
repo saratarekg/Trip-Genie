@@ -10,3 +10,4 @@ node_modules
 *.sln
 *.sw?
 .env
+backend/.env
