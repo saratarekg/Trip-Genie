@@ -132,16 +132,14 @@ const login = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
       secure: process.env.NODE_ENV === "production", // Use `secure` only in production (HTTPS)
-      // sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Allow cross-origin cookies in production
-      sameSite: "Strict",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Allow cross-origin cookies in production
       maxAge: process.env.MAX_AGE * 1000, // Ensure `maxAge` is set in milliseconds
     });
 
     res.cookie("role", role, {
       httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
       secure: process.env.NODE_ENV === "production", // Use `secure` only in production (HTTPS)
-      // sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Allow cross-origin cookies in production
-      sameSite: "Strict",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Allow cross-origin cookies in production
       maxAge: process.env.MAX_AGE * 1000, // Ensure `maxAge` is set in milliseconds
     });
     res.setHeader("Authorization", `Bearer ${token}`);
