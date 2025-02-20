@@ -157,6 +157,10 @@ export function SignupForm() {
       description: z.string().trim().optional(),
       website: z.string().trim().optional(),
       hotline: z.string().trim().optional(),
+
+      accessibility: z.string().trim().optional(),
+
+
     })
     .superRefine((data, ctx) => {
       if (
@@ -325,6 +329,8 @@ export function SignupForm() {
     description: useRef(null),
     website: useRef(null),
     hotline: useRef(null),
+
+    accessibility: useRef(null),
   };
 
   const form = useForm({
@@ -346,6 +352,7 @@ export function SignupForm() {
       description: "",
       website: "",
       hotline: "",
+      accessibility:"",
     },
   });
 
@@ -1016,10 +1023,14 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
+
+
                   )}
                 />
+
               </>
             )}
+
             {(userType === "seller" ||
               userType === "advertiser" ||
               userType === "tour-guide") && (
@@ -1239,6 +1250,21 @@ export function SignupForm() {
                 />
               </>
             )}
+
+            <FormField
+                control={control}
+                name="accessibility"
+                render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Accessibility</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Accessibility" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                )}
+                useRef={formRefs.accessibility}
+            />
           </>
         );
       case 2:
