@@ -1251,20 +1251,31 @@ export function SignupForm() {
               </>
             )}
 
+
             <FormField
                 control={control}
                 name="accessibility"
                 render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Accessibility</FormLabel>
+                      <FormLabel>Accessibility Needs</FormLabel>
                       <FormControl>
-                        <Input placeholder="Accessibility" {...field} />
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an accessibility need" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="visual">Visual Impairment (e.g., color blindness, low vision)</SelectItem>
+                            <SelectItem value="auditory">Auditory Impairment (e.g., hearing loss, deafness)</SelectItem>
+                            <SelectItem value="motor">Motor Impairment (e.g., difficulty using a mouse/keyboard)</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                 )}
                 useRef={formRefs.accessibility}
             />
+
           </>
         );
       case 2:
