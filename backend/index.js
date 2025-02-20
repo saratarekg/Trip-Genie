@@ -52,8 +52,13 @@ mongoose
   .then((connection) => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
     const db = connection.connection.db; // access the raw MongoDB driver from the connection
-    const gfs = new mongoose.mongo.GridFSBucket(db, { bucketName: "uploads" });
-    app.locals.gfs = gfs;
+    if (db) {
+      const gfs = new mongoose.mongo.GridFSBucket(db, { bucketName: "uploads" });
+      app.locals.gfs = gfs;
+      console.log("GridFS Initialized");
+    } else {
+      console.error("Database not found. GridFS initialization failed.");
+    }
   })
   .catch((err) => console.log(err));
 
@@ -619,3 +624,5 @@ checkAndUpdateRatesOnStart();
 checkAndUpdateStatusOnStart();
 checkBirthdays();
 checkUpcomingEvents();
+
+

@@ -110,7 +110,6 @@ const Login = () => {
         "https://trip-genie-apis.vercel.app/auth/login",
         {
           method: "POST",
-
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -193,6 +192,7 @@ const Login = () => {
         "https://trip-genie-apis.vercel.app/auth/verify-otp",
         {
           method: "POST",
+   
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp: otpString }),
@@ -225,6 +225,7 @@ const Login = () => {
         "https://trip-genie-apis.vercel.app/auth/reset-password",
         {
           method: "POST",
+   
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password: newPassword }),

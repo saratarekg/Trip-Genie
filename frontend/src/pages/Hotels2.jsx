@@ -44,8 +44,8 @@ export default function HotelSearch() {
 
     try {
       const response = await fetch(url, {
-        method: "GET",
-        credentials: "include",
+         method: "GET",
+ mode: "no-cors",        credentials: "include",
         headers: {
           "x-rapidapi-key": API_KEY,
           "x-rapidapi-host": API_HOST,
@@ -76,8 +76,8 @@ export default function HotelSearch() {
       const url = `https://hotels-com-provider.p.rapidapi.com/v2/hotels/search?amenities=WIFI%2CPARKING&meal_plan=FREE_BREAKFAST&available_filter=SHOW_AVAILABLE_ONLY&price_min=10&payment_type=PAY_LATER%2CFREE_CANCELLATION&star_rating_ids=3%2C4%2C5&guest_rating_min=8&children_ages=4%2C0%2C15&checkin_date=2025-05-26&locale=es_AR&adults_number=1&sort_order=REVIEW&page_number=1&domain=AR&price_max=500&region_id=2872&lodging_type=HOTEL%2CHOSTEL%2CAPART_HOTEL&checkout_date=2025-05-27`;
 
       const response = await fetch(url, {
-        method: "GET",
-        credentials: "include",
+         method: "GET",
+ mode: "no-cors",        credentials: "include",
         headers: {
           "x-rapidapi-key": API_KEY,
           "x-rapidapi-host": API_HOST,
@@ -104,8 +104,8 @@ export default function HotelSearch() {
       const url = `https://${API_HOST}/v2/hotels/details?domain=AR&hotel_id=${hotelId}&locale=es_AR`;
 
       const response = await fetch(url, {
-        method: "GET",
-        credentials: "include",
+         method: "GET",
+ mode: "no-cors",        credentials: "include",
         headers: {
           "x-rapidapi-key": API_KEY,
           "x-rapidapi-host": API_HOST,
@@ -133,8 +133,8 @@ export default function HotelSearch() {
       const url = `https://${API_HOST}/v3/hotels/offers?domain=AR&hotel_id=${hotelId}&checkin_date=${checkInDate}&checkout_date=${checkOutDate}&adults_number=${adults}&locale=es_AR`;
 
       const response = await fetch(url, {
-        method: "GET",
-        credentials: "include",
+         method: "GET",
+ mode: "no-cors",        credentials: "include",
         headers: {
           "x-rapidapi-key": API_KEY,
           "x-rapidapi-host": API_HOST,

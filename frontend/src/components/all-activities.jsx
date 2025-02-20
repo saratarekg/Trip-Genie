@@ -136,6 +136,7 @@ const ActivityCard = ({
           `https://trip-genie-apis.vercel.app/${userInfo.role}/populate`,
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,

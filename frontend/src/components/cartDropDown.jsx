@@ -98,7 +98,8 @@ export default function CartDropdown({
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/tourist/update/cart`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

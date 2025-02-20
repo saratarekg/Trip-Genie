@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Facebook, Twitter, Instagram } from 'lucide-react';
 import teapot from '../assets/images/teapot.svg';
 import Cookies from 'js-cookie';
+import {useSession} from "@/utils/logging/components/sessionContext.jsx";
+import {useLocation} from "react-router-dom";
 
 const FooterSection = ({ title, items }) => (
   <div className="mb-6 md:mb-0">
@@ -77,6 +79,10 @@ export function FooterComponent() {
     return [...(roleSpecificItems[userRole] || [])];
   };
 
+  const { logInteraction } = useSession();
+  const location = useLocation();
+
+
   return (
     <footer className="bg-[#1A3B47] text-white">
       <div className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
@@ -84,7 +90,7 @@ export function FooterComponent() {
           {/* Logo and Copyright */}
           <div className="col-span-1 md:col-span-2 lg:col-span-2">
             <div className="flex items-center mb-4">
-              <img src={teapot} alt="Logo" className="w-8 h-8 mr-2" />
+              <img src={teapot} alt="Logo" className="w-8 h-8 mr-2"/>
               <span className="text-xl font-bold">Trip Genie</span>
             </div>
             <p className="text-sm text-gray-300">
@@ -93,16 +99,19 @@ export function FooterComponent() {
           </div>
 
           {/* Menu */}
-          <FooterSection title="Menu" items={getMenuItems()} />
+          <FooterSection title="Menu" items={getMenuItems()}/>
+
+          <button onClick={() => logInteraction(location.pathname,`button_click`, {element: "start_button"})}>Start Task</button>
+          <button onClick={() => logInteraction(location.pathname,`button_click`, {element: "submit_button"})}>Submit</button>
 
           {/* Information */}
           <FooterSection
-            title="Information"
-            items={[
-              { name: "FAQ's", link: '/faqs' },
-              { name: 'Terms & Conditions', link: '/terms' },
-              { name: 'Privacy', link: '/privacy' }
-            ]} />
+              title="Information"
+              items={[
+                {name: "FAQ's", link: '/faqs'},
+                {name: 'Terms & Conditions', link: '/terms'},
+                {name: 'Privacy', link: '/privacy'}
+              ]}/>
 
           {/* Contact Info */}
           <div>
@@ -118,7 +127,7 @@ export function FooterComponent() {
         {/* Social Media Icons */}
         <div className="mt-8 pt-8 border-t border-gray-700">
           <div className="flex justify-center md:justify-end space-x-6">
-            <SocialIcon Icon={Facebook} href="https://facebook.com/tripgenie" />
+            <SocialIcon Icon={Facebook} href="https://facebook.com/tripgenie"/>
             <SocialIcon Icon={Twitter} href="https://twitter.com/tripgenie" />
             <SocialIcon Icon={Instagram} href="https://instagram.com/tripgenie" />
           </div>

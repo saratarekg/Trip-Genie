@@ -97,8 +97,8 @@ export default function HotelDetails() {
         const response = await fetch(
           "https://trip-genie-apis.vercel.app/tourist/currencies/code",
           {
-            method: "GET",
-            credentials: "include",
+             method: "GET",
+ mode: "no-cors",            credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -524,6 +524,7 @@ export default function HotelDetails() {
         "https://trip-genie-apis.vercel.app/tourist/book-hotel",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -801,7 +802,7 @@ export default function HotelDetails() {
               hotelName={hotelData?.name}
               stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
               hotelID={hotelId}
-              returnLocation={`https://trip-genie-acl.vercel.app/hotels/${hotelId}?checkinDate=${checkinDate}&checkoutDate=${checkoutDate}&adults=${numberOfAdults}`}
+              returnLocation={`localhost:3000/hotels/${hotelId}?checkinDate=${checkinDate}&checkoutDate=${checkoutDate}&adults=${numberOfAdults}`}
               roomName={selectedRoom?.name}
               maxRooms={10}
               onWalletPayment={handleConfirmBooking}

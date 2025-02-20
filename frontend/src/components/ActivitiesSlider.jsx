@@ -59,6 +59,7 @@ export function Activities() {
         `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,

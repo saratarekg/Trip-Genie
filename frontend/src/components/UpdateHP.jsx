@@ -128,6 +128,7 @@ export default function UpdateHistoricalPlace() {
         const response = await fetch(
           `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
           {
+     
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -183,6 +184,7 @@ export default function UpdateHistoricalPlace() {
         "https://countriesnow.space/api/v0.1/countries/cities",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

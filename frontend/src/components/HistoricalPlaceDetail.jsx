@@ -98,6 +98,7 @@ const HistoricalPlaceDetail = () => {
         const response = await fetch(
           `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
           {
+     
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -142,6 +143,7 @@ const HistoricalPlaceDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,

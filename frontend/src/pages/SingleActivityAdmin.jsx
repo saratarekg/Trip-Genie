@@ -404,7 +404,8 @@ const SingleActivityAdmin = ({ activityId }) => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/${userRole}/activities/${activity._id}`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -432,6 +433,7 @@ const SingleActivityAdmin = ({ activityId }) => {
         `https://trip-genie-apis.vercel.app/${userRole}/activityBooking`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -613,6 +615,7 @@ const SingleActivityAdmin = ({ activityId }) => {
         `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -832,6 +835,7 @@ const SingleActivityAdmin = ({ activityId }) => {
         `https://trip-genie-apis.vercel.app/${userRole}/activities/rate/${id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

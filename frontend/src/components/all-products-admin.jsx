@@ -120,6 +120,7 @@ const ProductCard = ({
           `https://trip-genie-apis.vercel.app/${userInfo.role}/populate`,
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -617,6 +618,7 @@ export function AllProducts({ notificationId }) {
         "https://trip-genie-apis.vercel.app/tourist/product/addToCart",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -654,6 +656,7 @@ export function AllProducts({ notificationId }) {
         `https://trip-genie-apis.vercel.app/tourist/product/addToWishlist/${product._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -721,6 +724,7 @@ export function AllProducts({ notificationId }) {
         "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

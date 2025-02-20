@@ -27,6 +27,8 @@ export default function Home() {
       "https://trip-genie-apis.vercel.app/increment-visit-count",
       {
         method: "POST",
+   
+
       }
     );
     const data = await response.json();

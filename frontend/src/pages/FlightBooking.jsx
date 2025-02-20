@@ -330,6 +330,7 @@ function BookingPage() {
         "https://trip-genie-apis.vercel.app/tourist/get/promo-code",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -451,6 +452,7 @@ function BookingPage() {
         "https://trip-genie-apis.vercel.app/create-flight-checkout-session",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -458,7 +460,7 @@ function BookingPage() {
           body: JSON.stringify({
             metadata,
             items,
-            returnLocation: "https://trip-genie-acl.vercel.app/flights",
+            returnLocation: "localhost:3000//flights",
             currency: currencyCode,
             discountPercentage: promoDetails ? promoDetails.percentOff : 0,
           }),
@@ -536,6 +538,7 @@ function BookingPage() {
                 "https://trip-genie-apis.vercel.app/tourist/book-flight",
                 {
                   method: "POST",
+   
                   credentials: "include",
                   headers: {
                     "Content-Type": "application/json",
@@ -627,6 +630,7 @@ function BookingPage() {
           "https://trip-genie-apis.vercel.app/tourist/book-flight",
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
@@ -765,6 +769,7 @@ function BookingPage() {
         "https://test.api.amadeus.com/v1/security/oauth2/token",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -795,8 +800,8 @@ function BookingPage() {
       const response = await fetch(
         "https://trip-genie-apis.vercel.app/tourist/currencies/code",
         {
-          method: "GET",
-          credentials: "include",
+           method: "GET",
+ mode: "no-cors",          credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
           },

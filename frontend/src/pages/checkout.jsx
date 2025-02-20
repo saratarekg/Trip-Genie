@@ -268,6 +268,7 @@ export default function CheckoutPage() {
         `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -393,6 +394,7 @@ export default function CheckoutPage() {
         "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

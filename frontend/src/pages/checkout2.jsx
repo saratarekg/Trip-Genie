@@ -371,6 +371,7 @@ export default function CheckoutPage() {
         "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -459,6 +460,7 @@ export default function CheckoutPage() {
         "https://trip-genie-apis.vercel.app/tourist/get/promo-code",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -522,6 +524,7 @@ export default function CheckoutPage() {
         "https://trip-genie-apis.vercel.app/create-checkout-session",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -663,6 +666,7 @@ export default function CheckoutPage() {
         `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,

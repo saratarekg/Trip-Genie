@@ -81,6 +81,8 @@ import HotelSearch from "@/components/hotel-search.jsx";
 import HotelDetails from "@/pages/HotelDetails.jsx";
 import ActivityReport from "@/components/ActivityReport.jsx";
 import TouristActivitiesPage from "@/pages/TouristActivitiesPage";
+import NavigationLogger from "@/utils/logging/components/navigationLogger.js";
+import {SessionProvider} from "@/utils/logging/components/sessionContext.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -684,9 +686,11 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+      <Router>
+          {/*<NavigationLogger />*/}
+          <AppContent />
+      </Router>
+
   );
 }
 

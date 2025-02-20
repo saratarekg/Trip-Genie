@@ -1043,6 +1043,7 @@ const ItineraryDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1218,6 +1219,7 @@ const ItineraryDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/itineraryBooking`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -1423,7 +1425,8 @@ const ItineraryDetail = () => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/${userRole}/itineraries/${itinerary._id}`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1543,7 +1546,8 @@ const ItineraryDetail = () => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/${userRole}/itineraries-activation/${id}`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1620,6 +1624,7 @@ const ItineraryDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/tourguide/rate/${tourGuideProfile._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -1653,6 +1658,7 @@ const ItineraryDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/tourguide/comment/${tourGuideProfile._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -1834,6 +1840,7 @@ const ItineraryDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/itinerary/rate/${itinerary._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -2576,7 +2583,7 @@ const ItineraryDetail = () => {
                 currency={userPreferredCurrency.code}
                 symbol={userPreferredCurrency.symbol}
                 returnLoc={
-                  "https://trip-genie-acl.vercel.app/itinerary/" + itinerary._id
+                  "localhost:3000/itinerary/" + itinerary._id
                 }
                 error={bookingError}
                 setError={setBookingError}
