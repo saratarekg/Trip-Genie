@@ -18,7 +18,7 @@ export const ItineraryCards = () => {
         let role = Cookies.get("role");
         if (role === undefined) role = "guest";
         const response = await axios.get(
-          `https://trip-genie-apis.vercel.app/${role}/itineraries`,
+          `http://localhost:4000/${role}/itineraries`,
           {
             credentials: "include",
             headers: {
@@ -41,7 +41,7 @@ export const ItineraryCards = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/${userRole}/populate`,
+        `http://localhost:4000/${userRole}/populate`,
         {
           method: "POST",
    
@@ -75,7 +75,7 @@ export const ItineraryCards = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/${userRole}/getCurrency/${itineraryCurrency}`,
+        `http://localhost:4000/${userRole}/getCurrency/${itineraryCurrency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -112,7 +112,7 @@ export const ItineraryCards = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -120,7 +120,7 @@ export const ItineraryCards = () => {
         );
         const currencyId = response.data.preferredCurrency;
         const response2 = await axios.get(
-          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },

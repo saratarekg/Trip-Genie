@@ -11,7 +11,7 @@ const TourGuideHome = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/tour-guide",
+        "http://localhost:4000/tour-guide",
         {
           credentials: "include",
           headers: {
@@ -37,7 +37,7 @@ const TourGuideHome = () => {
       const token = Cookies.get("jwt");
       if (response.role === "tourGuide") {
         const response = await fetch(
-          "https://trip-genie-apis.vercel.app/tour-guide/itinerary",
+          "http://localhost:4000/tour-guide/itinerary",
           {
             credentials: "include",
             headers: {

@@ -194,7 +194,7 @@ const SkeletonDialog = () => {
 const fetchData = async (userRole, dataType) => {
   try {
     const response = await axios.get(
-      `https://trip-genie-apis.vercel.app/${userRole}/${dataType}`,
+      `http://localhost:4000/${userRole}/${dataType}`,
       {
         credentials: "include",
         headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -227,7 +227,7 @@ export default function TouristAttendedActivities() {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/rates"
+        "http://localhost:4000/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {
@@ -242,7 +242,7 @@ export default function TouristAttendedActivities() {
     if (role === "tourist") {
       try {
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -252,7 +252,7 @@ export default function TouristAttendedActivities() {
         setTourist(response.data);
 
         const currencyResponse = await axios.get(
-          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -300,7 +300,7 @@ export default function TouristAttendedActivities() {
     try {
       // fetch the activity from the backend
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/tourist/activities/${id}`,
+        `http://localhost:4000/tourist/activities/${id}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },

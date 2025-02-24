@@ -154,7 +154,7 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "https://localhost:3000/auth/login",
+        "httpss://localhost:3000/auth/login",
         {
           method: "POST",
    

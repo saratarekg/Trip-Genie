@@ -106,7 +106,7 @@ export function CreatePromoCode() {
         },
       };
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/admin/promo-code",
+        "http://localhost:4000/admin/promo-code",
         {
           method: "POST",
    

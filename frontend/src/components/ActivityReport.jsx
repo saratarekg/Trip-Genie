@@ -95,7 +95,7 @@ const ActivityReport = () => {
       const monthlyDataPromises = Array.from({ length: 12 }, (_, i) => {
         const month = i + 1;
         const url = new URL(
-          `https://trip-genie-apis.vercel.app/${role}/activities-report`
+          `http://localhost:4000/${role}/activities-report`
         );
         url.searchParams.append("year", currentYear);
         url.searchParams.append("month", month);
@@ -168,7 +168,7 @@ const ActivityReport = () => {
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const url = new URL(
-        `https://trip-genie-apis.vercel.app/${role}/activities-report`
+        `http://localhost:4000/${role}/activities-report`
       );
       if (newFilters.month) url.searchParams.append("month", newFilters.month);
       if (newFilters.year) url.searchParams.append("year", newFilters.year);

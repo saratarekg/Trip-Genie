@@ -64,7 +64,7 @@ export function NotificationsDropdownAdmin({
   const checkUnseenNotifications = async () => {
     try {
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/admin/unseen-notifications`,
+        `http://localhost:4000/admin/unseen-notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -80,7 +80,7 @@ export function NotificationsDropdownAdmin({
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/admin/notifications`,
+        `http://localhost:4000/admin/notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -105,7 +105,7 @@ export function NotificationsDropdownAdmin({
   const markNotificationsAsSeen = async () => {
     try {
       await axios.post(
-        `https://trip-genie-apis.vercel.app/admin/mark-dropdown-opened`,
+        `http://localhost:4000/admin/mark-dropdown-opened`,
         {},
         {
           credentials: "include",
@@ -122,7 +122,7 @@ export function NotificationsDropdownAdmin({
   const markNotificationAsSeen = async (notificationId) => {
     try {
       await axios.post(
-        `https://trip-genie-apis.vercel.app/admin/notifications/markAsSeen/${notificationId}`,
+        `http://localhost:4000/admin/notifications/markAsSeen/${notificationId}`,
         {},
         {
           credentials: "include",
@@ -144,7 +144,7 @@ export function NotificationsDropdownAdmin({
   const markAllAsSeen = async () => {
     try {
       await axios.post(
-        `https://trip-genie-apis.vercel.app/admin/mark-notifications-seen`,
+        `http://localhost:4000/admin/mark-notifications-seen`,
         {},
         {
           credentials: "include",

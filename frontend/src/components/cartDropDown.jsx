@@ -25,7 +25,7 @@ export default function CartDropdown({
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/rates"
+        "http://localhost:4000/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {
@@ -36,7 +36,7 @@ export default function CartDropdown({
   const fetchCurrencies = useCallback(async () => {
     try {
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/tourist/currencies",
+        "http://localhost:4000/tourist/currencies",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -56,7 +56,7 @@ export default function CartDropdown({
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -65,7 +65,7 @@ export default function CartDropdown({
         const currencyId = response.data.preferredCurrency;
 
         const response2 = await axios.get(
-          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -96,7 +96,7 @@ export default function CartDropdown({
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/tourist/update/cart`,
+        `http://localhost:4000/tourist/update/cart`,
         {
          method: "PUT",
 mode: "no-cors",
@@ -120,7 +120,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/tourist/remove/cart/${productId}`,
+        `http://localhost:4000/tourist/remove/cart/${productId}`,
         {
           method: "DELETE",
           credentials: "include",

@@ -128,7 +128,7 @@ export function DashboardSidebar({
     console.log("Logging out...");
     try {
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/auth/logout"
+        "http://localhost:4000/auth/logout"
       );
 
       if (response.ok) {

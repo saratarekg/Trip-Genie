@@ -229,7 +229,7 @@ export default function BookedActivities() {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/rates"
+        "http://localhost:4000/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {
@@ -244,7 +244,7 @@ export default function BookedActivities() {
     if (role === "tourist") {
       try {
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -254,7 +254,7 @@ export default function BookedActivities() {
         const currencyId = response.data.preferredCurrency;
 
         const currencyResponse = await axios.get(
-          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -278,7 +278,7 @@ export default function BookedActivities() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/tourist/touristActivityBookings",
+        "http://localhost:4000/tourist/touristActivityBookings",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -341,7 +341,7 @@ export default function BookedActivities() {
 
     try {
       const response = await axios.delete(
-        `https://trip-genie-apis.vercel.app/tourist/activityBooking/${selectedBooking._id}`,
+        `http://localhost:4000/tourist/activityBooking/${selectedBooking._id}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },

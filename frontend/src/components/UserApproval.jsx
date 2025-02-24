@@ -109,7 +109,7 @@ export default function UserApproval() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/admin/files/${filename}`,
+        `http://localhost:4000/admin/files/${filename}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -128,7 +128,7 @@ export default function UserApproval() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/admin/unaccepted-advertiser",
+        "http://localhost:4000/admin/unaccepted-advertiser",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -147,7 +147,7 @@ export default function UserApproval() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/admin/unaccepted-seller",
+        "http://localhost:4000/admin/unaccepted-seller",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -166,7 +166,7 @@ export default function UserApproval() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/admin/unaccepted-tourguide",
+        "http://localhost:4000/admin/unaccepted-tourguide",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -201,7 +201,7 @@ export default function UserApproval() {
     try {
       const token = Cookies.get("jwt");
       await axios.put(
-        `https://trip-genie-apis.vercel.app/admin/approve-${role}/${userId}`,
+        `http://localhost:4000/admin/approve-${role}/${userId}`,
         {},
         {
           credentials: "include",
@@ -225,7 +225,7 @@ export default function UserApproval() {
     try {
       const token = Cookies.get("jwt");
       await axios.delete(
-        `https://trip-genie-apis.vercel.app/admin/reject/${role}s/${user._id}`,
+        `http://localhost:4000/admin/reject/${role}s/${user._id}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },

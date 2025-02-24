@@ -127,7 +127,7 @@ export default function HotelSearch() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/tourist/",
+        "http://localhost:4000/tourist/",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -135,7 +135,7 @@ export default function HotelSearch() {
       );
       const currencyId = response.data.preferredCurrency;
       const currencyResponse = await axios.get(
-        `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -150,7 +150,7 @@ export default function HotelSearch() {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/rates"
+        "http://localhost:4000/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {

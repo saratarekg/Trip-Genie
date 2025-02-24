@@ -96,7 +96,7 @@ const HistoricalPlaceDetail = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
+          `http://localhost:4000/${userRole}/historical-places/${id}`,
           {
      
             credentials: "include",
@@ -140,7 +140,7 @@ const HistoricalPlaceDetail = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/${userRole}/populate`,
+        `http://localhost:4000/${userRole}/populate`,
         {
           method: "POST",
    
@@ -173,7 +173,7 @@ const HistoricalPlaceDetail = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/${userRole}/getCurrency/${historicalPlace.currency}`,
+        `http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -213,7 +213,7 @@ const HistoricalPlaceDetail = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -222,7 +222,7 @@ const HistoricalPlaceDetail = () => {
         const currencyId = response.data.preferredCurrency;
 
         const response2 = await axios.get(
-          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -260,7 +260,7 @@ const HistoricalPlaceDetail = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
+        `http://localhost:4000/${userRole}/historical-places/${id}`,
         {
           method: "DELETE",
           credentials: "include",

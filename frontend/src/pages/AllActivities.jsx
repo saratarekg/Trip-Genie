@@ -241,7 +241,7 @@ export function AllActivitiesComponent() {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/rates"
+        "http://localhost:4000/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {
@@ -254,7 +254,7 @@ export function AllActivitiesComponent() {
     if (role !== "tourist") return;
     try {
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/tourist/currencies",
+        "http://localhost:4000/tourist/currencies",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -273,7 +273,7 @@ export function AllActivitiesComponent() {
     if (role === "tourist") {
       try {
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -282,7 +282,7 @@ export function AllActivitiesComponent() {
         const currencyId = response.data.preferredCurrency;
 
         const currencyResponse = await axios.get(
-          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -394,7 +394,7 @@ export function AllActivitiesComponent() {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/api/getAllCategories"
+          "http://localhost:4000/api/getAllCategories"
         );
         setCategoryOptions(response.data);
       } catch (error) {
@@ -439,7 +439,7 @@ export function AllActivitiesComponent() {
 
       if (role === "tourist" && !isInitialized) {
         const preferredActivities = await fetch(
-          "https://trip-genie-apis.vercel.app/tourist/activities-preference",
+          "http://localhost:4000/tourist/activities-preference",
           {
             credentials: "include",
             headers: {
@@ -449,7 +449,7 @@ export function AllActivitiesComponent() {
         ).then((res) => res.json());
 
         const otherActivities = await fetch(
-          "https://trip-genie-apis.vercel.app/tourist/activities-not-preference",
+          "http://localhost:4000/tourist/activities-not-preference",
           {
             credentials: "include",
             headers: {
@@ -463,7 +463,7 @@ export function AllActivitiesComponent() {
         setIsInitialized(true);
       } else {
         const url = new URL(
-          `https://trip-genie-apis.vercel.app/${role}/activities`
+          `http://localhost:4000/${role}/activities`
         );
         const response = await fetch(url, {
           credentials: "include",
@@ -495,7 +495,7 @@ export function AllActivitiesComponent() {
     // console.log("Role:", role);
     const token = Cookies.get("jwt");
     const url = new URL(
-      `https://trip-genie-apis.vercel.app/${role}/maxPriceActivities`
+      `http://localhost:4000/${role}/maxPriceActivities`
     );
     const response = await fetch(url, {
       credentials: "include",
@@ -522,7 +522,7 @@ export function AllActivitiesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(
-        `https://trip-genie-apis.vercel.app/${role}/activities`
+        `http://localhost:4000/${role}/activities`
       );
       if (myActivities) {
         url.searchParams.append("myActivities", myActivities);
@@ -599,7 +599,7 @@ export function AllActivitiesComponent() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/${role}/activities/${activityToDelete.id}`,
+        `http://localhost:4000/${role}/activities/${activityToDelete.id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -649,7 +649,7 @@ export function AllActivitiesComponent() {
 
       if (role === "tourist") {
         const preferredActivities = await fetch(
-          "https://trip-genie-apis.vercel.app/tourist/activities-preference",
+          "http://localhost:4000/tourist/activities-preference",
           {
             credentials: "include",
             headers: {
@@ -659,7 +659,7 @@ export function AllActivitiesComponent() {
         ).then((res) => res.json());
 
         const otherActivities = await fetch(
-          "https://trip-genie-apis.vercel.app/tourist/activities-not-preference",
+          "http://localhost:4000/tourist/activities-not-preference",
           {
             credentials: "include",
             headers: {
@@ -672,7 +672,7 @@ export function AllActivitiesComponent() {
         setIsSortedByPreference(true);
       } else {
         const url = new URL(
-          `https://trip-genie-apis.vercel.app/${role}/activities`
+          `http://localhost:4000/${role}/activities`
         );
         const response = await fetch(url, {
           credentials: "include",

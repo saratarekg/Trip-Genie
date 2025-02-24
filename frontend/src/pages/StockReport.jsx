@@ -66,7 +66,7 @@ const StockReport = () => {
       const role = Cookies.get("role");
 
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/${role}/stock-report`,
+        `http://localhost:4000/${role}/stock-report`,
         {
           credentials: "include",
           headers: {
@@ -98,7 +98,7 @@ const StockReport = () => {
       if (productId) queryParams.append("productIds", productId);
 
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/${role}/stock-report?${queryParams.toString()}`,
+        `http://localhost:4000/${role}/stock-report?${queryParams.toString()}`,
         {
           credentials: "include",
           headers: {

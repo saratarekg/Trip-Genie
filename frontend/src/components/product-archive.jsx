@@ -102,7 +102,7 @@ export default function ProductArchive() {
         const token = Cookies.get("jwt");
         const role = getUserRole();
         const url = new URL(
-          `https://trip-genie-apis.vercel.app/${role}/productsarchive`
+          `http://localhost:4000/${role}/productsarchive`
         );
 
         if (params.searchBy)
@@ -159,7 +159,7 @@ export default function ProductArchive() {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(
-      `https://trip-genie-apis.vercel.app/${role}/max-price-products-archived`
+      `http://localhost:4000/${role}/max-price-products-archived`
     );
     const response = await fetch(url, {
       credentials: "include",

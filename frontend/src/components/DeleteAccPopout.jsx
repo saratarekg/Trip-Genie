@@ -51,7 +51,7 @@ export function DeleteAccount() {
     setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
-      const url = "https://trip-genie-apis.vercel.app/admin/userbyrole";
+      const url = "http://localhost:4000/admin/userbyrole";
       const response = await axios.get(url, {
         credentials: "include",
         headers: { Authorization: `Bearer ${token}` },
@@ -94,7 +94,7 @@ export function DeleteAccount() {
         showToast("Cannot delete user: role is undefined.", "error");
         return;
       }
-      const url = `https://trip-genie-apis.vercel.app/admin/${userRole}s/${id}`;
+      const url = `http://localhost:4000/admin/${userRole}s/${id}`;
       const response = await axios.delete(url, {
         credentials: "include",
         headers: { Authorization: `Bearer ${token}` },

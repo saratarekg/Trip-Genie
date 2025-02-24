@@ -159,7 +159,7 @@ export default function AllHistoricalPlacesComponent() {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      let url = `https://trip-genie-apis.vercel.app/${role}/historical-places`;
+      let url = `http://localhost:4000/${role}/historical-places`;
       const response = await fetch(url, {
         credentials: "include",
         headers: {
@@ -183,7 +183,7 @@ export default function AllHistoricalPlacesComponent() {
     try {
       const [typesResponse] = await Promise.all([
         axios.get(
-          "https://trip-genie-apis.vercel.app/api/getAllHistoricalTypes"
+          "http://localhost:4000/api/getAllHistoricalTypes"
         ),
       ]);
       setTypesOptions(typesResponse.data);
@@ -224,7 +224,7 @@ export default function AllHistoricalPlacesComponent() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${historicalPlaceToDelete.id}`,
+        `http://localhost:4000/${userRole}/historical-places/${historicalPlaceToDelete.id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -257,7 +257,7 @@ export default function AllHistoricalPlacesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(
-        `https://trip-genie-apis.vercel.app/${role}/historical-places`
+        `http://localhost:4000/${role}/historical-places`
       );
       if (searchTerm) url.searchParams.append("searchBy", searchTerm);
       if (selectedTypes.length > 0)

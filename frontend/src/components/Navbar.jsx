@@ -142,7 +142,7 @@ export function NavbarComponent() {
   const checkUnseenNotificationsTourist = async () => {
     try {
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/tourist/unseen-notifications`,
+        `http://localhost:4000/tourist/unseen-notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -159,7 +159,7 @@ export function NavbarComponent() {
   const checkUnseenNotificationsAdmin = async () => {
     try {
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/admin/unseen-notifications`,
+        `http://localhost:4000/admin/unseen-notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -176,7 +176,7 @@ export function NavbarComponent() {
   const checkUnseenNotificationsSeller = async () => {
     try {
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/seller/unseen-notifications`,
+        `http://localhost:4000/seller/unseen-notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -192,7 +192,7 @@ export function NavbarComponent() {
   const checkUnseenNotificationsTourGuide = async () => {
     try {
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/tour-guide/unseen-notifications`,
+        `http://localhost:4000/tour-guide/unseen-notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -208,7 +208,7 @@ export function NavbarComponent() {
   const checkUnseenNotificationsAdvertiser = async () => {
     try {
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/advertiser/unseen-notifications`,
+        `http://localhost:4000/advertiser/unseen-notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -249,7 +249,7 @@ export function NavbarComponent() {
       const role = Cookies.get("role");
       if (role !== "tourist") return;
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/tourist/cart",
+        "http://localhost:4000/tourist/cart",
         {
           credentials: "include",
           headers: {
@@ -341,7 +341,7 @@ export function NavbarComponent() {
     console.log("Logging out...");
     try {
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/auth/logout"
+        "http://localhost:4000/auth/logout"
       );
 
       if (response.ok) {

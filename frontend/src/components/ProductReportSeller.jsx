@@ -83,7 +83,7 @@ const ProductReport = () => {
         const role = getUserRole();
         const { day, month, year } = filters;
         const url = new URL(
-          `https://trip-genie-apis.vercel.app/${role}/sales-report`
+          `http://localhost:4000/${role}/sales-report`
         );
         if (day) url.searchParams.append("day", day);
         if (month) url.searchParams.append("month", month);

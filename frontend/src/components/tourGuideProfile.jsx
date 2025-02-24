@@ -688,7 +688,7 @@ export function TourGuideProfileComponent() {
   const checkUnseenNotifications = async () => {
     try {
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/tour-guide/unseen-notifications`,
+        `http://localhost:4000/tour-guide/unseen-notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -704,7 +704,7 @@ export function TourGuideProfileComponent() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/tour-guide/notifications`,
+        `http://localhost:4000/tour-guide/notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -726,7 +726,7 @@ export function TourGuideProfileComponent() {
   const markNotificationAsSeen = async (notificationID) => {
     try {
       await axios.post(
-        `https://trip-genie-apis.vercel.app/tour-guide/notifications/markAsSeen/${notificationID}`,
+        `http://localhost:4000/tour-guide/notifications/markAsSeen/${notificationID}`,
         {},
         {
           credentials: "include",
@@ -762,7 +762,7 @@ export function TourGuideProfileComponent() {
         const token = Cookies.get("jwt");
         const role = getUserRole();
 
-        const api = `https://trip-genie-apis.vercel.app/${role}`;
+        const api = `http://localhost:4000/${role}`;
         const response = await axios.get(api, {
           credentials: "include",
           headers: {
@@ -795,7 +795,7 @@ export function TourGuideProfileComponent() {
     const fetchNationalities = async () => {
       try {
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/api/nationalities"
+          "http://localhost:4000/api/nationalities"
         );
         setNationalities(response.data);
       } catch (error) {
@@ -902,7 +902,7 @@ export function TourGuideProfileComponent() {
           : editedTourGuide.previousWorks;
       formData.append("previousWorks", JSON.stringify(worksToAppend));
 
-      const api = `https://trip-genie-apis.vercel.app/${role}`;
+      const api = `http://localhost:4000/${role}`;
       const response = await axios.put(api, formData, {
         credentials: "include",
         headers: {
@@ -992,7 +992,7 @@ export function TourGuideProfileComponent() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/tour-guide/itineraries-report`,
+        `http://localhost:4000/tour-guide/itineraries-report`,
         {
           credentials: "include",
           headers: {

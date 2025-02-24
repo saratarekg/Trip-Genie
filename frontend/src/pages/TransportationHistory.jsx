@@ -29,7 +29,7 @@ import TransportationCard from "@/components/transportationCardAttended";
 const fetchData = async (userRole, dataType) => {
   try {
     const response = await axios.get(
-      `https://trip-genie-apis.vercel.app/${userRole}/history-transportation`,
+      `http://localhost:4000/${userRole}/history-transportation`,
       {
         credentials: "include",
         headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -188,7 +188,7 @@ export default function TouristTransportationHistory() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/tourist/",
+        "http://localhost:4000/tourist/",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -198,7 +198,7 @@ export default function TouristTransportationHistory() {
       setTourist(response.data);
 
       const response2 = await axios.get(
-        `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -214,7 +214,7 @@ export default function TouristTransportationHistory() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/tourist/populate`,
+        `http://localhost:4000/tourist/populate`,
         {
           method: "POST",
    

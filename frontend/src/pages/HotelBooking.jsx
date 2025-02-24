@@ -294,7 +294,7 @@ export default function HotelBookingPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/tourist/currencies/code",
+        "http://localhost:4000/tourist/currencies/code",
         {
            method: "GET",
  mode: "no-cors",
@@ -318,7 +318,7 @@ export default function HotelBookingPage() {
 
   const getExchangeRates = useCallback(async () => {
     try {
-      const response = await fetch("https://trip-genie-apis.vercel.app/rates");
+      const response = await fetch("http://localhost:4000/rates");
       if (!response.ok) {
         throw new Error("Failed to fetch exchange rates");
       }

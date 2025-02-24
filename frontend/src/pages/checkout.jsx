@@ -165,12 +165,13 @@ export default function CheckoutPage() {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        console.log(response.data)
         const userData = response.data;
         const currencyId = userData.preferredCurrency;
         setSavedCards(userData.cards || []);
@@ -194,7 +195,7 @@ export default function CheckoutPage() {
         personalDetailsForm.setValue("phone", userData.mobile || "");
 
         const response2 = await axios.get(
-          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -211,7 +212,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.post(
-        "https://trip-genie-apis.vercel.app/tourist/addAddress",
+        "http://localhost:4000/tourist/addAddress",
         addressData,
         {
           credentials: "include",
@@ -221,7 +222,7 @@ export default function CheckoutPage() {
 
       if (response.status === 200) {
         const userResponse = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -243,7 +244,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/tourist/cart",
+        "http://localhost:4000/tourist/cart",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -265,7 +266,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `https://trip-genie-apis.vercel.app/${userRole}/populate`,
+        `http://localhost:4000/${userRole}/populate`,
         {
           method: "POST",
    
@@ -296,7 +297,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `https://trip-genie-apis.vercel.app/${userRole}/getCurrency/${cartItems[0]?.product.currency}`,
+        `http://localhost:4000/${userRole}/getCurrency/${cartItems[0]?.product.currency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -391,7 +392,7 @@ export default function CheckoutPage() {
       }));
 
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/tourist/purchase",
+        "http://localhost:4000/tourist/purchase",
         {
           method: "POST",
    
@@ -442,7 +443,7 @@ export default function CheckoutPage() {
 
       const token = Cookies.get("jwt");
       const emptyCartResponse = await fetch(
-        "https://trip-genie-apis.vercel.app/tourist/empty/cart",
+        "http://localhost:4000/tourist/empty/cart",
         {
           method: "DELETE",
           credentials: "include",
@@ -466,7 +467,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.post(
-        "https://trip-genie-apis.vercel.app/tourist/addCard",
+        "http://localhost:4000/tourist/addCard",
         cardData,
         {
           credentials: "include",
@@ -477,7 +478,7 @@ export default function CheckoutPage() {
       if (response.status === 200) {
         // Refetch user cards
         const userResponse = await axios.get(
-          "https://trip-genie-apis.vercel.app/tourist/",
+          "http://localhost:4000/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },

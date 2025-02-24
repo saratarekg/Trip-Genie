@@ -27,7 +27,7 @@ export default function AddCard() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "https://trip-genie-apis.vercel.app/tourist/cards",
+        "http://localhost:4000/tourist/cards",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -105,7 +105,7 @@ export default function AddCard() {
     try {
       const token = Cookies.get("jwt");
       await axios.put(
-        "https://trip-genie-apis.vercel.app/tourist/add-card",
+        "http://localhost:4000/tourist/add-card",
         cardDetails,
         {
           credentials: "include",
@@ -142,7 +142,7 @@ export default function AddCard() {
     try {
       const token = Cookies.get("jwt");
       await axios.put(
-        `https://trip-genie-apis.vercel.app/tourist/add-default-card/${cardId}`,
+        `http://localhost:4000/tourist/add-default-card/${cardId}`,
         {},
         {
           credentials: "include",
@@ -168,7 +168,7 @@ export default function AddCard() {
     try {
       const token = Cookies.get("jwt");
       await axios.delete(
-        `https://trip-genie-apis.vercel.app/tourist/card/${cardId}`,
+        `http://localhost:4000/tourist/card/${cardId}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
