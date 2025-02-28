@@ -95,7 +95,7 @@ export default function HotelDetails() {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          "http://localhost:4000/tourist/currencies/code",
+          "https://trip-genie-apis.vercel.app/tourist/currencies/code",
           {
              method: "GET",
  mode: "no-cors",            credentials: "include",
@@ -140,7 +140,7 @@ export default function HotelDetails() {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -150,7 +150,7 @@ export default function HotelDetails() {
         const currencyId = response.data.preferredCurrency;
 
         const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -306,7 +306,7 @@ export default function HotelDetails() {
 
   const fetchExchangeRates = async () => {
     try {
-      const response = await fetch("http://localhost:4000/rates");
+      const response = await fetch("https://trip-genie-apis.vercel.app/rates");
       if (!response.ok) {
         throw new Error("Failed to fetch exchange rates");
       }
@@ -321,7 +321,7 @@ export default function HotelDetails() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        "http://localhost:4000/tourist/currencies",
+        "https://trip-genie-apis.vercel.app/tourist/currencies",
         {
           credentials: "include",
           headers: {
@@ -418,7 +418,7 @@ export default function HotelDetails() {
       if (sessionId && success === "true") {
         try {
           const response = await axios.get(
-            `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+            `https://trip-genie-apis.vercel.app/check-payment-status?session_id=${sessionId}`
           );
 
           console.log("Payment status response:", response.data);
@@ -521,7 +521,7 @@ export default function HotelDetails() {
       const token = Cookies.get("jwt");
       const convertedPrice = convertPrice(price, currencyCode, "USD");
       const response = await fetch(
-        "http://localhost:4000/tourist/book-hotel",
+        "https://trip-genie-apis.vercel.app/tourist/book-hotel",
         {
           method: "POST",
    

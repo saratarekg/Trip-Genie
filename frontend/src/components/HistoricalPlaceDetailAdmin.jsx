@@ -93,7 +93,7 @@ const HistoricalPlaceDetail = ({ id }) => {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          `http://localhost:4000/${userRole}/historical-places/${id}`,
+          `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
           {
      
             credentials: "include",
@@ -143,7 +143,7 @@ const HistoricalPlaceDetail = ({ id }) => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/historical-places/${id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
         {
           method: "DELETE",
           credentials: "include",

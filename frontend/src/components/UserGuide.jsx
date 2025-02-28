@@ -21,7 +21,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
       if (token) {
         // Fetch visited pages from the backend
         const response = await axios.get(
-          "http://localhost:4000/tourist/visited-pages",
+          "https://trip-genie-apis.vercel.app/tourist/visited-pages",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -41,7 +41,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
         // Update visited pages
         if (token) {
           await axios.post(
-            `http://localhost:4000/tourist/visited-pages`,
+            `https://trip-genie-apis.vercel.app/tourist/visited-pages`,
             {
               visitedPages,
             },

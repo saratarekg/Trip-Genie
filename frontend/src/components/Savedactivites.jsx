@@ -39,7 +39,7 @@ const ActivityCard = ({
     try {
       const token = Cookies.get("jwt");
       const response = await axios.post(
-        `http://localhost:4000/tourist/save-activity/${activity._id}`,
+        `https://trip-genie-apis.vercel.app/tourist/save-activity/${activity._id}`,
         {},
         {
           credentials: "include",
@@ -240,7 +240,7 @@ export default function SavedActivities() {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/rates"
+        "https://trip-genie-apis.vercel.app/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {
@@ -253,7 +253,7 @@ export default function SavedActivities() {
     if (role !== "tourist") return;
     try {
       const response = await axios.get(
-        "http://localhost:4000/tourist/currencies",
+        "https://trip-genie-apis.vercel.app/tourist/currencies",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -273,7 +273,7 @@ export default function SavedActivities() {
     if (role === "tourist") {
       try {
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -282,7 +282,7 @@ export default function SavedActivities() {
         const currencyId = response.data.preferredCurrency;
 
         const currencyResponse = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -320,7 +320,7 @@ export default function SavedActivities() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "http://localhost:4000/tourist/saved-activities",
+        "https://trip-genie-apis.vercel.app/tourist/saved-activities",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },

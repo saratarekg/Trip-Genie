@@ -235,7 +235,7 @@ const SingleActivityAdmin = ({ activityId }) => {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.post(
-        "http://localhost:4000/tourist/book-transportation",
+        "https://trip-genie-apis.vercel.app/tourist/book-transportation",
         {
           touristID: currentUser,
           transportationID: selectedTransportation._id,
@@ -402,7 +402,7 @@ const SingleActivityAdmin = ({ activityId }) => {
       const token = Cookies.get("jwt");
 
       const response = await fetch(
-        `http://localhost:4000/${userRole}/activities/${activity._id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/activities/${activity._id}`,
         {
          method: "PUT",
 mode: "no-cors",
@@ -430,7 +430,7 @@ mode: "no-cors",
       const totalPrice = calculateTotalPrice();
 
       const response = await fetch(
-        `http://localhost:4000/${userRole}/activityBooking`,
+        `https://trip-genie-apis.vercel.app/${userRole}/activityBooking`,
         {
           method: "POST",
    
@@ -498,7 +498,7 @@ mode: "no-cors",
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          `http://localhost:4000/${userRole}/activities/${activityIdToUse}`,
+          `https://trip-genie-apis.vercel.app/${userRole}/activities/${activityIdToUse}`,
           {
             credentials: "include",
             headers: {
@@ -563,7 +563,7 @@ mode: "no-cors",
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          `http://localhost:4000/${userRole}/touristActivityAttendedBookings`,
+          `https://trip-genie-apis.vercel.app/${userRole}/touristActivityAttendedBookings`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -581,7 +581,7 @@ mode: "no-cors",
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist/touristActivityBookings",
+          "https://trip-genie-apis.vercel.app/tourist/touristActivityBookings",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -612,7 +612,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
+        `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
    
@@ -645,7 +645,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${activity.currency}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/getCurrency/${activity.currency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -683,7 +683,7 @@ mode: "no-cors",
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -692,7 +692,7 @@ mode: "no-cors",
         const currencyId = response.data.preferredCurrency;
 
         const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -739,7 +739,7 @@ mode: "no-cors",
           additionalTickets;
 
       const response = await axios.put(
-        `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/activityBooking/${userBooking._id}`,
         {
           numberOfTickets,
           paymentAmount: additionalPrice,
@@ -774,7 +774,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/activities/${id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/activities/${id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -832,7 +832,7 @@ mode: "no-cors",
   const handleActivityRating = async () => {
     try {
       const response = await fetch(
-        `http://localhost:4000/${userRole}/activities/rate/${id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/activities/rate/${id}`,
         {
           method: "POST",
    
@@ -874,8 +874,8 @@ mode: "no-cors",
     try {
       const method = userComment ? "PUT" : "POST";
       const url = userComment
-        ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
-        : `http://localhost:4000/${userRole}/activities/comment/${id}`;
+        ? `https://trip-genie-apis.vercel.app/${userRole}/activities/updateComment/${id}`
+        : `https://trip-genie-apis.vercel.app/${userRole}/activities/comment/${id}`;
 
       const response = await fetch(url, {
         method: method,
@@ -906,8 +906,8 @@ mode: "no-cors",
     try {
       const method = userComment ? "PUT" : "POST";
       const url = userComment
-        ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
-        : `http://localhost:4000/${userRole}/activities/comment/${id}`;
+        ? `https://trip-genie-apis.vercel.app/${userRole}/activities/updateComment/${id}`
+        : `https://trip-genie-apis.vercel.app/${userRole}/activities/comment/${id}`;
 
       const response = await fetch(url, {
         method: method,

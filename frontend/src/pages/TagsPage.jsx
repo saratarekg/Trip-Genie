@@ -37,7 +37,7 @@ export function TagsPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "http://localhost:4000/admin/tags",
+        "https://trip-genie-apis.vercel.app/admin/tags",
         {
           credentials: "include",
           headers: {
@@ -67,7 +67,7 @@ export function TagsPage() {
       try {
         const token = Cookies.get("jwt");
         await axios.post(
-          "http://localhost:4000/admin/tags",
+          "https://trip-genie-apis.vercel.app/admin/tags",
           { type: newTag },
           {
             credentials: "include",
@@ -92,7 +92,7 @@ export function TagsPage() {
       try {
         const token = Cookies.get("jwt");
         await axios.put(
-          `http://localhost:4000/admin/tags/${editTagId}`,
+          `https://trip-genie-apis.vercel.app/admin/tags/${editTagId}`,
           { type: editTagName },
           {
             credentials: "include",
@@ -117,7 +117,7 @@ export function TagsPage() {
     try {
       const token = Cookies.get("jwt");
       await axios.delete(
-        `http://localhost:4000/admin/tags/${tagId}`,
+        `https://trip-genie-apis.vercel.app/admin/tags/${tagId}`,
         {
           credentials: "include",
           headers: {

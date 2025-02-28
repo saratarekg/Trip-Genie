@@ -49,7 +49,7 @@ const ProductCard = ({ product, onSelect, userInfo }) => {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`,
+        `https://trip-genie-apis.vercel.app/${userInfo.role}/getCurrency/${product.currency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -137,7 +137,7 @@ export function MyProducts() {
     if (role === "admin" || role === "seller") {
       try {
         const response = await axios.get(
-          `http://localhost:4000/${role}/`,
+          `https://trip-genie-apis.vercel.app/${role}/`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -163,7 +163,7 @@ export function MyProducts() {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(
-      `http://localhost:4000/${role}/max-price-products-my`
+      `https://trip-genie-apis.vercel.app/${role}/max-price-products-my`
     );
     const response = await fetch(url, {
       credentials: "include",
@@ -184,7 +184,7 @@ export function MyProducts() {
         const token = Cookies.get("jwt");
         const role = getUserRole();
         const url = new URL(
-          `http://localhost:4000/${role}/products?myproducts=true`
+          `https://trip-genie-apis.vercel.app/${role}/products?myproducts=true`
         );
 
         if (params.searchBy)

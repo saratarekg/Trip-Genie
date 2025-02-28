@@ -281,7 +281,7 @@ const ProductDetail = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
+        `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
    
@@ -314,7 +314,7 @@ const ProductDetail = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${product.currency}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/getCurrency/${product.currency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -353,7 +353,7 @@ const ProductDetail = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -362,7 +362,7 @@ const ProductDetail = () => {
         const currencyId = response.data.preferredCurrency;
 
         const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -500,7 +500,7 @@ const ProductDetail = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          `http://localhost:4000/${userRole}/products/${id}`,
+          `https://trip-genie-apis.vercel.app/${userRole}/products/${id}`,
           {
             credentials: "include",
             headers: {
@@ -559,7 +559,7 @@ const ProductDetail = () => {
 
         // Fetch user's purchases
         const purchasesResponse = await fetch(
-          "http://localhost:4000/tourist/purchase",
+          "https://trip-genie-apis.vercel.app/tourist/purchase",
           {
             credentials: "include",
             headers: {
@@ -599,7 +599,7 @@ const ProductDetail = () => {
   //   try {
   //     const token = Cookies.get("jwt");
   //     const response = await fetch(
-  //       `http://localhost:4000/${userRole}/products/${id}/reviews?rating=${rating}`,
+  //       `https://trip-genie-apis.vercel.app/${userRole}/products/${id}/reviews?rating=${rating}`,
   //       {
   //          credentials: "include", headers: {
   //           Authorization: `Bearer ${token}`,
@@ -625,7 +625,7 @@ const ProductDetail = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/archiveproducts/${id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/archiveproducts/${id}`,
         {
          method: "PUT",
 mode: "no-cors",
@@ -665,7 +665,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/products/${id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/products/${id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -706,7 +706,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        "http://localhost:4000/tourist/product/addToCart",
+        "https://trip-genie-apis.vercel.app/tourist/product/addToCart",
         {
           method: "POST",
    
@@ -739,7 +739,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/tourist/product/addToWishlist/${id}`,
+        `https://trip-genie-apis.vercel.app/tourist/product/addToWishlist/${id}`,
         {
           method: "POST",
    
@@ -765,7 +765,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/tourist/remove/wishlist/${id}`,
+        `https://trip-genie-apis.vercel.app/tourist/remove/wishlist/${id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -796,7 +796,7 @@ mode: "no-cors",
 
       // Make the POST request to purchase the single product
       const response = await fetch(
-        "http://localhost:4000/tourist/purchase",
+        "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
    
@@ -850,7 +850,7 @@ mode: "no-cors",
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/tourist/product/rate/${id}`,
+        `https://trip-genie-apis.vercel.app/tourist/product/rate/${id}`,
         {
           method: "POST",
    
@@ -871,7 +871,7 @@ mode: "no-cors",
       setShowRatingDialog(false);
       // Refresh product details to show updated rating
       const updatedProductResponse = await fetch(
-        `http://localhost:4000/${userRole}/products/${id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/products/${id}`,
         {
           credentials: "include",
           headers: {
@@ -893,8 +893,8 @@ mode: "no-cors",
       const token = Cookies.get("jwt");
       const method = userReview ? "PUT" : "POST";
       const url = userReview
-        ? `http://localhost:4000/tourist/product/updateComment/${id}`
-        : `http://localhost:4000/tourist/product/comment/${id}`;
+        ? `https://trip-genie-apis.vercel.app/tourist/product/updateComment/${id}`
+        : `https://trip-genie-apis.vercel.app/tourist/product/comment/${id}`;
 
       const response = await fetch(url, {
         method: method,
@@ -984,8 +984,8 @@ mode: "no-cors",
       const token = Cookies.get("jwt");
       const method = userReview ? "PUT" : "POST";
       const url = userReview
-        ? `http://localhost:4000/tourist/product/updateComment/${id}`
-        : `http://localhost:4000/tourist/product/comment/${id}`;
+        ? `https://trip-genie-apis.vercel.app/tourist/product/updateComment/${id}`
+        : `https://trip-genie-apis.vercel.app/tourist/product/comment/${id}`;
 
       const response = await fetch(url, {
         method: method,

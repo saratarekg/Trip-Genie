@@ -195,7 +195,7 @@ export default function TravelPreferences() {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/rates"
+        "https://trip-genie-apis.vercel.app/rates"
       );
       return response.data.rates;
     } catch (error) {
@@ -208,7 +208,7 @@ export default function TravelPreferences() {
     const token = Cookies.get("jwt");
     try {
       const response = await axios.get(
-        "http://localhost:4000/tourist/",
+        "https://trip-genie-apis.vercel.app/tourist/",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -217,7 +217,7 @@ export default function TravelPreferences() {
       const currencyId = response.data.preferredCurrency;
 
       const currencyResponse = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+        `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -248,14 +248,14 @@ export default function TravelPreferences() {
           exchangeRates,
           userInfo,
         ] = await Promise.all([
-          axios.get("http://localhost:4000/tourist/preferences", {
+          axios.get("https://trip-genie-apis.vercel.app/tourist/preferences", {
             headers,
           }),
-          axios.get("http://localhost:4000/api/getAllLanguages"),
-          axios.get("http://localhost:4000/api/getAllCategories"),
-          axios.get("http://localhost:4000/api/getAllTypes"),
+          axios.get("https://trip-genie-apis.vercel.app/api/getAllLanguages"),
+          axios.get("https://trip-genie-apis.vercel.app/api/getAllCategories"),
+          axios.get("https://trip-genie-apis.vercel.app/api/getAllTypes"),
           axios.get(
-            "http://localhost:4000/api/getAllHistoricalTypes"
+            "https://trip-genie-apis.vercel.app/api/getAllHistoricalTypes"
           ),
 
           fetchExchangeRates(),
@@ -343,7 +343,7 @@ export default function TravelPreferences() {
       };
 
       await axios.put(
-        "http://localhost:4000/tourist/preferences",
+        "https://trip-genie-apis.vercel.app/tourist/preferences",
         updatedData,
         { headers }
       );

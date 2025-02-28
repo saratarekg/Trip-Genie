@@ -81,7 +81,7 @@ export default function AdvertiserNotificationsPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `http://localhost:4000/advertiser/notifications`,
+        `https://trip-genie-apis.vercel.app/advertiser/notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -126,7 +126,7 @@ export default function AdvertiserNotificationsPage() {
   const markNotificationsAsSeen = async () => {
     try {
       await axios.post(
-        `http://localhost:4000/advertiser/mark-notifications-seen`,
+        `https://trip-genie-apis.vercel.app/advertiser/mark-notifications-seen`,
         {},
         {
           credentials: "include",
@@ -149,7 +149,7 @@ export default function AdvertiserNotificationsPage() {
   const markNotificationAsSeen = async (notificationId) => {
     try {
       await axios.post(
-        `http://localhost:4000/advertiser/notifications/markAsSeen/${notificationId}`,
+        `https://trip-genie-apis.vercel.app/advertiser/notifications/markAsSeen/${notificationId}`,
         {},
         {
           credentials: "include",

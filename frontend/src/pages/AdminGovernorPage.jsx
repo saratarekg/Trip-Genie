@@ -78,7 +78,7 @@ const AdminGovernorPage = () => {
 
       if (values.type === "admin") {
         response = await fetch(
-          "http://localhost:4000/admin/admins",
+          "https://trip-genie-apis.vercel.app/admin/admins",
           {
             method: "POST",
    
@@ -92,7 +92,7 @@ const AdminGovernorPage = () => {
         );
       } else {
         response = await fetch(
-          "http://localhost:4000/admin/governors",
+          "https://trip-genie-apis.vercel.app/admin/governors",
           {
             method: "POST",
    

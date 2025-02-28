@@ -152,7 +152,7 @@ const ShoppingCart = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:4000/tourist/get/promo-code",
+        "https://trip-genie-apis.vercel.app/tourist/get/promo-code",
         {
           method: "POST",
    
@@ -210,7 +210,7 @@ const ShoppingCart = () => {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/rates"
+        "https://trip-genie-apis.vercel.app/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {
@@ -221,7 +221,7 @@ const ShoppingCart = () => {
   const fetchCurrencies = useCallback(async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/tourist/currencies",
+        "https://trip-genie-apis.vercel.app/tourist/currencies",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -240,7 +240,7 @@ const ShoppingCart = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "http://localhost:4000/tourist/",
+        "https://trip-genie-apis.vercel.app/tourist/",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -251,7 +251,7 @@ const ShoppingCart = () => {
       setCurrentPromoCode(response.data.currentPromoCode || "");
 
       const response2 = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+        `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -284,7 +284,7 @@ const ShoppingCart = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        "http://localhost:4000/tourist/cart",
+        "https://trip-genie-apis.vercel.app/tourist/cart",
         {
           credentials: "include",
           headers: {
@@ -342,7 +342,7 @@ const ShoppingCart = () => {
       setCartItems([]);
       const token = Cookies.get("jwt");
       const emptyCartResponse = await fetch(
-        "http://localhost:4000/tourist/empty/cart",
+        "https://trip-genie-apis.vercel.app/tourist/empty/cart",
         {
           method: "DELETE",
           credentials: "include",
@@ -369,7 +369,7 @@ const ShoppingCart = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/tourist/remove/cart/${productId}`,
+        `https://trip-genie-apis.vercel.app/tourist/remove/cart/${productId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -398,7 +398,7 @@ const ShoppingCart = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/tourist/update/cart`,
+        `https://trip-genie-apis.vercel.app/tourist/update/cart`,
         {
          method: "PUT",
 mode: "no-cors",
@@ -457,7 +457,7 @@ mode: "no-cors",
       }));
 
       const response = await fetch(
-        "http://localhost:4000/tourist/purchase",
+        "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
    

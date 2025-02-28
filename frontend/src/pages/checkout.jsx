@@ -165,7 +165,7 @@ export default function CheckoutPage() {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -195,7 +195,7 @@ export default function CheckoutPage() {
         personalDetailsForm.setValue("phone", userData.mobile || "");
 
         const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -212,7 +212,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.post(
-        "http://localhost:4000/tourist/addAddress",
+        "https://trip-genie-apis.vercel.app/tourist/addAddress",
         addressData,
         {
           credentials: "include",
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
 
       if (response.status === 200) {
         const userResponse = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "http://localhost:4000/tourist/cart",
+        "https://trip-genie-apis.vercel.app/tourist/cart",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -266,7 +266,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
+        `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
    
@@ -297,7 +297,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${cartItems[0]?.product.currency}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/getCurrency/${cartItems[0]?.product.currency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -392,7 +392,7 @@ export default function CheckoutPage() {
       }));
 
       const response = await fetch(
-        "http://localhost:4000/tourist/purchase",
+        "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
    
@@ -443,7 +443,7 @@ export default function CheckoutPage() {
 
       const token = Cookies.get("jwt");
       const emptyCartResponse = await fetch(
-        "http://localhost:4000/tourist/empty/cart",
+        "https://trip-genie-apis.vercel.app/tourist/empty/cart",
         {
           method: "DELETE",
           credentials: "include",
@@ -467,7 +467,7 @@ export default function CheckoutPage() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.post(
-        "http://localhost:4000/tourist/addCard",
+        "https://trip-genie-apis.vercel.app/tourist/addCard",
         cardData,
         {
           credentials: "include",
@@ -478,7 +478,7 @@ export default function CheckoutPage() {
       if (response.status === 200) {
         // Refetch user cards
         const userResponse = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },

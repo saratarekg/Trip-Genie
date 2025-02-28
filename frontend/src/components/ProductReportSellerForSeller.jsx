@@ -82,7 +82,7 @@ const ProductReport = () => {
         const token = Cookies.get("jwt");
         const role = getUserRole();
         const url = new URL(
-          `http://localhost:4000/${role}/sales-report`
+          `https://trip-genie-apis.vercel.app/${role}/sales-report`
         );
 
         ["day", "month", "year"].forEach((key) => {

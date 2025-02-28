@@ -4,6 +4,7 @@ import { db, collection, addDoc, updateDoc, serverTimestamp, query, where, getDo
 
 // Function to initialize a session
 const startSession = async (userId) => {
+    if (userId === null) return;
     const sessionsRef = collection(db, "sessions");
 
     // Check if an active session exists (session without an endTime)
@@ -66,24 +67,6 @@ export const useSessionTracker = (userId) => {
             }
         };
     }, [userId]); // Runs only when userId changes
-
-
-    useEffect(() => {
-        const handleTabClose = async () => {
-            // Check if session exists
-            if (session) {
-                console.log("Tab is closing, ending session...");
-               endSession()
-            }
-        };
-
-        // Use `pagehide` instead of `beforeunload` (better compatibility)
-        window.addEventListener("pagehide", handleTabClose);
-
-        return () => {
-            window.removeEventListener("pagehide", handleTabClose);
-        };
-    }, []);
 
     // Function to reset inactivity timer
     const resetInactivityTimer = () => {

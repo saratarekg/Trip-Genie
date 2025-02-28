@@ -52,7 +52,7 @@ const touristSchema = new Schema(
       trim: true,
     },
     accessibility: {
-      type: String, // Change from ObjectId to String
+      type: String,
       ref: "Accessibility",
       required: false,
       trim: true,

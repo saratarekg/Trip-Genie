@@ -129,7 +129,7 @@ const login = async (req, res) => {
       throw new Error("Email not found");
     }
 
-    console.log(user._id)
+    // console.log(user._id)
     const token = createToken(user._id, role);
     res.cookie("role", role, {
       httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
@@ -159,7 +159,7 @@ const login = async (req, res) => {
 
 const advertiserSignup = async (req, res) => {
   try {
-    const { password, name, description, website, hotline } = req.body;
+    const { password, name, description, website, hotline, accessibility } = req.body;
     let { email, username } = req.body;
     email = email.toLowerCase();
     username = username.toLowerCase();
@@ -190,6 +190,7 @@ const advertiserSignup = async (req, res) => {
       username,
       password,
       name,
+      accessibility,
       description,
       website,
       hotline,
@@ -216,6 +217,7 @@ const tourGuideSignup = async (req, res) => {
       password,
       name,
       nationality,
+      accessibility,
       mobile,
       yearsOfExperience,
       previousWorks,
@@ -255,6 +257,7 @@ const tourGuideSignup = async (req, res) => {
       password,
       name,
       nationality,
+      accessibility,
       mobile,
       yearsOfExperience,
       previousWorks: JSON.parse(previousWorks),
@@ -278,7 +281,7 @@ const tourGuideSignup = async (req, res) => {
 
 const sellerSignup = async (req, res) => {
   try {
-    const { password, name, description, mobile } = req.body;
+    const { password, name, description, mobile, accessibility } = req.body;
     let { email, username } = req.body;
     email = email.toLowerCase();
     username = username.toLowerCase();
@@ -312,6 +315,7 @@ const sellerSignup = async (req, res) => {
       description,
       mobile,
       logo,
+      accessibility,
       files: { IDFilename, taxationRegistryCardFilename },
     });
 

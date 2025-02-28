@@ -82,7 +82,7 @@ export default function SellerNotificationsPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `http://localhost:4000/seller/notifications`,
+        `https://trip-genie-apis.vercel.app/seller/notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -127,7 +127,7 @@ export default function SellerNotificationsPage() {
   const markNotificationsAsSeen = async () => {
     try {
       await axios.post(
-        `http://localhost:4000/seller/mark-notifications-seen`,
+        `https://trip-genie-apis.vercel.app/seller/mark-notifications-seen`,
         {},
         {
           credentials: "include",
@@ -150,7 +150,7 @@ export default function SellerNotificationsPage() {
   const markNotificationAsSeen = async (notificationId) => {
     try {
       await axios.post(
-        `http://localhost:4000/seller/notifications/markAsSeen/${notificationId}`,
+        `https://trip-genie-apis.vercel.app/seller/notifications/markAsSeen/${notificationId}`,
         {},
         {
           credentials: "include",

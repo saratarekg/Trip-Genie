@@ -129,7 +129,7 @@ export default function TransportationPage() {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist",
+          "https://trip-genie-apis.vercel.app/tourist",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -173,7 +173,7 @@ export default function TransportationPage() {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -182,7 +182,7 @@ export default function TransportationPage() {
         const currencyId = response.data.preferredCurrency;
 
         const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -198,7 +198,7 @@ export default function TransportationPage() {
   const fetchRates = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/rates"
+        "https://trip-genie-apis.vercel.app/rates"
       );
       setRates(response.data.rates);
     } catch (error) {
@@ -212,7 +212,7 @@ export default function TransportationPage() {
       const token = Cookies.get("jwt");
       const role = Cookies.get("role");
       const response = await axios.get(
-        `http://localhost:4000/${role}/transportations`,
+        `https://trip-genie-apis.vercel.app/${role}/transportations`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -302,7 +302,7 @@ export default function TransportationPage() {
       bookingProcessedRef.current = true;
       const token = Cookies.get("jwt");
       const response = await axios.post(
-        "http://localhost:4000/tourist/book-transportation",
+        "https://trip-genie-apis.vercel.app/tourist/book-transportation",
         {
           transportationID: selectedTransportID,
           seatsToBook: seatsToBook,
@@ -373,7 +373,7 @@ export default function TransportationPage() {
       if (sessionId && success === "true") {
         try {
           const response = await axios.get(
-            `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+            `https://trip-genie-apis.vercel.app/check-payment-status?session_id=${sessionId}`
           );
 
           console.log("Payment status response:", response.data);
@@ -429,7 +429,7 @@ export default function TransportationPage() {
       data.isStandAlone = true;
 
       const response = await axios.post(
-        `http://localhost:4000/${role}/transportations`,
+        `https://trip-genie-apis.vercel.app/${role}/transportations`,
         data,
         {
           credentials: "include",
@@ -462,7 +462,7 @@ export default function TransportationPage() {
       const role = Cookies.get("role");
 
       const response = await axios.put(
-        `http://localhost:4000/${role}/transportations/${editingTransportation._id}`,
+        `https://trip-genie-apis.vercel.app/${role}/transportations/${editingTransportation._id}`,
         data,
         {
           credentials: "include",
@@ -521,7 +521,7 @@ export default function TransportationPage() {
       const token = Cookies.get("jwt");
       const role = Cookies.get("role");
       await axios.delete(
-        `http://localhost:4000/${role}/transportations/${id}`,
+        `https://trip-genie-apis.vercel.app/${role}/transportations/${id}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },

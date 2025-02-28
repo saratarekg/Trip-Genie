@@ -66,7 +66,7 @@ function UserGrowthChart() {
 
       for (let month = 0; month < 12; month++) {
         const response = await axios.get(
-          `http://localhost:4000/admin/users-report?month=${
+          `https://trip-genie-apis.vercel.app/admin/users-report?month=${
             month + 1
           }&year=${currentYear}`,
           {
@@ -140,7 +140,7 @@ export function Dashboard({ setActiveTab }) {
     ]);
   }, []);
 
-  // fetch http://localhost:4000/admin/sales-report
+  // fetch https://trip-genie-apis.vercel.app/admin/sales-report
 
   // const fetchSalesReportLastMonth = async () => {
   //   try {
@@ -155,7 +155,7 @@ export function Dashboard({ setActiveTab }) {
   //       lastMonthYear = lastMonthYear - 1;
   //     }
 
-  //     const response = await axios.get( `http://localhost:4000/admin/sales-report?month=${lastMonth}&year=${lastMonthYear}`,
+  //     const response = await axios.get( `https://trip-genie-apis.vercel.app/admin/sales-report?month=${lastMonth}&year=${lastMonthYear}`,
   //       {  credentials: "include", headers: { Authorization: `Bearer ${Cookies.get("jwt")}` } }
   //     );
   //     setTotalRevenueLastMonth(response.data.totalAdminSalesRevenue);
@@ -167,7 +167,7 @@ export function Dashboard({ setActiveTab }) {
   const fetchSalesReport = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/admin/sales-report",
+        "https://trip-genie-apis.vercel.app/admin/sales-report",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -190,7 +190,7 @@ export function Dashboard({ setActiveTab }) {
   const fetchPageVisits = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/visit-count"
+        "https://trip-genie-apis.vercel.app/visit-count"
       );
       setPageVisits(response.data.visitCount.count);
       setPageVisitsToday(response.data.visitCount.dailyCount);
@@ -236,7 +236,7 @@ export function Dashboard({ setActiveTab }) {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/admin/notifications`,
+        `https://trip-genie-apis.vercel.app/admin/notifications`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -258,7 +258,7 @@ export function Dashboard({ setActiveTab }) {
   const markNotificationAsSeen = async (notificationId) => {
     try {
       await axios.post(
-        `http://localhost:4000/admin/notifications/markAsSeen/${notificationId}`,
+        `https://trip-genie-apis.vercel.app/admin/notifications/markAsSeen/${notificationId}`,
         {},
         {
           credentials: "include",
@@ -281,7 +281,7 @@ export function Dashboard({ setActiveTab }) {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "http://localhost:4000/admin/admin-info",
+        "https://trip-genie-apis.vercel.app/admin/admin-info",
         {
           credentials: "include",
           headers: {

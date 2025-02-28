@@ -30,7 +30,7 @@ export function Activities() {
         if (role === undefined) role = "guest";
         if (role !== "tourist" && role !== "advertiser" && role != "guest")
           return;
-        const api = `http://localhost:4000/${role}/activities`;
+        const api = `https://trip-genie-apis.vercel.app/${role}/activities`;
         const response = await axios.get(api, {
           credentials: "include",
           headers: {
@@ -56,7 +56,7 @@ export function Activities() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
+        `https://trip-genie-apis.vercel.app/${userRole}/populate`,
         {
           method: "POST",
    
@@ -89,7 +89,7 @@ export function Activities() {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${activityCurrency}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/getCurrency/${activityCurrency}`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -123,7 +123,7 @@ export function Activities() {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -131,7 +131,7 @@ export function Activities() {
         );
         const currencyId = response.data.preferredCurrency;
         const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },

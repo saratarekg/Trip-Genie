@@ -104,7 +104,7 @@ export default function UpdateHistoricalPlace() {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          `http://localhost:4000/tourism-governor/currencies`,
+          `https://trip-genie-apis.vercel.app/tourism-governor/currencies`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -126,7 +126,7 @@ export default function UpdateHistoricalPlace() {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          `http://localhost:4000/${userRole}/historical-places/${id}`,
+          `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
           {
      
             credentials: "include",
@@ -216,7 +216,7 @@ export default function UpdateHistoricalPlace() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/historical-tag`,
+        `https://trip-genie-apis.vercel.app/${userRole}/historical-tag`,
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -430,7 +430,7 @@ export default function UpdateHistoricalPlace() {
       });
 
       const response = await axios.put(
-        `http://localhost:4000/${userRole}/historical-places/${id}`,
+        `https://trip-genie-apis.vercel.app/${userRole}/historical-places/${id}`,
         formData,
         {
           credentials: "include",

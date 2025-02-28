@@ -81,7 +81,7 @@ export default function NotificationsPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `http://localhost:4000/tourist/notifications`,
+        `https://trip-genie-apis.vercel.app/tourist/notifications`,
         {
    
           credentials: "include",
@@ -127,7 +127,7 @@ export default function NotificationsPage() {
   const markNotificationsAsSeen = async () => {
     try {
       await axios.post(
-        `http://localhost:4000/tourist/mark-notifications-seen`,
+        `https://trip-genie-apis.vercel.app/tourist/mark-notifications-seen`,
         {},
         {
           credentials: "include",
@@ -150,7 +150,7 @@ export default function NotificationsPage() {
   const markNotificationAsSeen = async (notificationId) => {
     try {
       await axios.post(
-        `http://localhost:4000/tourist/notifications/markAsSeen/${notificationId}`,
+        `https://trip-genie-apis.vercel.app/tourist/notifications/markAsSeen/${notificationId}`,
         {},
         {
           credentials: "include",

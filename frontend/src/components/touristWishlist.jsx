@@ -49,7 +49,7 @@ const WishlistPage = () => {
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/rates"
+        "https://trip-genie-apis.vercel.app/rates"
       );
       setExchangeRates(response.data.rates);
     } catch (error) {
@@ -61,7 +61,7 @@ const WishlistPage = () => {
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
-        "http://localhost:4000/tourist/currencies",
+        "https://trip-genie-apis.vercel.app/tourist/currencies",
         {
           credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
@@ -108,7 +108,7 @@ const WishlistPage = () => {
         }
 
         const response = await axios.get(
-          "http://localhost:4000/tourist/",
+          "https://trip-genie-apis.vercel.app/tourist/",
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -118,7 +118,7 @@ const WishlistPage = () => {
 
         if (currencyId) {
           const response2 = await axios.get(
-            `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+            `https://trip-genie-apis.vercel.app/tourist/getCurrency/${currencyId}`,
             {
               credentials: "include",
               headers: { Authorization: `Bearer ${token}` },
@@ -151,7 +151,7 @@ const WishlistPage = () => {
       }
 
       const response = await fetch(
-        "http://localhost:4000/tourist/wishlist",
+        "https://trip-genie-apis.vercel.app/tourist/wishlist",
         {
           credentials: "include",
           headers: {
@@ -213,7 +213,7 @@ const WishlistPage = () => {
       }
 
       const response = await fetch(
-        `http://localhost:4000/tourist/remove/wishlist/${productId}`,
+        `https://trip-genie-apis.vercel.app/tourist/remove/wishlist/${productId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -249,7 +249,7 @@ const WishlistPage = () => {
       }
 
       const response = await fetch(
-        `http://localhost:4000/tourist/move/wishlist/${productId}`,
+        `https://trip-genie-apis.vercel.app/tourist/move/wishlist/${productId}`,
         {
          method: "PUT",
 mode: "no-cors",
@@ -281,7 +281,7 @@ mode: "no-cors",
       }
 
       const response = await fetch(
-        "http://localhost:4000/tourist/move/all/wishlist",
+        "https://trip-genie-apis.vercel.app/tourist/move/all/wishlist",
         {
          method: "PUT",
 mode: "no-cors",
@@ -313,7 +313,7 @@ mode: "no-cors",
       }
 
       const response = await fetch(
-        "http://localhost:4000/tourist/remove/all/wishlist",
+        "https://trip-genie-apis.vercel.app/tourist/remove/all/wishlist",
         {
           method: "DELETE",
           credentials: "include",

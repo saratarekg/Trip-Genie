@@ -56,7 +56,8 @@ const Login = () => {
     console.log("Logging out...");
     try {
       const response = await fetch(
-        "http://localhost:4000/auth/logout"
+        "https://trip-genie-apis.vercel.app/auth/logout"
+
       );
 
       if (response.ok) {
@@ -163,7 +164,7 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:4000/auth/forgot-password",
+        "https://trip-genie-apis.vercel.app/auth/forgot-password",
         {
           method: "POST",
           credentials: "include",
@@ -193,7 +194,7 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:4000/auth/verify-otp",
+        "https://trip-genie-apis.vercel.app/auth/verify-otp",
         {
           method: "POST",
    
@@ -226,7 +227,7 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:4000/auth/reset-password",
+        "https://trip-genie-apis.vercel.app/auth/reset-password",
         {
           method: "POST",
    
