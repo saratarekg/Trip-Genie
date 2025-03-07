@@ -71,9 +71,9 @@ export const useSessionTracker = (userId) => {
     // Function to reset inactivity timer
     const resetInactivityTimer = () => {
         if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
-        inactivityTimer.current = setTimeout(() => {
+        inactivityTimer.current = setTimeout(async () => {
             console.log("Session ended due to inactivity");
-            endSession();
+            await endSession();
         }, 600000); // 10 minutes (600,000 ms)
     };
 

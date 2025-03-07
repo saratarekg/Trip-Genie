@@ -71,7 +71,7 @@ export function FooterComponent() {
         <ul className="text-gray-300">
           {items.map((item, index) => (
               <li key={index} className="mb-2"
-                  onClick={() => logInteraction(location.pathname, 'click', {tagName: 'a', content: `${item.name}`,location:'footer',classList: [], id: 'no-id'})}>
+                  onClick={() => logInteraction(location.pathname, 'click', {tagName: 'a', content: `footer_${item.name}`,classList: [], id: 'no-id'})}>
                 <a href={item.link} className="hover:underline">
                   {item.name}
                 </a>

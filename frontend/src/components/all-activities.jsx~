@@ -612,9 +612,7 @@ export default function AllActivities() {
 
   const handleActivitySelect = useCallback(
     (id) => {
-      setTimeout(() => navigate(`/activity/${id}`), 100);
-
-      // navigate(`/activity/${id}`);
+      navigate(`/activity/${id}`);
     },
     [navigate]
   );

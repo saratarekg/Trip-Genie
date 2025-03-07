@@ -399,7 +399,6 @@ export function NavbarComponent() {
             <div className="flex-shrink-0 ml-8">
               <Link to="/" className="flex items-center">
                 <img
-                    id={'logo'}
                   src={logo}
                   alt="logo"
                   onClick={() => setIsCartOpen(false)}

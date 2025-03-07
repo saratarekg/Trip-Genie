@@ -520,11 +520,7 @@ export function AllProducts() {
   ]);
 
   const handleProductSelect = (id) => {
-    event.preventDefault(); // Prevent immediate navigation
-
-    // Small delay to ensure logging completes before navigation
-    setTimeout(() => navigate(`/product/${id}`), 100);
-    // navigate(`/product/${id}`);
+    navigate(`/product/${id}`);
   };
 
   const handlePageChange = (pageNumber) => {

@@ -84,7 +84,6 @@ import TouristActivitiesPage from "@/pages/TouristActivitiesPage";
 import NavigationLogger from "@/utils/logging/components/navigationLogger.js";
 import {SessionProvider} from "@/utils/logging/components/sessionContext.jsx";
 import axios from "axios";
-import GlobalEventLogger from "@/utils/logging/components/globalEventLogger.js";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -722,7 +721,6 @@ function App() {
             <SessionProvider userId={userId}>
                 <Router>
                     {/*<NavigationLogger />*/}
-                    <GlobalEventLogger />
                     <AppContent/>
                 </Router>
             </SessionProvider>

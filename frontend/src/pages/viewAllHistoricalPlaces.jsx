@@ -365,7 +365,8 @@ export default function AllHistoricalPlacesComponent() {
   };
 
   const handleHistoricalPlaceSelect = (id) => {
-    navigate(`/historical-place/${id}`);
+    setTimeout(() => navigate(`/historical-place/${id}`), 100);
+    // navigate(`/historical-place/${id}`);
   };
 
   const handlePageChange = (pageNumber) => {
