@@ -872,6 +872,7 @@ const ItineraryDetail = ({ id, onBack }) => {
         `https://trip-genie-apis.vercel.app/${userRole}/itineraryBooking`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -951,7 +952,8 @@ const ItineraryDetail = ({ id, onBack }) => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/${userRole}/itineraries/${itinerary._id}`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1078,7 +1080,8 @@ const ItineraryDetail = ({ id, onBack }) => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/${userRole}/itineraries-activation/${id}`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1151,6 +1154,7 @@ const ItineraryDetail = ({ id, onBack }) => {
         `https://trip-genie-apis.vercel.app/${userRole}/tourguide/rate/${tourGuideProfile._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -1184,6 +1188,7 @@ const ItineraryDetail = ({ id, onBack }) => {
         `https://trip-genie-apis.vercel.app/${userRole}/tourguide/comment/${tourGuideProfile._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -1292,6 +1297,7 @@ const ItineraryDetail = ({ id, onBack }) => {
         `https://trip-genie-apis.vercel.app/${userRole}/itinerary/rate/${itinerary._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

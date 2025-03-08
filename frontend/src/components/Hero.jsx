@@ -1,17 +1,20 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import hero1 from "../assets/images/hero1.png";
 import hero2 from "../assets/images/hero2.png";
 import hero3 from "../assets/images/hero3.png";
 import heroArrow from "../assets/images/heroArrow.svg";
 
 import "../styles/Hero.css";
-
+import { useSession } from "@/utils/logging/components/sessionContext.jsx";
 const Navbar = () => {
+    const { logInteraction } = useSession();
+
+
     return (
         <div className="heroContainer">
             <div className="imgW ">
-                <img src={hero1} alt="hero1" className="heroImg1" />
+                <img src={hero1} alt="hero1" className="heroImg1"  onClick={() => logInteraction("button_click", "Clicked Start")}/>
                 <Link to={"/"}>
 
                     <p className="heroLinks">Activities</p>

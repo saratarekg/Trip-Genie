@@ -463,7 +463,7 @@ const ActivityDetail = () => {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(
-      "https://trip-genie-acl.vercel.app/activity/" + id
+      "localhost:3000/activity/" + id
     );
     setIsToastOpen(true);
     setOpen(false);
@@ -517,7 +517,8 @@ const ActivityDetail = () => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/${userRole}/activities/${activity._id}`,
         {
-          method: "PUT",
+         method: "PUT",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -922,6 +923,7 @@ const ActivityDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/activityBooking`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -1077,6 +1079,7 @@ const ActivityDetail = () => {
         `https://trip-genie-apis.vercel.app/${userRole}/activities/rate/${id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -2134,7 +2137,7 @@ const ActivityDetail = () => {
                 ).toFixed(2)}
                 currency={userPreferredCurrency.code}
                 symbol={userPreferredCurrency.symbol}
-                returnLoc={"https://trip-genie-acl.vercel.app/activity/" + id}
+                returnLoc={"http://localhost:3000/activity/" + id}
                 error={bookingError}
                 setError={setBookingError}
                 promoDetails={promoDetails}

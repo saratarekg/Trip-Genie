@@ -40,6 +40,7 @@ import {
   ArchiveIcon,
   Package,
 } from "lucide-react";
+import {useSession} from "@/utils/logging/components/sessionContext.jsx";
 
 const NavLinkIcon = ({ to, children }) => (
   <Link
@@ -93,6 +94,7 @@ export function NavbarComponent() {
 
   const [key, setKey] = useState(0);
   const location = useLocation();
+  // const { logInteraction } = useSession();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
@@ -374,6 +376,7 @@ export function NavbarComponent() {
 
   const promoBanner = <PromoBanner setPromoMargin={setPromoBannerMargin} />;
 
+
   return (
     <div style={{ marginBottom: `${promoBannerMargin}px` }}>
       <nav
@@ -396,6 +399,7 @@ export function NavbarComponent() {
             <div className="flex-shrink-0 ml-8">
               <Link to="/" className="flex items-center">
                 <img
+                    id={'logo'}
                   src={logo}
                   alt="logo"
                   onClick={() => setIsCartOpen(false)}
@@ -536,69 +540,76 @@ export function NavbarComponent() {
                 )}
                 {role === "tourist" && (
                   <>
-                    <NavLink to="/activity" className="navbar-activities">
-                      Activities
-                    </NavLink>
-                    <NavLink
-                      to="/all-itineraries"
-                      className="navbar-itineraries"
-                    >
-                      Itineraries
-                    </NavLink>
-                    <NavLink
+                    <Link to="/activity"
+>
+                      <NavLink className="navbar-activities">Activities</NavLink>
+                    </Link>
+                    {/*<NavLink*/}
+                    {/*  to="/all-itineraries"*/}
+                    {/*  className="navbar-itineraries"*/}
+                    {/*>*/}
+                    {/*  Itineraries*/}
+                    {/*</NavLink>*/}
+                    <Link
                       to="/all-historical-places"
-                      className="navbar-historical-places"
+>
+                      <NavLink className="navbar-historical-places"> Historical Places</NavLink>
+
+                    </Link>
+                    <Link to="/all-products"
+>
+                      <NavLink className="navbar-products">Products</NavLink>
+                    </Link>
+
+                    <Link to="/flights"
                     >
-                      Historical Places
-                    </NavLink>
-                    <NavLink to="/all-products" className="navbar-products">
-                      Products
-                    </NavLink>
+                      <NavLink className="navbar-transportation">Flights</NavLink>
+                    </Link>
+                    {/*<div>*/}
+                    {/*  /!* Transportation Dropdown *!/*/}
+                    {/*  <div*/}
+                    {/*    className="relative navbar-transportation"*/}
+                    {/*    ref={transportationRef}*/}
+                    {/*  >*/}
+                    {/*    <button*/}
+                    {/*      onClick={() => (*/}
+                    {/*        toggleDropdown("transportation"),*/}
+                    {/*        setIsCartOpen(false)*/}
+                    {/*      )}*/}
+                    {/*      className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"*/}
+                    {/*    >*/}
+                    {/*      Transportation*/}
+                    {/*      {openDropdown === "transportation" ? (*/}
+                    {/*        <ChevronUp className="ml-1 h-4 w-4" />*/}
+                    {/*      ) : (*/}
+                    {/*        <ChevronDown className="ml-1 h-4 w-4" />*/}
+                    {/*      )}*/}
+                    {/*    </button>*/}
+                    {/*    {openDropdown === "transportation" && (*/}
+                    {/*      <div className="absolute left-0 mt-2 w-48 bg-black/90 rounded-xl border border-white/20 shadow-lg">*/}
+                    {/*        <Link*/}
+                    {/*          to="/transportation"*/}
+                    {/*          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200"*/}
+                    {/*          onClick={closeDropdown}*/}
+                    {/*        >*/}
+                    {/*          Vehicles*/}
+                    {/*        </Link>*/}
+                    {/*        <Link*/}
+                    {/*          to="/flights"*/}
+                    {/*          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200"*/}
+                    {/*          onClick={closeDropdown}*/}
+                    {/*        >*/}
+                    {/*          Flights*/}
+                    {/*        </Link>*/}
+                    {/*      </div>*/}
+                    {/*    )}*/}
+                    {/*  </div>*/}
+                    {/*</div>*/}
 
-                    <div>
-                      {/* Transportation Dropdown */}
-                      <div
-                        className="relative navbar-transportation"
-                        ref={transportationRef}
-                      >
-                        <button
-                          onClick={() => (
-                            toggleDropdown("transportation"),
-                            setIsCartOpen(false)
-                          )}
-                          className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
-                        >
-                          Transportation
-                          {openDropdown === "transportation" ? (
-                            <ChevronUp className="ml-1 h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="ml-1 h-4 w-4" />
-                          )}
-                        </button>
-                        {openDropdown === "transportation" && (
-                          <div className="absolute left-0 mt-2 w-48 bg-black/90 rounded-xl border border-white/20 shadow-lg">
-                            <Link
-                              to="/transportation"
-                              className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200"
-                              onClick={closeDropdown}
-                            >
-                              Vehicles
-                            </Link>
-                            <Link
-                              to="/flights"
-                              className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200"
-                              onClick={closeDropdown}
-                            >
-                              Flights
-                            </Link>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <Link to="/hotels">
+                      <NavLink className="navbar-hotels">Hotels</NavLink>
 
-                    <NavLink to="/hotels" className="navbar-hotels">
-                      Hotels
-                    </NavLink>
+                    </Link>
                   </>
                 )}
                 {role === "advertiser" && (
@@ -847,12 +858,13 @@ export function NavbarComponent() {
                   </Link>
                 </div>
               ) : role !== "admin" || role === "admin" ? (
-                <div className="relative navbar-profile" ref={userMenuRef}>
+                <div className="relative navbar-profile" ref={userMenuRef}  id={'menu-icon'}>
                   <button
                     onClick={() => toggleDropdown("userMenu")}
+                    id={'menu-icon'}
                     className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"
                   >
-                    <Menu className="h-6 w-6" />
+                    <Menu className="h-6 w-6"  id={'menu-icon'}/>
                   </button>
                   {openDropdown === "userMenu" && (
                     <div className="absolute right-0 mt-2 w-48 bg-black/90 rounded-2xl border border-white/20 shadow-lg py-1">
@@ -932,25 +944,25 @@ export function NavbarComponent() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center">
+            <div className="md:hidden flex items-center" id={'notifications-icon'}>
               {role !== undefined && role !== "guest" && (
                 <>
-                  <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                    <Bell className="h-5 w-5" />
-                    <span className="sr-only">Notifications</span>
+                  <button id={'notifications-icon'} className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                    <Bell className="h-5 w-5" id={'notifications-icon'}/>
+                    <span className="sr-only" id={'notifications-icon'}>Notifications</span>
                   </button>
                   {role === "tourist" && (
                     <>
-                      <NavLinkIcon to="/account/cart">
-                        <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                          <ShoppingCart className="h-5 w-5" />
-                          <span className="sr-only">Cart</span>
+                      <NavLinkIcon to="/account/cart" id={'cart-icon'}>
+                        <button id={'cart-icon'} className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                          <ShoppingCart className="h-5 w-5" id={'cart-icon'}/>
+                          <span className="sr-only" id={'cart-icon'}>Cart</span>
                         </button>
                       </NavLinkIcon>
-                      <NavLinkIcon to="/account/wishlist">
-                        <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                          <Heart className="h-5 w-5" />
-                          <span className="sr-only">Wishlist</span>
+                      <NavLinkIcon to="/account/wishlist" id={'heart-icon'}>
+                        <button id={'heart-icon'} className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                          <Heart className="h-5 w-5" id={'heart-icon'}/>
+                          <span className="sr-only" id={'heart-icon'}>Wishlist</span>
                         </button>
                       </NavLinkIcon>
                     </>

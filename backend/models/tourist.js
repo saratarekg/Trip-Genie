@@ -51,6 +51,12 @@ const touristSchema = new Schema(
       required: true,
       trim: true,
     },
+    accessibility: {
+      type: String,
+      ref: "Accessibility",
+      required: false,
+      trim: true,
+    },
     dateOfBirth: {
       type: Date,
       required: true,

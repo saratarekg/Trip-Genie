@@ -330,6 +330,7 @@ function BookingPage() {
         "https://trip-genie-apis.vercel.app/tourist/get/promo-code",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -451,6 +452,7 @@ function BookingPage() {
         "https://trip-genie-apis.vercel.app/create-flight-checkout-session",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -458,7 +460,7 @@ function BookingPage() {
           body: JSON.stringify({
             metadata,
             items,
-            returnLocation: "https://trip-genie-acl.vercel.app/flights",
+            returnLocation: "http://localhost:3000/flights",
             currency: currencyCode,
             discountPercentage: promoDetails ? promoDetails.percentOff : 0,
           }),
@@ -536,6 +538,7 @@ function BookingPage() {
                 "https://trip-genie-apis.vercel.app/tourist/book-flight",
                 {
                   method: "POST",
+   
                   credentials: "include",
                   headers: {
                     "Content-Type": "application/json",
@@ -627,6 +630,7 @@ function BookingPage() {
           "https://trip-genie-apis.vercel.app/tourist/book-flight",
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
@@ -765,7 +769,6 @@ function BookingPage() {
         "https://test.api.amadeus.com/v1/security/oauth2/token",
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -777,12 +780,14 @@ function BookingPage() {
         }
       );
 
+      console.log(response)
       if (!response.ok) {
         throw new Error("Failed to refresh access token");
       }
 
       const data = await response.json();
       setAccessToken(data.access_token);
+      console.log(accessToken)
       setTimeout(refreshToken, 29 * 60 * 1000);
     } catch (err) {
       setError("Authentication failed. Please try again later.");
@@ -795,8 +800,8 @@ function BookingPage() {
       const response = await fetch(
         "https://trip-genie-apis.vercel.app/tourist/currencies/code",
         {
-          method: "GET",
-          credentials: "include",
+           method: "GET",
+         credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -847,12 +852,13 @@ function BookingPage() {
           tripType === "roundTrip" ? `&returnDate=${returnDate}` : ""
         }&adults=1&nonStop=true&currencyCode=${currencyCode}`,
         {
-          credentials: "include",
+          // credentials: "include",
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         }
       );
+      console.log(response)
 
       if (!response.ok) {
         throw new Error("Failed to fetch flights");

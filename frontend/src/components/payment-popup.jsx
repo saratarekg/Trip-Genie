@@ -106,6 +106,7 @@ const PaymentPopup = ({
         "https://trip-genie-apis.vercel.app/tourist/get/promo-code",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${Cookies.get("jwt")}`,

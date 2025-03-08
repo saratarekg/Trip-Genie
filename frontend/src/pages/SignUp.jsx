@@ -157,6 +157,10 @@ export function SignupForm() {
       description: z.string().trim().optional(),
       website: z.string().trim().optional(),
       hotline: z.string().trim().optional(),
+
+      accessibility: z.string().trim().optional(),
+
+
     })
     .superRefine((data, ctx) => {
       if (
@@ -325,6 +329,8 @@ export function SignupForm() {
     description: useRef(null),
     website: useRef(null),
     hotline: useRef(null),
+
+    accessibility: useRef(null),
   };
 
   const form = useForm({
@@ -346,6 +352,7 @@ export function SignupForm() {
       description: "",
       website: "",
       hotline: "",
+      accessibility:"",
     },
   });
 
@@ -590,7 +597,7 @@ export function SignupForm() {
       });
 
       await axios.post(
-        `https://trip-genie-apis.vercel.app/auth/sign-up/${userType}`,
+        `http://localhost:4000/auth/sign-up/${userType}`,
         finalData,
         {
           credentials: "include",
@@ -1016,10 +1023,14 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
+
+
                   )}
                 />
+
               </>
             )}
+
             {(userType === "seller" ||
               userType === "advertiser" ||
               userType === "tour-guide") && (
@@ -1239,6 +1250,32 @@ export function SignupForm() {
                 />
               </>
             )}
+
+
+            <FormField
+                control={control}
+                name="accessibility"
+                render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Accessibility Needs</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an accessibility need" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="visual">Visual Impairment (e.g., color blindness, low vision)</SelectItem>
+                            <SelectItem value="auditory">Auditory Impairment (e.g., hearing loss, deafness)</SelectItem>
+                            <SelectItem value="motor">Motor Impairment (e.g., difficulty using a mouse/keyboard)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                )}
+                useRef={formRefs.accessibility}
+            />
+
           </>
         );
       case 2:

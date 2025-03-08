@@ -251,7 +251,8 @@ const WishlistPage = () => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/tourist/move/wishlist/${productId}`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -282,7 +283,8 @@ const WishlistPage = () => {
       const response = await fetch(
         "https://trip-genie-apis.vercel.app/tourist/move/all/wishlist",
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import logInPicture from "../assets/images/logInPicture.jpg";
 import { EyeIcon, EyeOffIcon, ArrowLeftIcon } from "@heroicons/react/outline";
+import axios from "axios";
 
 let role = null;
 
@@ -56,6 +57,7 @@ const Login = () => {
     try {
       const response = await fetch(
         "https://trip-genie-apis.vercel.app/auth/logout"
+
       );
 
       if (response.ok) {
@@ -92,6 +94,7 @@ const Login = () => {
     }
   };
 
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -110,7 +113,6 @@ const Login = () => {
         "https://trip-genie-apis.vercel.app/auth/login",
         {
           method: "POST",
-
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -132,6 +134,8 @@ const Login = () => {
           navigate("/");
         }
         console.log("Login successful!");
+        console.log(data);
+
         window.location.reload();
       } else {
         const errorData = await response.json();
@@ -193,6 +197,7 @@ const Login = () => {
         "https://trip-genie-apis.vercel.app/auth/verify-otp",
         {
           method: "POST",
+   
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp: otpString }),
@@ -225,6 +230,7 @@ const Login = () => {
         "https://trip-genie-apis.vercel.app/auth/reset-password",
         {
           method: "POST",
+   
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password: newPassword }),

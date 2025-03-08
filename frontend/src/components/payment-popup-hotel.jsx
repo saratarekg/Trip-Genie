@@ -74,6 +74,7 @@ const PaymentPopup = ({
         "https://trip-genie-apis.vercel.app/tourist/get/promo-code",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -171,8 +172,9 @@ const PaymentPopup = ({
         discountPercentage: promo.percentOff,
       };
 
+      console.log(payload)
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/create-hotel-booking-session",
+        "http://localhost:4000/create-hotel-booking-session",
         {
           method: "POST",
           credentials: "include",
@@ -181,12 +183,15 @@ const PaymentPopup = ({
         }
       );
 
+      console.log(response)
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to create booking session");
       }
 
       const { id: sessionId } = await response.json();
+
       const result = await stripe.redirectToCheckout({ sessionId });
 
       if (result.error) {

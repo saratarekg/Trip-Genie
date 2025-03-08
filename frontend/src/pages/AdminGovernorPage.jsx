@@ -81,6 +81,7 @@ const AdminGovernorPage = () => {
           "https://trip-genie-apis.vercel.app/admin/admins",
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -94,6 +95,7 @@ const AdminGovernorPage = () => {
           "https://trip-genie-apis.vercel.app/admin/governors",
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,

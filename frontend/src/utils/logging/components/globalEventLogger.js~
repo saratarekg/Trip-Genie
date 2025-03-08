@@ -1,0 +1,77 @@
+import { useEffect } from "react";
+import { useSession } from "./SessionContext"; // Assuming this contains logInteraction
+
+const GlobalEventLogger = () => {
+    const { logInteraction } = useSession();
+
+    const getElementLocation = (element) => {
+        if (element.closest("nav")) return "navbar";
+        if (element.closest("footer")) return "footer";
+        if (element.closest("aside")) return "sidebar";
+        if (element.closest("header")) return "header";
+        if (element.closest("main")) return "main-content";
+        return "\"main-content"; // Default if no section is detected
+    };
+
+
+    useEffect(() => {
+        // Function to handle clicks
+        const handleClick = (event) => {
+            const computedStyle = window.getComputedStyle(event.target);
+            const role = event.target.getAttribute("role");
+            const interactiveRoles = ["button", "link", "menuitem", "checkbox", "radio"];
+            // const interactiveCards = ["Historicalplace-card", "product-card", "activity-card"]
+
+            const isClickable =
+                event.target.onClick !== undefined ||
+                event.target.hasAttribute("onclick") || // Check for onclick handler
+                interactiveRoles.includes(role) || // Check for interactive roles
+                computedStyle.cursor === "pointer" || // Check for cursor style
+                event.target.tagName === "A" || // Links are always clickable
+                event.target.tagName === "BUTTON" || // Buttons are always clickable
+            event.target.tagName === "INPUT" ||//Inputs always clickable
+            event.target.tagName === "TEXTAREA" ||  // Text areas
+            event.target.tagName === "SELECT" ;    // Dropdowns
+
+                logInteraction(window.location.pathname, "click", {
+                    id: event.target.id || "no-id",
+                    tagName: event.target.tagName,
+                    content: event.target.innerText || event.target.textContent || "no-content",
+                    location: getElementLocation(event.target),
+                    clickable: isClickable,
+                    svgDetails: event.target.tagName === "SVG" || event.target.closest("svg")
+                        ? {
+                            svgClassList: [...event.target.classList] || [], // Class list of the SVG element
+                        }
+                        : null,
+                });
+        };
+        // Function to handle zoom events
+        let zoomTimeout;
+        const handleZoom = (event) => {
+            if (event.ctrlKey) { // Detects pinch-to-zoom or Ctrl + Scroll
+                clearTimeout(zoomTimeout); // Clear the previous timeout
+                zoomTimeout = setTimeout(() => {
+                    logInteraction(window.location.pathname, "zoom", {
+                        deltaY: event.deltaY, // Positive means zoom out, negative means zoom in
+                        scale: event.deltaY > 0 ? "out" : "in",
+                    });
+                }, 100); // Log only after 100ms of inactivity
+            }
+        };
+
+        // Add event listeners
+        document.addEventListener("click", handleClick);
+        document.addEventListener("wheel", handleZoom);
+
+        // Cleanup listeners on unmount
+        return () => {
+            document.removeEventListener("click", handleClick);
+            document.removeEventListener("wheel", handleZoom);
+        };
+    }, [logInteraction]);
+
+    return null; // This component doesn't render anything
+};
+
+export default GlobalEventLogger;

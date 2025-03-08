@@ -155,6 +155,7 @@ const ShoppingCart = () => {
         "https://trip-genie-apis.vercel.app/tourist/get/promo-code",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             Authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -399,7 +400,8 @@ const ShoppingCart = () => {
       const response = await fetch(
         `https://trip-genie-apis.vercel.app/tourist/update/cart`,
         {
-          method: "PUT",
+         method: "PUT",
+mode: "no-cors",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -458,6 +460,7 @@ const ShoppingCart = () => {
         "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

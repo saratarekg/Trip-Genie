@@ -265,6 +265,7 @@ export default function HotelBookingPage() {
         "https://test.api.amadeus.com/v1/security/oauth2/token",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -295,7 +296,7 @@ export default function HotelBookingPage() {
       const response = await fetch(
         "https://trip-genie-apis.vercel.app/tourist/currencies/code",
         {
-          method: "GET",
+           method: "GET",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,

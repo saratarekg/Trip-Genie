@@ -124,6 +124,7 @@ const ProductCard = ({
           `https://trip-genie-apis.vercel.app/${userInfo.role}/populate`,
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -519,7 +520,11 @@ export function AllProducts() {
   ]);
 
   const handleProductSelect = (id) => {
-    navigate(`/product/${id}`);
+    event.preventDefault(); // Prevent immediate navigation
+
+    // Small delay to ensure logging completes before navigation
+    setTimeout(() => navigate(`/product/${id}`), 100);
+    // navigate(`/product/${id}`);
   };
 
   const handlePageChange = (pageNumber) => {
@@ -574,6 +579,7 @@ export function AllProducts() {
         "https://trip-genie-apis.vercel.app/tourist/product/addToCart",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -613,6 +619,7 @@ export function AllProducts() {
         `https://trip-genie-apis.vercel.app/tourist/product/addToWishlist/${product._id}`,
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -680,6 +687,7 @@ export function AllProducts() {
         "https://trip-genie-apis.vercel.app/tourist/purchase",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",

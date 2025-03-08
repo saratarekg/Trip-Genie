@@ -81,6 +81,10 @@ import HotelSearch from "@/components/hotel-search.jsx";
 import HotelDetails from "@/pages/HotelDetails.jsx";
 import ActivityReport from "@/components/ActivityReport.jsx";
 import TouristActivitiesPage from "@/pages/TouristActivitiesPage";
+import NavigationLogger from "@/utils/logging/components/navigationLogger.js";
+import {SessionProvider} from "@/utils/logging/components/sessionContext.jsx";
+import axios from "axios";
+import GlobalEventLogger from "@/utils/logging/components/globalEventLogger.js";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -681,12 +685,49 @@ function AppContent() {
     </div>
   );
 }
+// const userId = "user123";
+
 
 function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
+    const [userId, setUserId] = useState(null);
+
+    useEffect(() => {
+        fetchUserInfo();
+    }, []);
+
+    const fetchUserInfo = async () => {
+        const role = Cookies.get("role") || "guest";
+        if (role !== "guest") {
+            try {
+                const token = Cookies.get("jwt");
+                const response = await axios.get(
+                    `https://trip-genie-apis.vercel.app/${role}/`,
+                    {
+                        credentials: "include",
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+                console.log(response.data)
+                const userData = response.data;
+                setUserId(userData._id)
+                // console.log("sara",userId)
+
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+        }
+    };
+
+    return (
+            <SessionProvider userId={userId}>
+                <Router>
+                    {/*<NavigationLogger />*/}
+                    <GlobalEventLogger />
+                    <AppContent/>
+                </Router>
+            </SessionProvider>
+
+
   );
 }
 

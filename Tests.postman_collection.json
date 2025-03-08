@@ -8,7 +8,7 @@
   },
   "item": [
     {
-      "name": "https://trip-genie-apis.vercel.app/tourist/currencies",
+      "name": "https://localhost:3000/tourist/currencies",
       "event": [
         {
           "listen": "test",
@@ -88,7 +88,7 @@
           }
         },
         "url": {
-          "raw": "https://trip-genie-apis.vercel.app/tourist/currencies",
+          "raw": "https://localhost:3000/tourist/currencies",
           "protocol": "http",
           "host": ["localhost"],
           "port": "4000",
@@ -98,7 +98,7 @@
       "response": []
     },
     {
-      "name": "https://trip-genie-apis.vercel.app/admin/notifications",
+      "name": "https://localhost:3000/admin/notifications",
       "event": [
         {
           "listen": "test",
@@ -172,7 +172,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://trip-genie-apis.vercel.app/admin/notifications",
+          "raw": "https://localhost:3000/admin/notifications",
           "protocol": "http",
           "host": ["localhost"],
           "port": "4000",
@@ -182,7 +182,7 @@
       "response": []
     },
     {
-      "name": "https://trip-genie-apis.vercel.app/admin/products",
+      "name": "https://localhost:3000/admin/products",
       "event": [
         {
           "listen": "test",
@@ -251,7 +251,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://trip-genie-apis.vercel.app/admin/products",
+          "raw": "https://localhost:3000/admin/products",
           "protocol": "http",
           "host": ["localhost"],
           "port": "4000",
@@ -261,7 +261,7 @@
       "response": []
     },
     {
-      "name": "https://trip-genie-apis.vercel.app/admin/products/67621071abf9dde0e0a20933",
+      "name": "https://localhost:3000/admin/products/67621071abf9dde0e0a20933",
       "event": [
         {
           "listen": "test",
@@ -357,7 +357,7 @@
           }
         },
         "url": {
-          "raw": "https://trip-genie-apis.vercel.app/admin/products/67621071abf9dde0e0a20933",
+          "raw": "https://localhost:3000/admin/products/67621071abf9dde0e0a20933",
           "protocol": "http",
           "host": ["localhost"],
           "port": "4000",
@@ -367,7 +367,7 @@
       "response": []
     },
     {
-      "name": "https://trip-genie-apis.vercel.app/tourist/cart",
+      "name": "https://localhost:3000/tourist/cart",
       "event": [
         {
           "listen": "test",
@@ -414,7 +414,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://trip-genie-apis.vercel.app/tourist/cart",
+          "raw": "https://localhost:3000/tourist/cart",
           "protocol": "http",
           "host": ["localhost"],
           "port": "4000",
@@ -424,7 +424,7 @@
       "response": []
     },
     {
-      "name": "https://trip-genie-apis.vercel.app/admin/promo-code",
+      "name": "https://localhost:3000/admin/promo-code",
       "event": [
         {
           "listen": "test",
@@ -489,7 +489,7 @@
           }
         },
         "url": {
-          "raw": "https://trip-genie-apis.vercel.app/admin/promo-code",
+          "raw": "https://localhost:3000/admin/promo-code",
           "protocol": "http",
           "host": ["localhost"],
           "port": "4000",
@@ -499,7 +499,7 @@
       "response": []
     },
     {
-      "name": "https://trip-genie-apis.vercel.app/admin/promo-code/67644db0b96d209909fe7d37",
+      "name": "https://localhost:3000/admin/promo-code/67644db0b96d209909fe7d37",
       "event": [
         {
           "listen": "test",

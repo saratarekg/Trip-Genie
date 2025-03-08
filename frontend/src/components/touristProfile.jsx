@@ -552,6 +552,7 @@ export function TouristProfileComponent() {
           `https://trip-genie-apis.vercel.app/tourist/populate`,
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,

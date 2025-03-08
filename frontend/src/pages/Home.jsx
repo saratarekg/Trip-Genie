@@ -22,11 +22,14 @@ export default function Home() {
     incrementVisitCount();
   }, []);
 
-  const incrementVisitCount = async () => {
+
+    const incrementVisitCount = async () => {
     const response = await fetch(
       "https://trip-genie-apis.vercel.app/increment-visit-count",
       {
         method: "POST",
+
+
       }
     );
     const data = await response.json();
@@ -34,7 +37,7 @@ export default function Home() {
 
   const tabs = {
     activities: <Activities />,
-    itineraries: <ItineraryCards />,
+    // itineraries: <ItineraryCards />,
     products: <ProductViewer />,
   };
 
@@ -44,9 +47,9 @@ export default function Home() {
       case 1:
         setActiveTab("activities");
         break;
-      case 2:
-        setActiveTab("itineraries");
-        break;
+      // case 2:
+      //   setActiveTab("itineraries");
+      //   break;
       case 3:
         setActiveTab("products");
         break;
@@ -66,11 +69,11 @@ export default function Home() {
       content: "Explore exciting activities and experiences here.",
       placement: "bottom",
     },
-    {
-      target: ".navbar-itineraries",
-      content: "Check out curated travel itineraries for your next adventure.",
-      placement: "bottom",
-    },
+    // {
+    //   target: ".navbar-itineraries",
+    //   content: "Check out curated travel itineraries for your next adventure.",
+    //   placement: "bottom",
+    // },
     {
       target: ".navbar-historical-places",
       content: "Discover fascinating historical places to visit.",
@@ -94,11 +97,11 @@ export default function Home() {
       : []),
     ...(role === "tourist"
       ? [
-          {
-            target: ".navbar-transportation",
-            content: "Find transportation options for your travels.",
-            placement: "bottom",
-          },
+          // {
+          //   target: ".navbar-transportation",
+          //   content: "Find transportation options for your travels.",
+          //   placement: "bottom",
+          // },
           {
             target: ".navbar-hotels",
             content: "Book accommodations for your stay.",

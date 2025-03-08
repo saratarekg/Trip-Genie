@@ -33,6 +33,12 @@ const advertiserSchema = new Schema(
       type: String,
       required: true,
     },
+    accessibility: {
+      type: String,
+      ref: "Accessibility",
+      required: false,
+      trim: true,
+    },
     description: {
       type: String,
       required: false,

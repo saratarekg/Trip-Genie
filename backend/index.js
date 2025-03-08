@@ -52,8 +52,13 @@ mongoose
   .then((connection) => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
     const db = connection.connection.db; // access the raw MongoDB driver from the connection
-    const gfs = new mongoose.mongo.GridFSBucket(db, { bucketName: "uploads" });
-    app.locals.gfs = gfs;
+    if (db) {
+      const gfs = new mongoose.mongo.GridFSBucket(db, { bucketName: "uploads" });
+      app.locals.gfs = gfs;
+      console.log("GridFS Initialized");
+    } else {
+      console.error("Database not found. GridFS initialization failed.");
+    }
   })
   .catch((err) => console.log(err));
 
@@ -353,6 +358,23 @@ app.post("/create-hotel-booking-session", async (req, res) => {
     // Ensure price is in cents (Stripe requires the price in the smallest currency unit, e.g., cents)
     const totalPrice = Math.round(price * 100); // Convert the total price to cents if it's in dollars
 
+    console.log("Stripe Secret Key:", process.env.STRIPE_PRIVATE_KEY);
+
+    const isValidUrl = (url) => {
+      try {
+        new URL(url);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    };
+
+    console.log("location",returnLocation)
+
+    if (!isValidUrl(returnLocation)) {
+      return res.status(400).json({ error: "Invalid returnLocation URL" });
+    }
+
     // Create a Stripe session for the hotel booking
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -619,3 +641,5 @@ checkAndUpdateRatesOnStart();
 checkAndUpdateStatusOnStart();
 checkBirthdays();
 checkUpcomingEvents();
+
+

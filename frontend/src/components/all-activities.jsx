@@ -136,6 +136,7 @@ const ActivityCard = ({
           `https://trip-genie-apis.vercel.app/${userInfo.role}/populate`,
           {
             method: "POST",
+   
             credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -611,7 +612,9 @@ export default function AllActivities() {
 
   const handleActivitySelect = useCallback(
     (id) => {
-      navigate(`/activity/${id}`);
+      setTimeout(() => navigate(`/activity/${id}`), 100);
+
+      // navigate(`/activity/${id}`);
     },
     [navigate]
   );

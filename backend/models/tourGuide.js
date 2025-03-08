@@ -40,6 +40,12 @@ const tourGuideSchema = new Schema(
       required: true,
       trim: true,
     },
+    accessibility: {
+      type: String,
+      ref: "Accessibility",
+      required: false,
+      trim: true,
+    },
     mobile: {
       type: String,
       required: true,

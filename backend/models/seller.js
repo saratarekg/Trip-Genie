@@ -34,6 +34,12 @@ const sellerSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  accessibility: {
+    type: String,
+    ref: "Accessibility",
+    required: false,
+    trim: true,
+  },
   mobile: {
     type: String,
     required: true,

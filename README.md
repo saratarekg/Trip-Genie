@@ -154,9 +154,10 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "https://trip-genie-apis.vercel.app/auth/login",
+        "httpss://localhost:3000/auth/login",
         {
           method: "POST",
+   
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -432,7 +433,7 @@ const CreateProductForm = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          `https://trip-genie-apis.vercel.app/${userRole}/currencies`,
+          `https://localhost:3000/${userRole}/currencies`,
           {
             credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
@@ -490,7 +491,7 @@ const CreateProductForm = () => {
     const token = Cookies.get("jwt");
     try {
       const response = await axios.post(
-        `https://trip-genie-apis.vercel.app/${userRole}/products`,
+        `https://localhost:3000/${userRole}/products`,
         formData,
         {
           credentials: "include",
