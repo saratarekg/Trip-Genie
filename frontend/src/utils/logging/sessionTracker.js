@@ -74,7 +74,7 @@ export const useSessionTracker = (userId) => {
         inactivityTimer.current = setTimeout(async () => {
             console.log("Session ended due to inactivity");
             await endSession();
-        }, 600000); // 10 minutes (600,000 ms)
+        }, 900000); // 15 minutes (900,000 ms)
     };
 
     // Log interactions and reset inactivity timer
@@ -137,18 +137,22 @@ export const useSessionTracker = (userId) => {
     const endSession = async () => {
         if (!session) return;
 
-        const endTime = Date.now();
+        // Get the timestamp of the last interaction in the sequence
+        const lastInteraction = session.sequence[session.sequence.length - 1];
+        const endTime = lastInteraction ? new Date(lastInteraction.timestamp).getTime() : Date.now();
+
+        // Calculate time spent in the session
         const timeSpentInMilliseconds = endTime - session.startTime;
         const timeSpentInMinutes = Math.round(timeSpentInMilliseconds / 60000); // Convert to minutes
 
+        // Update Firestore with the endTime and timeSpent
         await updateDoc(session.docRef, {
             timeSpent: timeSpentInMinutes, // Store timeSpent in minutes
-            endTime: serverTimestamp(),
+            endTime: serverTimestamp(), // Use Firestore serverTimestamp for consistency
         });
 
         console.log("Session ended:", session.sessionId);
         setSession(null);
     };
-
     return { logInteraction, endSession };
 };

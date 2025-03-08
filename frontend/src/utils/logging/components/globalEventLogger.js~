@@ -24,9 +24,9 @@ const GlobalEventLogger = () => {
 
             const isClickable =
                 event.target.onClick !== undefined ||
-                event.target.hasAttribute("onclick") ||
-                interactiveRoles.includes(role) ||
-                computedStyle.cursor === "pointer" ||
+                event.target.hasAttribute("onclick") || // Check for onclick handler
+                interactiveRoles.includes(role) || // Check for interactive roles
+                computedStyle.cursor === "pointer" || // Check for cursor style
                 event.target.tagName === "A" || // Links are always clickable
                 event.target.tagName === "BUTTON" || // Buttons are always clickable
             event.target.tagName === "INPUT" ||//Inputs always clickable
@@ -56,7 +56,7 @@ const GlobalEventLogger = () => {
                         deltaY: event.deltaY, // Positive means zoom out, negative means zoom in
                         scale: event.deltaY > 0 ? "out" : "in",
                     });
-                }, 100); // Log only after 100ms of inactivity to prevent multiple logs of same action
+                }, 100); // Log only after 100ms of inactivity
             }
         };
 

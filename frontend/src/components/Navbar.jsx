@@ -561,6 +561,10 @@ export function NavbarComponent() {
                       <NavLink className="navbar-products">Products</NavLink>
                     </Link>
 
+                    <Link to="/flights"
+                    >
+                      <NavLink className="navbar-transportation">Flights</NavLink>
+                    </Link>
                     {/*<div>*/}
                     {/*  /!* Transportation Dropdown *!/*/}
                     {/*  <div*/}

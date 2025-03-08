@@ -297,6 +297,7 @@ export default function HotelBookingPage() {
         "https://trip-genie-apis.vercel.app/tourist/currencies/code",
         {
            method: "GET",
+ mode: "no-cors",
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,

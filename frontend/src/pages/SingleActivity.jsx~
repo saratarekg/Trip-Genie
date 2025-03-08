@@ -2137,7 +2137,7 @@ const ActivityDetail = () => {
                 ).toFixed(2)}
                 currency={userPreferredCurrency.code}
                 symbol={userPreferredCurrency.symbol}
-                returnLoc={"http://localhost:3000/activity/" + id}
+                returnLoc={"localhost:3000/activity/" + id}
                 error={bookingError}
                 setError={setBookingError}
                 promoDetails={promoDetails}

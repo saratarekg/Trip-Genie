@@ -460,7 +460,7 @@ function BookingPage() {
           body: JSON.stringify({
             metadata,
             items,
-            returnLocation: "http://localhost:3000/flights",
+            returnLocation: "http://localhost:3000//flights",
             currency: currencyCode,
             discountPercentage: promoDetails ? promoDetails.percentOff : 0,
           }),

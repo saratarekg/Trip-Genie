@@ -397,7 +397,7 @@ app.post("/create-hotel-booking-session", async (req, res) => {
       mode: "payment",
       success_url: `${
         req.body.returnLocation
-      }&success=true&session_id={CHECKOUT_SESSION_ID}&hotelID=${hotelID}&roomName=${encodeURIComponent(
+      }&success=true&session_id=${CHECKOUT_SESSION_ID}&hotelID=${hotelID}&roomName=${encodeURIComponent(
         roomName
       )}&checkinDate=${encodeURIComponent(
         checkinDate

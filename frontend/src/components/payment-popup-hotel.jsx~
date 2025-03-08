@@ -174,7 +174,7 @@ const PaymentPopup = ({
 
       console.log(payload)
       const response = await fetch(
-        "http://localhost:4000/create-hotel-booking-session",
+        "https://trip-genie-apis.vercel.app/create-hotel-booking-session",
         {
           method: "POST",
           credentials: "include",

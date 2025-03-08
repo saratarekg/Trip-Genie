@@ -33,7 +33,9 @@ export function FooterComponent() {
         { name: 'Historical Places', link: '/all-historical-places' },
         { name: 'Activities', link: '/activity' },
         // { name: 'Itineraries', link: '/all-itineraries' },
-        { name: 'Products', link: '/all-products' }
+        { name: 'Products', link: '/all-products' },
+        { name: 'Flights', link: '/flights' },
+        { name: 'Hotels', link: '/hotels' },
       ],
       // admin: [
       //   { name: 'Historical Places', link: 'all-historical-places' },
