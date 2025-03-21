@@ -5,6 +5,7 @@ import logInPicture from "../assets/images/logInPicture.jpg";
 import { EyeIcon, EyeOffIcon, ArrowLeftIcon } from "@heroicons/react/outline";
 import axios from "axios";
 
+
 let role = null;
 
 const getPasswordStrength = (password) => {
@@ -57,8 +58,9 @@ const Login = () => {
     try {
       const response = await fetch(
         "https://trip-genie-apis.vercel.app/auth/logout"
-
       );
+
+     
 
       if (response.ok) {
         localStorage.removeItem("role");
