@@ -64,6 +64,8 @@ const NavLink = ({ to, children, className }) => (
 );
 
 export function NavbarComponent() {
+  const { endSession } = useSession();
+
   const [openDropdown, setOpenDropdown] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const role = Cookies.get("role");
@@ -335,6 +337,7 @@ export function NavbarComponent() {
   };
 
   const handleLogout = () => {
+    endSession();
     logOut();
     setShowLogoutModal(false);
   };

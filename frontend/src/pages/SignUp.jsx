@@ -1264,9 +1264,9 @@ export function SignupForm() {
                             <SelectValue placeholder="Select an accessibility need" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="visual">Visual Impairment (e.g., color blindness, low vision)</SelectItem>
-                            <SelectItem value="auditory">Auditory Impairment (e.g., hearing loss, deafness)</SelectItem>
-                            <SelectItem value="motor">Motor Impairment (e.g., difficulty using a mouse/keyboard)</SelectItem>
+                            <SelectItem value="visual">Visual Impairment (e.g., color blindness, low vision, difficulty reading small text, etc...)</SelectItem>
+                            <SelectItem value="motor">Motor Impairment (e.g., difficulty using a mouse/keyboard, epilepsy, seizures, etc...)</SelectItem>
+                            <SelectItem value="cognitive_overload">Cognitive Overload (e.g., difficulty processing complex interfaces, overwhelmed by excessive information, difficulty following multi-step processes, etc...)</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
