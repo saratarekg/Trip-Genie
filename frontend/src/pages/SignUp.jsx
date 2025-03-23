@@ -158,7 +158,7 @@ export function SignupForm() {
       website: z.string().trim().optional(),
       hotline: z.string().trim().optional(),
 
-      accessibility: z.string().trim().optional(),
+      accessibility: z.array(z.string().trim()).optional(),
 
 
     })
@@ -352,7 +352,7 @@ export function SignupForm() {
       description: "",
       website: "",
       hotline: "",
-      accessibility:"",
+      accessibility: [],
     },
   });
 
@@ -1257,24 +1257,47 @@ export function SignupForm() {
                 name="accessibility"
                 render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Accessibility Needs</FormLabel>
+                      <FormLabel >Accessibility Needs</FormLabel><br/>
                       <FormControl>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select an accessibility need" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="visual">Visual Impairment (e.g., color blindness, low vision, difficulty reading small text, etc...)</SelectItem>
-                            <SelectItem value="motor">Motor Impairment (e.g., difficulty using a mouse/keyboard, epilepsy, seizures, etc...)</SelectItem>
-                            <SelectItem value="cognitive_overload">Cognitive Overload (e.g., difficulty processing complex interfaces, overwhelmed by excessive information, difficulty following multi-step processes, etc...)</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline">
+                              {field.value.length > 0
+                                  ? field.value.map((v) => v.charAt(0).toUpperCase() + v.slice(1)).join(", ")
+                                  : "Select accessibility needs (if any)"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-2xl">
+                            <div className="flex flex-col space-y-2">
+                              {[
+                                { label: "Visual Impairment (e.g., color blindness, low vision, difficulty reading small text, etc...)", value: "visual" },
+                                { label: "Motor Impairment (e.g., difficulty using a mouse/keyboard, epilepsy, seizures, etc...)", value: "motor" },
+                                { label: "Cognitive Overload (e.g., difficulty processing complex interfaces, overwhelmed by excessive information, difficulty following multi-step processes, etc...)", value: "cognitive" },
+                              ].map((option) => (
+                                  <div key={option.value} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        checked={field.value.includes(option.value)}
+                                        onCheckedChange={(checked) => {
+                                          field.onChange(
+                                              checked
+                                                  ? [...field.value, option.value]
+                                                  : field.value.filter((v) => v !== option.value)
+                                          );
+                                        }}
+                                    />
+                                    <label>{option.label}</label>
+                                  </div>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                 )}
                 useRef={formRefs.accessibility}
             />
+
 
           </>
         );
