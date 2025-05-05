@@ -722,7 +722,7 @@ function App() {
             <SessionProvider userId={userId}>
                 <Router>
                     {/*<NavigationLogger />*/}
-                    <GlobalEventLogger />
+{/*                     <GlobalEventLogger /> */}
                     <AppContent/>
                 </Router>
             </SessionProvider>

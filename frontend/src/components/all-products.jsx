@@ -1009,33 +1009,45 @@ export function AllProducts() {
                   )}
                 </div>
 
-                <div className="mt-8 flex justify-center items-center space-x-4">
-                  <Button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    variant="outline"
-                    size="icon"
-                    className="text-[#1A3B47] border-[#1A3B47]"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm font-medium text-[#1A3B47]">
-                    Page {currentPage} of{" "}
-                    {Math.max(1, Math.ceil(products.length / tripsPerPage))}
-                  </span>
-                  <Button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={
-                      currentPage ===
-                      Math.max(1, Math.ceil(products.length / tripsPerPage))
-                    }
-                    variant="outline"
-                    size="icon"
-                    className="text-[#1A3B47] border-[#1A3B47]"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+    <div className="mt-8 flex justify-center items-center space-x-4">
+      {/* Previous Button with Tooltip */}
+      <div className="relative group">
+        <Button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          variant="outline"
+          size="icon"
+          className="text-[#1A3B47] border-[#1A3B47]"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+          Previous Page
+        </div>
+      </div>
+
+      <span className="text-sm font-medium text-[#1A3B47]">
+        Page {currentPage} of {Math.max(1, Math.ceil(products.length / tripsPerPage))}
+      </span>
+
+      {/* Next Button with Tooltip */}
+      <div className="relative group">
+        <Button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={
+            currentPage === Math.max(1, Math.ceil(products.length / tripsPerPage))
+          }
+          variant="outline"
+          size="icon"
+          className="text-[#1A3B47] border-[#1A3B47]"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+          Next Page
+        </div>
+      </div>
+    </div>
               </>
             )}
           </div>
