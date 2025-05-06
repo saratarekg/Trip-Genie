@@ -15,6 +15,8 @@ import UpdatehistoricalPlace from "@/components/UpdateHP.jsx";
 import ProductDetail from "@/components/ProductDetail.jsx";
 import ShoppingCart from "@/components/touristCart.jsx";
 import WishlistPage from "@/components/touristWishlist.jsx";
+
+import IndexHandling from './indexhandling';
 // import TouristPurchases from "./components/touristPurchases.jsx";
 
 import CreateItineraryPage from "@/pages/CreateItineraryPage.jsx";
@@ -85,6 +87,8 @@ import NavigationLogger from "@/utils/logging/components/navigationLogger.js";
 import {SessionProvider} from "@/utils/logging/components/sessionContext.jsx";
 import axios from "axios";
 import GlobalEventLogger from "@/utils/logging/components/globalEventLogger.js";
+import { db, query, where, getDocs, collection } from "./utils/logging/configs/firebaseConfig";
+
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -696,33 +700,59 @@ function App() {
     }, []);
 
     const fetchUserInfo = async () => {
-        const role = Cookies.get("role") || "guest";
-        if (role !== "guest") {
-            try {
-                const token = Cookies.get("jwt");
-                const response = await axios.get(
-                    `https://trip-genie-apis.vercel.app/${role}/`,
-                    {
-                        credentials: "include",
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
-                console.log(response.data)
-                const userData = response.data;
-                setUserId(userData._id)
-                // console.log("sara",userId)
+      const role = Cookies.get("role") || "guest";
+      if (role !== "guest") {
+          try {
+              const token = Cookies.get("jwt");
+              const response = await axios.get(
+                  `https://trip-genie-apis.vercel.app/${role}/`,
+                  {
+                      credentials: "include",
+                      headers: { Authorization: `Bearer ${token}` },
+                  }
+              );
+              console.log(response.data);
+              const userData = response.data;
+              const userId = userData._id;  // Assuming userId is stored in _id from API response
+              setUserId(userId);
 
-            } catch (error) {
-                console.error("Error fetching user profile:", error);
-            }
-        }
-    };
+              // If userId is valid, proceed to fetch the cluster from Firebase
+             // console.log("abl el if bashoof el userId: " , userId);
+              if (userId !== null) {
+                  const usersRef = collection(db, "users"); // Firebase collection reference
+                  console.log("inside first if checking userssref: ", usersRef)
+                  const q = query(usersRef, where("_id", "==", userId)); // Query by user ID
+                  const querySnapshot = await getDocs(q);
+                   console.log("making sure querysnapshot not empty? ", querySnapshot);
+                   console.log("el if condition?", !querySnapshot.empty);
+                  if (!querySnapshot.empty) {
+                      // If user document is found
+                      console.log("inside el if");
+                      const userDoc = querySnapshot.docs[0];
+                      console.log("eh el gowa UserDoc: " , userDoc);
+                      const cluster = userDoc.data().subclusterLabel;  // Extract cluster from the document
+                      console.log("EL Cluster:", cluster);
+
+                      // Save cluster value in localStorage
+                      localStorage.setItem("cluster", cluster);
+                      console.log("ana fl app.jsx ba3d set w get" ,  localStorage.getItem("cluster"));
+
+                  } else {
+                      console.log("No user found with the given ID");
+                  }
+              }
+          } catch (error) {
+              console.error("Error fetching user profile:", error);
+          }
+      }
+  };
 
     return (
             <SessionProvider userId={userId}>
                 <Router>
+                  <IndexHandling />  {/* Ensure the CSS handling logic is applied */}
                     {/*<NavigationLogger />*/}
-{/*                     <GlobalEventLogger /> */}
+                    {/*<GlobalEventLogger />*/}
                     <AppContent/>
                 </Router>
             </SessionProvider>

@@ -75,6 +75,8 @@ body{
   }
 }
 
+
+
 @layer base {
   * {
     @apply border-border;
@@ -83,6 +85,9 @@ body{
     @apply bg-background text-foreground;
   }
 }
+
+
+
 
 /* Custom scrollbar styles */
 ::-webkit-scrollbar {
