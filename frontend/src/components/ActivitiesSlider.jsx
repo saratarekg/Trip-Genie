@@ -255,10 +255,10 @@ export function Activities() {
             {activities.map((act) => (
               <div
                 key={act._id}
-                className="w-full min-w-[33.333%] px-3 transition-all duration-300 group"
+                className="w-full min-w-[34.333%] px-3 transition-all duration-300 group "
               >
                 <div
-                  className="rounded-lg overflow-hidden "
+                  className="rounded-lg overflow-hidden min-h-[525px] h-full "
                   style={{ backgroundColor: "rgb(255, 248, 241)" }}
                 >
                   <img
@@ -309,7 +309,7 @@ export function Activities() {
                         From {formatPrice(act.price, act.currency)}
                       </span>
                       <Link to={`/activity/${act._id}`}>
-                        <button className="bg-[#388A94] hover:bg-[#5D9297] text-white px-4 py-2 rounded-full text-l font-medium transition-colors duration-300">
+                        <button className="bg-[#388A94] hover:bg-[#5D9297] text-white ml-3  px-4 py-2 rounded-full text-l font-medium transition-colors duration-300">
                           Details
                         </button>
                       </Link>

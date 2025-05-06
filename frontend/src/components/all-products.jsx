@@ -193,7 +193,7 @@ const ProductCard = ({
           className="w-full h-40 object-cover"
         />
       </CardHeader>
-      <CardContent className="p-4" onClick={() => onSelect(product._id)}>
+      <CardContent className="p-4 h-[240px]" onClick={() => onSelect(product._id)}>
         <CardTitle className="text-lg text-[#1A3B47]">{product.name}</CardTitle>
         <div className="mt-1">{renderStars(product.rating)}</div>
         <p className="text-sm text-gray-600 mt-2 break-words">
@@ -202,14 +202,14 @@ const ProductCard = ({
             : product.description}
         </p>
       </CardContent>
-      <CardFooter className="p-4 flex justify-between items-center border-t">
+      <CardFooter className="px-2 pt-3 flex flex-col justify-between items-center border-t">
         <span className="text-2xl font-bold text-[#388A94]">
           {formatPrice(product.price)}
         </span>
 
         {userInfo?.role === "tourist" && product.quantity > 0 ? (
           <Button
-            className="bg-[#F88C33] hover:bg-orange-500 text-white"
+            className="bg-[#F88C33] hover:bg-orange-500 text-white mt-2"
             style={{
               borderRadius: "20px",
               padding: "4px 12px",
@@ -230,7 +230,7 @@ const ProductCard = ({
       </CardFooter>
 
       {userInfo?.role === "tourist" && (
-        <div className="absolute top-2 right-2 flex space-x-2">
+        <div className="absolute top-2 right-2 flex space-x-2 group">
           <Button
             className={`rounded-full w-10 h-10 p-0 ${
               isInWishlistLocal
@@ -251,6 +251,12 @@ const ProductCard = ({
               className={`w-5 h-5 ${isInWishlistLocal ? "fill-current" : ""}`}
             />
             <span className="sr-only">Add to Wishlist</span>
+                {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+                     <div className="absolute top-full -translate-x-1/3 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                               Add to wishlist
+                             </div>
+                             }
           </Button>
         </div>
       )}
