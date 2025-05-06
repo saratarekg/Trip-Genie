@@ -9,7 +9,7 @@ const IndexHandling = () => {
     if (userCluster) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      if (userCluster === "4-0") {
+      if (userCluster === "0-0") {
         link.href = "/src/accIndex.css";  // Example for cluster 0-0
       } else if (userCluster === "1-1") {
         link.href = "/src/accIndex.css";  // Example for cluster 1-1
