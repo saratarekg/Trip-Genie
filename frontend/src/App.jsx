@@ -720,22 +720,22 @@ function App() {
              // console.log("abl el if bashoof el userId: " , userId);
               if (userId !== null) {
                   const usersRef = collection(db, "users"); // Firebase collection reference
-                  console.log("inside first if checking userssref: ", usersRef)
+                  //console.log("inside first if checking userssref: ", usersRef)
                   const q = query(usersRef, where("_id", "==", userId)); // Query by user ID
                   const querySnapshot = await getDocs(q);
-                   console.log("making sure querysnapshot not empty? ", querySnapshot);
-                   console.log("el if condition?", !querySnapshot.empty);
+                   //console.log("making sure querysnapshot not empty? ", querySnapshot);
+                   //console.log("el if condition?", !querySnapshot.empty);
                   if (!querySnapshot.empty) {
                       // If user document is found
-                      console.log("inside el if");
+                     // console.log("inside el if");
                       const userDoc = querySnapshot.docs[0];
-                      console.log("eh el gowa UserDoc: " , userDoc);
+                      //console.log("eh el gowa UserDoc: " , userDoc);
                       const cluster = userDoc.data().subclusterLabel;  // Extract cluster from the document
-                      console.log("EL Cluster:", cluster);
+                      //console.log("EL Cluster:", cluster);
 
                       // Save cluster value in localStorage
                       localStorage.setItem("cluster", cluster);
-                      console.log("ana fl app.jsx ba3d set w get" ,  localStorage.getItem("cluster"));
+                      //console.log("ana fl app.jsx ba3d set w get" ,  localStorage.getItem("cluster"));
 
                   } else {
                       console.log("No user found with the given ID");
