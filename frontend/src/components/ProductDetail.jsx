@@ -80,6 +80,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+const userCluster = localStorage.getItem("cluster");
 
 const RatingDistributionBar = ({ percentage, count }) => (
   <div className="flex items-center gap-2 text-sm">
@@ -1174,13 +1175,23 @@ mode: "no-cors",
                     <ToastProvider>
                       <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
+                                    <div className="group">
+
                           <Button
                             variant="outline"
                             size="sm"
                             className="ml-auto"
                           >
                             <Share2 className="h-4 w-4" />
+               {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+                                                   <div className="absolute  mt-16 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                                                             Share
+                                                           </div>
+}
                           </Button>
+                          </div>
+
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
                           <div className="flex flex-col">

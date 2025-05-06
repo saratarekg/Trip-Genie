@@ -17,7 +17,7 @@ body {
 
 /* Increased base font size for better legibility */
 html {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 @layer base {
@@ -129,4 +129,21 @@ input[type="checkbox"]:checked {
 
 .highlight {
   animation: highlight 1s ease-in-out infinite !important; /* Runs indefinitely */
+}
+
+/* Button styles for accessibility */
+button {
+  transition: transform 0.3s ease-in-out !important; /* Smooth transition */
+}
+
+button:hover {
+  transform: scale(1.1) !important; /* Slightly scale up on hover */
+}
+
+a {
+  transition: transform 0.3s ease-in-out !important; /* Smooth transition */
+}
+
+a:hover {
+  transform: scale(1.1) !important; /* Slightly scale up on hover */
 }
