@@ -57,6 +57,7 @@ import backgroundImage from "../assets/images/allProducts.jpg";
 
 import { role } from "@/pages/login";
 
+const userCluster = localStorage.getItem("cluster");
 const renderStars = (rating) => {
   return (
     <div className="flex items-center">
@@ -1021,9 +1022,11 @@ export function AllProducts() {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
+        {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
           Previous Page
         </div>
+        }
       </div>
 
       <span className="text-sm font-medium text-[#1A3B47]">
@@ -1043,9 +1046,12 @@ export function AllProducts() {
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
+
+                {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
           Next Page
         </div>
+        }
       </div>
     </div>
               </>

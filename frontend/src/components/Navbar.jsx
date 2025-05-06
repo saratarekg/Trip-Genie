@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import {useSession} from "@/utils/logging/components/sessionContext.jsx";
 
+const userCluster = localStorage.getItem("cluster");
+
 const NavLinkIcon = ({ to, children }) => (
   <Link
     to={to}
@@ -814,9 +816,12 @@ export function NavbarComponent() {
 
                       <NotificationsDropdownTourist />
                       {/* Tooltip on hover */}
+                              {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
                         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
                           Notifications
                         </div>
+                        }
                       </div>
 <div className="relative mr-2 navbar-cart group">
                         <button
@@ -834,9 +839,12 @@ export function NavbarComponent() {
                           )}
                         </button>
  {/* Tooltip on hover */}
+         {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
     View Cart
   </div>
+  }
                         <CartDropdown
                           isOpen={isCartOpen}
                           setIsCartOpen={setIsCartOpen}
@@ -856,16 +864,20 @@ export function NavbarComponent() {
                           className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 navbar-wishlist"
                         >
                           <Heart className="h-7 w-7" />
+                                  {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
                             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
                               Wishlist
                             </div>
+                            }
                           <span className="sr-only">Wishlist</span>
                         </button>
                       </NavLinkIcon>
                          {/* Tooltip on hover */}
+                                 {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
                                               <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
                                                 Wishlist
                                               </div>
+                                              }
                                             </div>
                     </>
                   )}
@@ -891,9 +903,11 @@ export function NavbarComponent() {
                   >
                     <Menu className="h-6 w-6"  id={'menu-icon'}/>
                   </button>
+                          {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
                                                                             Menu
                                                                           </div>
+                                                                          }
                                                                         </div>
                   {openDropdown === "userMenu" && (
                     <div className="absolute right-0 mt-2 w-48 bg-black/90 rounded-2xl border border-white/20 shadow-lg py-1">
