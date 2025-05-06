@@ -230,7 +230,7 @@ const ProductCard = ({
       </CardFooter>
 
       {userInfo?.role === "tourist" && (
-        <div className="absolute top-2 right-2 flex space-x-2">
+        <div className="absolute top-2 right-2 flex space-x-2 group">
           <Button
             className={`rounded-full w-10 h-10 p-0 ${
               isInWishlistLocal
@@ -251,6 +251,12 @@ const ProductCard = ({
               className={`w-5 h-5 ${isInWishlistLocal ? "fill-current" : ""}`}
             />
             <span className="sr-only">Add to Wishlist</span>
+                {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+                     <div className="absolute top-full -translate-x-1/3 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                               Add to wishlist
+                             </div>
+                             }
           </Button>
         </div>
       )}
