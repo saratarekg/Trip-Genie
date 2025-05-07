@@ -121,6 +121,18 @@ export default function CheckoutPage() {
   const [isAddressLoaded, setIsAddressLoaded] = useState(false);
   const [isExchangeRateLoaded, setIsExchangeRateLoaded] = useState(false);
   const [isCurrencySymbolLoaded, setIsCurrencySymbolLoaded] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+
+    const showToast = (message, type = "success") => {
+      setToastMessage(message);
+      setToastType(type);
+      setIsToastOpen(true);
+       // Auto-hide after 3 seconds
+      setTimeout(() => setIsToastOpen(false), 3000);
+    };
+
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -1619,12 +1631,47 @@ export default function CheckoutPage() {
           <DialogHeader>
             <DialogTitle>Add New Address</DialogTitle>
           </DialogHeader>
-          <ShippingAddress onCancel={() => setIsAddressDialogOpen(false)} />
+          <ShippingAddress onCancel={() => setIsAddressDialogOpen(false)}
+                showToast={showToast}  />
         </DialogContent>
       </Dialog>
-      {(userRole === "guest" || userRole === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="Checkout" />
+      
+      {/* Toast Notification */}
+      {/* Toast Notification - Updated Version */}
+      {isToastOpen && (
+        <div className={`
+          fixed top-4 right-4 p-4 rounded-md z-[9999] animate-in fade-in
+          ${toastType === "success" 
+            ? "bg-green-500 text-white shadow-lg shadow-green-500/30" 
+            : "bg-red-500 text-white shadow-lg shadow-red-500/30"}
+          flex items-center gap-2
+          border-0
+          min-w-[300px]
+          transition-all duration-300
+        `}>
+          <div className="flex items-start gap-3">
+            {toastType === "success" ? (
+              <CheckCircle className="h-5 w-5 flex-shrink-0" />
+            ) : (
+              <XCircle className="h-5 w-5 flex-shrink-0" />
+            )}
+            <span className="flex-1 font-medium">{toastMessage}</span>
+            <button 
+              onClick={() => setIsToastOpen(false)}
+              className="
+                ml-4 text-white hover:text-white/80 
+                focus:outline-none focus:ring-2 focus:ring-white/50
+              "
+            >
+              ✕
+            </button>
+          </div>
+        </div>
       )}
-    </div>
+
+        {(userRole === "guest" || userRole === "tourist") && (
+          <UserGuide steps={guideSteps} pageName="Checkout" />
+        )}
+      </div>
   );
 }
