@@ -5,7 +5,7 @@ import { db, collection, addDoc, updateDoc, serverTimestamp, query, where, getDo
 // Function to initialize a session
 const startSession = async (userId) => {
     if (userId === null) return;
-    const sessionsRef = collection(db, "sessions");
+    const sessionsRef = collection(db, "sessions-adapted");
 
     // Check if an active session exists (session without an endTime)
     const q = query(sessionsRef, where("userId", "==", userId), where("endTime", "==", null));

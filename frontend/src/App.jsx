@@ -752,7 +752,7 @@ function App() {
                 <Router>
                   <IndexHandling />  {/* Ensure the CSS handling logic is applied */}
                     {/*<NavigationLogger />*/}
-                    {/*<GlobalEventLogger />*/}
+                    <GlobalEventLogger />
                     <AppContent/>
                 </Router>
             </SessionProvider>
