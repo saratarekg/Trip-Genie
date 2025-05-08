@@ -61,7 +61,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import PasswordChanger from "@/components/Passwords";
-import { TouristProfileComponent } from "@/components/touristProfile";
+import { TouristProfileComponent, TouristProfileComponentNGthree } from "@/components/touristProfile";
 import { TouristProfileComponentNG } from "@/components/touristProfile";
 
 import FileComplaintForm from "@/components/FileComplaintForm";
@@ -140,8 +140,12 @@ const AccountInfo = ({ user }) => {
         return <TourGuideProfileComponent />;
       case "tourist":
         //users in clusters that require accessibility changes --> simplify layout
-        if (userCluster === "0-0" || userCluster === "1-1" || userCluster === "3-1") {
-          return <TouristProfileComponentNG tourist={user} />;
+        if (userCluster === "0-0" || userCluster === "1-1" || userCluster === "3-1") {//0-0
+          if(userCluster === "3-1"){//3-1
+            return <TouristProfileComponentNGthree tourist={user} />;          }
+          else{
+            return <TouristProfileComponentNG tourist={user} />;
+          }
         } else {
           return <TouristProfileComponent tourist={user} />;
         }
