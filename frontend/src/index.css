@@ -75,6 +75,8 @@ body{
   }
 }
 
+
+
 @layer base {
   * {
     @apply border-border;
@@ -83,6 +85,9 @@ body{
     @apply bg-background text-foreground;
   }
 }
+
+
+
 
 /* Custom scrollbar styles */
 ::-webkit-scrollbar {
@@ -124,4 +129,6 @@ input[type="checkbox"]:checked {
   background-color: #388A94;
   border-color: #388A94;
 }
+
+
 

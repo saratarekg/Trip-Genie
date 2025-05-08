@@ -6,6 +6,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils"; // Assuming you have this utility for class names
 import { Button } from "@/components/ui/button"; // Assuming you have a Button component
 
+const userCluster = localStorage.getItem("cluster");
+
 const CarouselContext = React.createContext(null);
 
 function useCarousel() {
@@ -160,6 +162,7 @@ const CarouselPrevious = React.forwardRef(
     const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
     return (
+    <div className="group">
       <Button
         ref={ref}
         variant={variant}
@@ -177,7 +180,14 @@ const CarouselPrevious = React.forwardRef(
       >
         <ArrowLeft className="h-4 w-4" />
         <span className="sr-only">Previous slide</span>
-      </Button>
+                {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                   Previous slide
+                 </div>
+}
+           </Button>
+            </div>
     );
   }
 );
@@ -188,6 +198,7 @@ const CarouselNext = React.forwardRef(
     const { orientation, scrollNext, canScrollNext } = useCarousel();
 
     return (
+    <div className="group">
       <Button
         ref={ref}
         variant={variant}
@@ -203,9 +214,17 @@ const CarouselNext = React.forwardRef(
         onClick={scrollNext}
         {...props}
       >
+
         <ArrowRight className="h-4 w-4" />
         <span className="sr-only">Next slide</span>
+                {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+              Next slide
+            </div>
+}
       </Button>
+       </div>
     );
   }
 );

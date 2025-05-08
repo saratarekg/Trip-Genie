@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Clock, Mountain, Twitter, Instagram, Facebook, ArrowRight, Sun, Leaf, Umbrella, Camera, Map, MapPin, Snowflake } from "lucide-react";
+const userCluster = localStorage.getItem("cluster");
 
 const images = [
   {
@@ -171,14 +172,21 @@ export default function TravelHero({
         {/* Navigation Dots and Arrows */}
         <div className="absolute right-20 top-1/2 -translate-y-1/2">
           <div className="flex flex-col items-center justify-center space-y-2">
+          <div className="group">
             <button
               onClick={() => navigate("up")}
               className="text-white opacity-50 hover:opacity-100 transition-opacity duration-300"
               aria-label="Previous image"
             >
               <ChevronUp className="h-4 w-4" />
-            </button>
+              {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
 
+                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                                 Previous
+                               </div>
+              }
+            </button>
+</div>
             <div className="flex flex-col items-center space-y-2">
               {visibleDotIndices.map((index, dotPosition) => {
                 const isActive = index === currentImage;
@@ -212,14 +220,21 @@ export default function TravelHero({
                 );
               })}
             </div>
-
+<div className="group">
             <button
               onClick={() => navigate("down")}
               className="text-white opacity-50 hover:opacity-100 transition-opacity duration-300"
               aria-label="Next image"
             >
               <ChevronDown className="h-4 w-4" />
-            </button>
+               {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+                                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                                               Next
+                                             </div>
+                            }
+                          </button>
+              </div>
           </div>
         </div>
 

@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Loader from "./Loader.jsx";
+const userCluster = localStorage.getItem("cluster");
 
 export function Activities() {
   const [activities, setActivities] = useState([]);
@@ -17,6 +18,7 @@ export function Activities() {
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+
 
   // Number of visible slides (3 cards at a time)
   const visibleSlides = 3;
@@ -201,6 +203,7 @@ export function Activities() {
       {/* Activity Cards Slider */}
       <div className="relative px-12">
         {/* Navigation Buttons */}
+         <div className="group">
         <Button
           variant="outline"
           size="icon"
@@ -210,7 +213,16 @@ export function Activities() {
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#B5D3D1] text-white hover:bg-[#1A3B47] disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
         >
           <ChevronLeft className="h-4 w-4" />
+
+                          {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                             Previous slide
+                           </div>
+                           }
         </Button>
+        </div>
+
+         <div className="group">
         <Button
           variant="outline"
           size="icon"
@@ -220,7 +232,14 @@ export function Activities() {
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#F88C33] text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
         >
           <ChevronRight className="h-4 w-4" />
-        </Button>
+
+                          {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                                    Next slide
+                                  </div>
+                                  }
+               </Button>
+               </div>
 
         {/* Overflow container */}
         <div className="overflow-hidden">
@@ -236,10 +255,10 @@ export function Activities() {
             {activities.map((act) => (
               <div
                 key={act._id}
-                className="w-full min-w-[33.333%] px-3 transition-all duration-300 group"
+                className="w-full min-w-[34.333%] px-3 transition-all duration-300 group "
               >
                 <div
-                  className="rounded-lg overflow-hidden "
+                  className="rounded-lg overflow-hidden min-h-[525px] h-full "
                   style={{ backgroundColor: "rgb(255, 248, 241)" }}
                 >
                   <img
@@ -290,7 +309,7 @@ export function Activities() {
                         From {formatPrice(act.price, act.currency)}
                       </span>
                       <Link to={`/activity/${act._id}`}>
-                        <button className="bg-[#388A94] hover:bg-[#5D9297] text-white px-4 py-2 rounded-full text-l font-medium transition-colors duration-300">
+                        <button className="bg-[#388A94] hover:bg-[#5D9297] text-white ml-3  px-4 py-2 rounded-full text-l font-medium transition-colors duration-300">
                           Details
                         </button>
                       </Link>

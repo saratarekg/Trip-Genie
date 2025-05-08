@@ -1,3 +1,4 @@
+//save button saves then sets it as defautlt and closes the modal now
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -32,6 +33,7 @@ export default function ShippingAddresses({
   const [addresses, setAddresses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentAddressId, setCurrentAddressId] = useState(null);
+//   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
   const [addressDetails, setAddressDetails] = useState({
     streetName: "",
     streetNumber: "",
@@ -51,6 +53,14 @@ export default function ShippingAddresses({
   useEffect(() => {
     fetchAddresses();
   }, []);
+
+  //here is the use effect
+//   useEffect(() => {
+//     if (!isAddressDialogOpen) {
+//       console.log("Modal closed!");
+//     }
+//   }, [isAddressDialogOpen]); // This hook will run when isAddressDialogOpen changes
+  
 
   const fetchAddresses = async () => {
     try {
@@ -79,9 +89,9 @@ export default function ShippingAddresses({
   };
 
   const handleCloseModal = () => {
-    setShowModal(false);
-    fetchAddresses();     // ng
-    resetAddressDetails();
+    setShowModal(false);  // Close the modal
+    fetchAddresses();     // Ensure the list of addresses is updated immediately
+    resetAddressDetails(); // Reset the form to its default state
   };
 
   const resetAddressDetails = () => {
@@ -99,7 +109,17 @@ export default function ShippingAddresses({
     });
     setCurrentAddressId(null);
   };
- const handleSubmitNG = async (e) => {
+
+  //trial eny a2fel el address dialog try again later
+//   const handleCloseModalNG = () => {
+//     console.log("inside handlecloseng");
+//     setIsAddressDialogOpen(false); // Close the modal
+//     console.log("Modal closed:", isAddressDialogOpen); // Log after state change
+//     resetAddressDetails(); // Reset any form details if necessary
+//  };
+ 
+
+ const handleSubmit = async (e) => {
   e.preventDefault();
 
   setIsLoading(true);
@@ -151,73 +171,36 @@ export default function ShippingAddresses({
     handleSetDefaultNG(addedAddressId);  // Set the added address as default if needed
   }
 };  
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setIsLoading(true);
+  
+  const handleSetDefaultNG = async (addressId) => {
     try {
       const token = Cookies.get("jwt");
-      console.log(addressDetails);
-      if (currentAddressId) {
-        // Update address
-        await axios.put(
-          `https://trip-genie-apis.vercel.app/tourist/update-shippingAdd/${currentAddressId}`,
-          addressDetails,
-          {
-            credentials: "include",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        showToast("Address updated successfully!", "success"); // Show success toast
-      } else {
-        // Add new address
-        await axios.put(
-          "https://trip-genie-apis.vercel.app/tourist/add-shippingAdd",
-          addressDetails,
-          {
-            credentials: "include",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        showToast("Address added successfully!", "success"); // Show success toast
-      }
-      fetchAddresses();
-      handleCloseModal();
+  
+      console.log("Setting address as default, addressId:", addressId);
+  
+      const response = await axios.put(
+        `https://trip-genie-apis.vercel.app/tourist/add-default-shippingAdds/${addressId}`,
+        {},
+        {
+          credentials: "include",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      console.log("Response from setting default address:", response);
+  
+      await fetchAddresses(); // Fetch the latest addresses
+  
+      showToast("Address set as default successfully!", "success");
+  
     } catch (error) {
-      console.error("Error saving address:", error);
-      showToast("Error saving address.", "error"); // Show error toast
-    } finally {
-      setIsLoading(false);
-      fetch();
+      console.error("Error setting default address:", error);
+      showToast("Error setting default address.", "error");
     }
   };
-    const handleSetDefaultNG = async (addressId) => {
-      try {
-        const token = Cookies.get("jwt");
-    
-        console.log("Setting address as default, addressId:", addressId);
-    
-        const response = await axios.put(
-          `https://trip-genie-apis.vercel.app/tourist/add-default-shippingAdds/${addressId}`,
-          {},
-          {
-            credentials: "include",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-    
-        console.log("Response from setting default address:", response);
-    
-        await fetchAddresses(); // Fetch the latest addresses
-    
-        showToast("Address set as default successfully!", "success");
-    
-      } catch (error) {
-        console.error("Error setting default address:", error);
-        showToast("Error setting default address.", "error");
-      }
-    };
+  
+  
+  
 
   const handleSetDefault = async (addressId) => {
     try {
@@ -291,20 +274,6 @@ export default function ShippingAddresses({
         return <Map className="w-5 h-5" />;
     }
   };
-
-  const onSubmit = (e) => {
-    const userCluster = localStorage.getItem("cluster"); // Retrieve cluster from localStorage
-    console.log("ENGY", userCluster);
-    if (userCluster === "4-0") {
-      //law 3erefty hena later tghayary en el tany modal ye2fel yaret bas mosta7eel
-      handleSubmitNG(e); // Call handleSubmitNG if cluster is 0-0
-    } else {
-      handleSubmit(e); // Call handleSubmit for other clusters
-    }
-  };
-  
-
-  //<form onSubmit={onSubmit} className="space-y-4 p-4"> on submit el gowa el bracket kanet handlesubmit
 
   return (
     <div className="max-w-3xl mx-auto bg-white border rounded-lg shadow-sm p-6">
@@ -468,7 +437,7 @@ export default function ShippingAddresses({
               </DialogTitle>
             </DialogHeader>
             <ScrollArea className="max-h-[500px] overflow-y-auto">
-              <form onSubmit={onSubmit} className="space-y-4 p-4">
+              <form onSubmit={handleSubmit} className="space-y-4 p-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Street Name

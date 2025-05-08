@@ -282,7 +282,7 @@ const BookingForm = () => {
       alignItems: "center",
       gap: "8px",
       alignSelf: "flex-end",
-      marginTop: "24px",
+      marginBottom: "64px",
     },
     modal: {
       position: "fixed",

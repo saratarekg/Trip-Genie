@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import {useSession} from "@/utils/logging/components/sessionContext.jsx";
 
+const userCluster = localStorage.getItem("cluster");
+
 const NavLinkIcon = ({ to, children }) => (
   <Link
     to={to}
@@ -810,8 +812,18 @@ export function NavbarComponent() {
                   {role === "admin" && <NotificationsDropdownAdmin />} */}
                   {role === "tourist" && (
                     <>
+                    <div className="relative group">
+
                       <NotificationsDropdownTourist />
-                      <div className="relative mr-2 navbar-cart">
+                      {/* Tooltip on hover */}
+                              {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
+                          Notifications
+                        </div>
+                        }
+                      </div>
+<div className="relative mr-2 navbar-cart group">
                         <button
                           onClick={() => setIsCartOpen(!isCartOpen)}
                           className="relative text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200"
@@ -826,6 +838,13 @@ export function NavbarComponent() {
                             </div>
                           )}
                         </button>
+ {/* Tooltip on hover */}
+         {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+
+  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
+    View Cart
+  </div>
+  }
                         <CartDropdown
                           isOpen={isCartOpen}
                           setIsCartOpen={setIsCartOpen}
@@ -836,16 +855,30 @@ export function NavbarComponent() {
                           setCartItems={setCartItems}
                         />
                       </div>
+   <div className="relative group">
 
-                      <NavLinkIcon to="/touristWishlist">
+
+                      <NavLinkIcon to="/touristWishlist" className="group">
                         <button
                           onClick={() => setIsCartOpen(false)}
                           className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 navbar-wishlist"
                         >
                           <Heart className="h-7 w-7" />
+                                  {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
+                              Wishlist
+                            </div>
+                            }
                           <span className="sr-only">Wishlist</span>
                         </button>
                       </NavLinkIcon>
+                         {/* Tooltip on hover */}
+                                 {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+                                              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
+                                                Wishlist
+                                              </div>
+                                              }
+                                            </div>
                     </>
                   )}
                 </>
@@ -862,6 +895,7 @@ export function NavbarComponent() {
                 </div>
               ) : role !== "admin" || role === "admin" ? (
                 <div className="relative navbar-profile" ref={userMenuRef}  id={'menu-icon'}>
+                  <div className="relative group">
                   <button
                     onClick={() => toggleDropdown("userMenu")}
                     id={'menu-icon'}
@@ -869,6 +903,12 @@ export function NavbarComponent() {
                   >
                     <Menu className="h-6 w-6"  id={'menu-icon'}/>
                   </button>
+                          {(userCluster == "0-0" || userCluster == "1-1" ||userCluster == "3-1") &&
+                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg z-20">
+                                                                            Menu
+                                                                          </div>
+                                                                          }
+                                                                        </div>
                   {openDropdown === "userMenu" && (
                     <div className="absolute right-0 mt-2 w-48 bg-black/90 rounded-2xl border border-white/20 shadow-lg py-1">
                       <Link
@@ -948,6 +988,7 @@ export function NavbarComponent() {
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center" id={'notifications-icon'}>
+
               {role !== undefined && role !== "guest" && (
                 <>
                   <button id={'notifications-icon'} className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
@@ -983,8 +1024,10 @@ export function NavbarComponent() {
                   <Menu className="block h-6 w-6" aria-hidden="true" />
                 )}
               </button>
+
             </div>
           </div>
+
         </div>
         {/* Mobile Navigation */}
         {openDropdown === "mobileMenu" && (
