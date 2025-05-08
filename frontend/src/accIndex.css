@@ -20,65 +20,67 @@ html {
   font-size: 18px;
 }
 
+
+
 @layer base {
   :root {
-    --dark-orange: #FFB915; /* Keep original */
-    --light-orange: #FFD358; /* Keep original */
-    --light-blue: #003566; /* Keep original */
-    --dark-blue: #002a45; /* Darker shade for better contrast */
-    --darker-blue: #011b2f; /* Darker shade for better contrast */
-    --background: 0 0% 100%; /* Lighter background for better contrast */
-    --foreground: 222.2 84% 4.9%; /* Lighter text */
-    --card: 0 0% 100%; /* Keep original */
-    --card-foreground: 222.2 84% 4.9%; /* Keep original */
-    --popover: 0 0% 100%; /* Keep original */
-    --popover-foreground: 222.2 84% 4.9%; /* Keep original */
-    --primary: 210 40% 98%; /* Lighter primary for better contrast */
-    --primary-foreground: 222.2 47.4% 11.2%; /* Darker foreground for readability */
-    --secondary: 207 45% 33%; /* Adjusted to be more distinct from primary */
-    --secondary-foreground: 222.2 47.4% 11.2%; /* Same as primary-foreground */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%; /* Light accent */
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --dark-orange: #CC6600 !important; /* Increased contrast */
+    --light-orange: #FFAA00 !important; /* Increased contrast */
+    --light-blue: #001F4D !important; /* Increased contrast */
+    --dark-blue: #00122E !important; /* Increased contrast */
+    --darker-blue: #000A1A !important; /* Increased contrast */
+    --background: #FFFFFF !important; /* Increased contrast */
+    --foreground: #000000 !important; /* Increased contrast */
+    --card: #FFFFFF !important; /* Increased contrast */
+    --card-foreground: #000000 !important; /* Increased contrast */
+    --popover: #FFFFFF !important; /* Increased contrast */
+    --popover-foreground: #000000 !important; /* Increased contrast */
+    --primary: #000000 !important; /* Increased contrast */
+    --primary-foreground: #FFFFFF !important; /* Increased contrast */
+    --secondary: #E0E0E0 !important; /* Increased contrast */
+    --secondary-foreground: #000000 !important; /* Increased contrast */
+    --muted: #E0E0E0 !important; /* Increased contrast */
+    --muted-foreground: #666666 !important; /* Increased contrast */
+    --accent: #E0E0E0 !important; /* Increased contrast */
+    --accent-foreground: #000000 !important; /* Increased contrast */
+    --destructive: #FF0000 !important; /* Increased contrast */
+    --destructive-foreground: #FFFFFF !important; /* Increased contrast */
+    --border: #666666 !important; /* Increased contrast */
+    --input: #666666 !important; /* Increased contrast */
+    --ring: #000000 !important; /* Increased contrast */
+    --chart-1: #FF3300 !important; /* Increased contrast */
+    --chart-2: #33FF33 !important; /* Increased contrast */
+    --chart-3: #3333FF !important; /* Increased contrast */
+    --chart-4: #FF3399 !important; /* Increased contrast */
+    --chart-5: #9933FF !important; /* Increased contrast */
+    --radius: 0.5rem !important; /* Original */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%; /* Darker background for better contrast */
-    --foreground: 210 40% 98%; /* Lighter text */
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%; /* Lighter primary for dark mode */
-    --primary-foreground: 222.2 47.4% 11.2%; /* Darker foreground for readability */
-    --secondary: 217.2 32.6% 17.5%; /* Darker secondary color */
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%; /* Darker muted color */
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%; /* Darker accent color */
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%; /* Ensure this is distinguishable */
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%; /* Darker border for better contrast */
-    --input: 217.2 32.6% 17.5%; /* Darker input field for contrast */
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%; /* Increase contrast in charts */
-    --chart-2: 160 60% 45%; /* Increase contrast in charts */
-    --chart-3: 30 80% 55%; /* Increase contrast in charts */
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: #000000 !important; /* Increased contrast */
+    --foreground: #FFFFFF !important; /* Increased contrast */
+    --card: #000000 !important; /* Increased contrast */
+    --card-foreground: #FFFFFF !important; /* Increased contrast */
+    --popover: #000000 !important; /* Increased contrast */
+    --popover-foreground: #FFFFFF !important; /* Increased contrast */
+    --primary: #FFFFFF !important; /* Increased contrast */
+    --primary-foreground: #000000 !important; /* Increased contrast */
+    --secondary: #333333 !important; /* Increased contrast */
+    --secondary-foreground: #FFFFFF !important; /* Increased contrast */
+    --muted: #333333 !important; /* Increased contrast */
+    --muted-foreground: #CCCCCC !important; /* Increased contrast */
+    --accent: #333333 !important; /* Increased contrast */
+    --accent-foreground: #FFFFFF !important; /* Increased contrast */
+    --destructive: #FF3333 !important; /* Increased contrast */
+    --destructive-foreground: #FFFFFF !important; /* Increased contrast */
+    --border: #333333 !important; /* Increased contrast */
+    --input: #333333 !important; /* Increased contrast */
+    --ring: #CCCCCC !important; /* Increased contrast */
+    --chart-1: #FF3300 !important; /* Increased contrast */
+    --chart-2: #33FF33 !important; /* Increased contrast */
+    --chart-3: #3333FF !important; /* Increased contrast */
+    --chart-4: #FF3399 !important; /* Increased contrast */
+    --chart-5: #9933FF !important; /* Increased contrast */
   }
 }
 
@@ -86,12 +88,78 @@ html {
   * {
     @apply border-border !important;
   }
+
   body {
     @apply bg-background text-foreground !important;
   }
+
+  .card {
+    background-color: var(--card) !important;
+    color: var(--card-foreground) !important;
+  }
+
+  .popover {
+    background-color: var(--popover) !important;
+    color: var(--popover-foreground) !important;
+  }
+
+  .primary {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+  }
+
+  .secondary {
+    background-color: var(--secondary) !important;
+    color: var(--secondary-foreground) !important;
+  }
+
+  .muted {
+    background-color: var(--muted) !important;
+    color: var(--muted-foreground) !important;
+  }
+
+  .accent {
+    background-color: var(--accent) !important;
+    color: var(--accent-foreground) !important;
+  }
+
+  .destructive {
+    background-color: var(--destructive) !important;
+    color: var(--destructive-foreground) !important;
+  }
+
+  .border {
+    border-color: var(--border) !important;
+  }
+
+  .input {
+    background-color: var(--input) !important;
+  }
+
+  .ring {
+    box-shadow: 0 0 0 3px var(--ring) !important;
+  }
+
+  .chart-1 {
+    background-color: var(--chart-1) !important;
+  }
+
+  .chart-2 {
+    background-color: var(--chart-2) !important;
+  }
+
+  .chart-3 {
+    background-color: var(--chart-3) !important;
+  }
+
+  .chart-4 {
+    background-color: var(--chart-4) !important;
+  }
+
+  .chart-5 {
+    background-color: var(--chart-5) !important;
+  }
 }
-
-
 
 input[type="checkbox"]:checked {
   background-color: #388A94 !important;
