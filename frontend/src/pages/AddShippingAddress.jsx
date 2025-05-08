@@ -296,10 +296,11 @@ export default function ShippingAddresses({
     }
   };
 
+  //clusters that will have the save button updates
   const onSubmit = (e) => {
     const userCluster = localStorage.getItem("cluster"); // Retrieve cluster from localStorage
     console.log("ENGY", userCluster);
-    if (userCluster === "2-0") {
+    if (userCluster === "0-0" || userCluster === "0-1" || userCluster === "1-0" || userCluster === "1-1" || userCluster === "2-0" || userCluster === "2-1" || userCluster === "3-0" || userCluster === "3-1" || userCluster === "4-0") {
       //law 3erefty hena later tghayary en el tany modal ye2fel yaret bas mosta7eel
       handleSubmitNG(e); // Call handleSubmitNG if cluster is 0-0
     } else {

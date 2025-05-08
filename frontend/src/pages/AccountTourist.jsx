@@ -141,14 +141,15 @@ const AccountInfo = ({ user }) => {
         return <TourGuideProfileComponent />;
       case "tourist":
         //users in clusters that require accessibility changes --> simplify layout
+        //clusters that will have account cards below each other and/or edit button handled
         if (userCluster === "0-0" || userCluster === "1-1" || userCluster === "3-1") {//0-0
           if(userCluster === "3-1"){//3-1
-            return <TouristProfileComponentNGthree tourist={user} />;          }
+            return <TouristProfileComponentNGthree tourist={user} />;} //edit button + ta7t ba3d
           else{
-            return <TouristProfileComponentNG tourist={user} />;
+            return <TouristProfileComponentNG tourist={user} />; //ta7t ba3d
           }
         } else {
-          return <TouristProfileComponent tourist={user} />;
+          return <TouristProfileComponent tourist={user} />; //default
         }
         
       default:
