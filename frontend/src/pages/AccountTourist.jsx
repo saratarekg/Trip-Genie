@@ -64,6 +64,7 @@ import PasswordChanger from "@/components/Passwords";
 import { TouristProfileComponent, TouristProfileComponentNGthree } from "@/components/touristProfile";
 import { TouristProfileComponentNG } from "@/components/touristProfile";
 
+
 import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";

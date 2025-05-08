@@ -647,7 +647,7 @@ export function TouristProfileComponentNG() {
     setSelectedImage(tourist.profilePicture);
     setDropdownOpen(false);
     setIsEditing(false);
-    setButtonClicked(false);
+    // setButtonClicked(false);
     setValidationMessages({});
   };
 
@@ -704,7 +704,7 @@ export function TouristProfileComponentNG() {
       if (response.status === 200) {
         setTourist(response.data.tourist);
         setIsEditing(false);
-        setButtonClicked(false);
+        // setButtonClicked(false);
         setError("");
         setValidationMessages({});
       }
@@ -1735,7 +1735,8 @@ export function TouristProfileComponentNG() {
         </div>
       </ToastProvider>
     );
-  }
+  
+}
 
   export function TouristProfileComponent() {
     const navigate = useNavigate();
@@ -1994,7 +1995,7 @@ export function TouristProfileComponentNG() {
       setSelectedImage(tourist.profilePicture);
       setDropdownOpen(false);
       setIsEditing(false);
-      setButtonClicked(false);
+      // setButtonClicked(false);
       setValidationMessages({});
     };
   
@@ -2051,7 +2052,7 @@ export function TouristProfileComponentNG() {
         if (response.status === 200) {
           setTourist(response.data.tourist);
           setIsEditing(false);
-          setButtonClicked(false);
+          // setButtonClicked(false);
           setError("");
           setValidationMessages({});
         }
