@@ -76,6 +76,36 @@ const styles = {
     borderRadius: "4px",
     fontSize: "14px",
   },
+  //engy
+  requiredAsterisk: {
+    color: "red",
+    marginLeft: "8px",
+    fontSize: "14px",     // Match your label font size
+    transform: "scale(1.5)", // Scales it up while maintaining position
+    display: "inline-block",
+  },
+  // requiredAsterisk: {
+  //   color: "red",
+  //   marginLeft: "8px",
+  //   fontSize: "16px",
+  //   verticalAlign: "super", // Positions it slightly above
+  //   lineHeight: 0,         // Prevents it from affecting line height
+  // },
+  disabledButton: {
+    padding: "12px 24px",
+    backgroundColor: "#cccccc",
+    color: "#666666",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "not-allowed",
+    fontSize: "14px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "20px",
+  },
+  //engy
   button: {
     padding: "12px 24px",
     backgroundColor: "#1A3B47",
@@ -108,6 +138,7 @@ export default function HotelSearch() {
   const today = new Date();
   const tomorrow = addDays(today, 1);
 
+
   const [checkInDate, setCheckInDate] = useState(today);
   const [checkOutDate, setCheckOutDate] = useState(tomorrow);
   const [adults, setAdults] = useState(null);
@@ -122,6 +153,7 @@ export default function HotelSearch() {
   const [showCheckInWarning, setShowCheckInWarning] = useState(false);
   const [priceFilter, setPriceFilter] = useState("all");
   const [maxPrice, setMaxPrice] = useState(0);
+  const [userCluster, setUserCluster] = useState(null);
 
   const fetchUserCurrency = useCallback(async () => {
     try {
@@ -142,10 +174,18 @@ export default function HotelSearch() {
         }
       );
       setUserCurrency(currencyResponse.data);
+      const userCluster = localStorage.getItem("cluster");
+      setUserCluster(userCluster);
+      console.log("weee" , userCluster);
     } catch (error) {
       console.error("Error fetching user currency:", error);
     }
   }, []);
+//hotel search updates, clusters to have new hotel search ui
+  const shouldApplySpecialStyles = () => {
+    if (!userCluster) return false;
+    return userCluster === "1-0" || userCluster === "1-1" || userCluster === "2-0" || userCluster === "2-1" || userCluster === "4-0";
+  };
 
   const fetchExchangeRates = useCallback(async () => {
     try {
@@ -297,6 +337,7 @@ export default function HotelSearch() {
       setCheckOutDate(date);
     }
   };
+  const allFieldsFilled = searchQuery && checkInDate && checkOutDate && adults;//engy
 
   return (
     <div className="bg-gray-100">
@@ -313,7 +354,10 @@ export default function HotelSearch() {
             <div style={styles.formContainer}>
               <form onSubmit={handleSearch} style={styles.form}>
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>DESTINATION</label>
+                <label style={styles.label}>
+                    DESTINATION
+                    {shouldApplySpecialStyles() && <span style={styles.requiredAsterisk}>*</span>}
+                </label>
                   <Input
                     type="text"
                     placeholder="Enter destination"
@@ -325,7 +369,10 @@ export default function HotelSearch() {
                   />
                 </div>
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>CHECK-IN</label>
+                  <label style={styles.label}>
+                    CHECK-IN  {shouldApplySpecialStyles() && <span style={styles.requiredAsterisk}>*</span>}
+
+                  </label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -366,7 +413,10 @@ export default function HotelSearch() {
                   </div>
                 </div>
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>CHECK-OUT</label>
+                  <label style={styles.label}>
+                    CHECK-OUT  {shouldApplySpecialStyles() && <span style={styles.requiredAsterisk}>*</span>}
+
+                  </label>                  
                   <Popover>
                     <div>
                       {checkInDate ? (
@@ -429,7 +479,10 @@ export default function HotelSearch() {
                   </div>
                 </div>
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>ADULTS</label>
+                 <label style={styles.label}>
+                  ADULTS  {shouldApplySpecialStyles() && <span style={styles.requiredAsterisk}>*</span>}
+
+                </label>                  
                   <Input
                     type="number"
                     placeholder="Number of adults"
@@ -442,9 +495,19 @@ export default function HotelSearch() {
                   />
                 </div>
                 <button
-                  style={styles.button}
-                  disabled={isLoading}
-                  className="bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold searchButton"
+                  style={
+                    allFieldsFilled 
+                      ? styles.button 
+                      : shouldApplySpecialStyles() 
+                        ? styles.disabledButton 
+                        : styles.button
+                  }
+                  disabled={!allFieldsFilled || isLoading}
+                  className={
+                    allFieldsFilled 
+                      ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold searchButton" 
+                      : ""
+                  }
                 >
                   {isLoading ? "Searching..." : "Search Hotels"}
                 </button>
@@ -563,3 +626,4 @@ export default function HotelSearch() {
     </div>
   );
 }
+

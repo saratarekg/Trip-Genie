@@ -61,7 +61,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import PasswordChanger from "@/components/Passwords";
-import { TouristProfileComponent } from "@/components/touristProfile";
+import { TouristProfileComponent, TouristProfileComponentNGthree } from "@/components/touristProfile";
+import { TouristProfileComponentNG } from "@/components/touristProfile";
+
+
 import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
@@ -126,31 +129,46 @@ const getInitials = (name) => {
 
 // Sub-components
 const AccountInfo = ({ user }) => {
-  switch (user.role) {
-    case "advertiser":
-      return <AdvertiserProfileComponent />;
-    case "seller":
-      return <SellerProfileComponent />;
-    case "tour-guide":
-      return <TourGuideProfileComponent />;
-    case "tourist":
-      return <TouristProfileComponent tourist={user} />;
-    default:
-      return (
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Account Information</h2>
-          <p>
-            <strong>Name:</strong> {user.username}
-          </p>
-          {/* make the user role not seperated by hyphen and first letter capital */}
-          <p>
-            <strong>Role:</strong>{" "}
-            {user.role.charAt(0).toUpperCase() +
-              user.role.slice(1).replace("-", " ")}
-          </p>
-        </div>
-      );
-  }
+  const userCluster = localStorage.getItem("cluster");
+  console.log("CLUSTER FL ACCOUNT INFO" , userCluster);
+
+    switch (user.role) {
+      case "advertiser":
+        return <AdvertiserProfileComponent />;
+      case "seller":
+        return <SellerProfileComponent />;
+      case "tour-guide":
+        return <TourGuideProfileComponent />;
+      case "tourist":
+        //users in clusters that require accessibility changes --> simplify layout
+        //clusters that will have account cards below each other and/or edit button handled
+        if (userCluster === "0-0" || userCluster === "1-1" || userCluster === "3-1") {//0-0
+          if(userCluster === "3-1"){//3-1
+            return <TouristProfileComponentNGthree tourist={user} />;} //edit button + ta7t ba3d
+          else{
+            return <TouristProfileComponentNG tourist={user} />; //ta7t ba3d
+          }
+        } else {
+          return <TouristProfileComponent tourist={user} />; //default
+        }
+        
+      default:
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Account Information</h2>
+            <p>
+              <strong>Name:</strong> {user.username}
+            </p>
+            {/* make the user role not seperated by hyphen and first letter capital */}
+            <p>
+              <strong>Role:</strong>{" "}
+              {user.role.charAt(0).toUpperCase() +
+                user.role.slice(1).replace("-", " ")}
+            </p>
+          </div>
+        );
+    }
+  
 };
 
 const Notifications = ({ user }) => {

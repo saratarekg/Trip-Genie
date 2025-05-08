@@ -720,12 +720,13 @@ export default function HotelBookingPage() {
           </Button> */}
             </form>
             <div className="mt-8 mr-2 ml-2">
-              <Button
-                onClick={handleSearch}
-                className="bg-[#1A3B47] hover:bg-[#388A94] text-white font-semibold px-8 w-full"
-              >
-                {isLoading ? "Searching..." : "Search Hotels"}
-              </Button>
+                <Button
+                  onClick={handleSearch}
+                  className="bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold px-8 w-full disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  disabled={!areAllFieldsFilled() || isLoading}
+                >
+                  {isLoading ? "Searching..." : "Search Hotels"}
+                </Button>
             </div>
           </div>
         </div>

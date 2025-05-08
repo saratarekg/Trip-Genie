@@ -703,7 +703,8 @@ export default function CheckoutPage() {
                           <DialogHeader>
                             <DialogTitle>Add New Address</DialogTitle>
                           </DialogHeader>
-                          <ShippingAddress onClose={handleAddNewAddress} />
+                          <ShippingAddress onClose={handleAddNewAddress} 
+                          showToast={showToast}/>
                         </DialogContent>
                       </Dialog>
 

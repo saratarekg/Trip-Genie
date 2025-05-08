@@ -52,6 +52,7 @@ import axios from "axios";
 const API_KEY = import.meta.env.VITE_HOTELS_API_KEY3;
 
 export default function HotelDetails() {
+  const [showAllFacilities, setShowAllFacilities] = useState(false);
   const { hotelId } = useParams();
   const [paymentType, setPaymentType] = useState("CreditCard");
   const [searchParams] = useSearchParams();
@@ -576,11 +577,68 @@ export default function HotelDetails() {
     }
   };
 
-  const renderFacilities = () => {
-    if (!hotelFacilities || hotelFacilities.length === 0) {
-      return null;
-    }
 
+  const renderFacilities = () => {
+    
+    const userCluster = localStorage.getItem("cluster");
+    //users in clusters that require accessibility changes --> simplify layout
+
+    if (userCluster === "0-0" || userCluster === "1-1" || userCluster === "3-1") {
+
+      if (!hotelFacilities || hotelFacilities.length === 0) {
+        return (
+          <Card className="mt-6 Facilities">
+            <CardHeader>
+              <CardTitle>Facilities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>No facilities information available</p>
+            </CardContent>
+          </Card>
+        );
+      }
+    
+      const visibleFacilities = showAllFacilities 
+        ? hotelFacilities 
+        : hotelFacilities.slice(0, 5);
+    
+      return (
+        <Card className="mt-6 Facilities">
+          <CardHeader>
+            <CardTitle>Facilities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {visibleFacilities.map((facility, index) => (
+                <Badge key={index} variant="outline" className="flex items-center gap-1">
+                  {/* Add appropriate icons based on facility type */}
+                  {facility.facility_name.toLowerCase().includes('wifi') && <Wifi className="h-3 w-3" />}
+                  {facility.facility_name.toLowerCase().includes('breakfast') && <Coffee className="h-3 w-3" />}
+                  {facility.facility_name.toLowerCase().includes('tv') && <Tv className="h-3 w-3" />}
+                  {facility.facility_name.toLowerCase().includes('air') && <AirVent className="h-3 w-3" />}
+                  {facility.facility_name}
+                </Badge>
+              ))}
+            </div>
+            {hotelFacilities.length > 5 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-3 text-[#388A94] hover:text-[#2e6b77]"
+                onClick={() => setShowAllFacilities(!showAllFacilities)}
+              >
+                {showAllFacilities ? 'Show Less' : `Show More (+${hotelFacilities.length - 5})`}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      );
+    }
+    else{
+      if (!hotelFacilities || hotelFacilities.length === 0) {
+        return null;
+      }
+      
     return (
       <Card className="mt-6 Facilities">
         <CardHeader>
@@ -594,6 +652,60 @@ export default function HotelDetails() {
               </Badge>
             ))}
           </div>
+        </CardContent>
+      </Card>
+    );
+    }
+
+  };
+
+
+  const renderFacilitiesNG = () => {
+    if (!hotelFacilities || hotelFacilities.length === 0) {
+      return (
+        <Card className="mt-6 Facilities">
+          <CardHeader>
+            <CardTitle>Facilities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>No facilities information available</p>
+          </CardContent>
+        </Card>
+      );
+    }
+  
+    const visibleFacilities = showAllFacilities 
+      ? hotelFacilities 
+      : hotelFacilities.slice(0, 5);
+  
+    return (
+      <Card className="mt-6 Facilities">
+        <CardHeader>
+          <CardTitle>Facilities</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {visibleFacilities.map((facility, index) => (
+              <Badge key={index} variant="outline" className="flex items-center gap-1">
+                {/* Add appropriate icons based on facility type */}
+                {facility.facility_name.toLowerCase().includes('wifi') && <Wifi className="h-3 w-3" />}
+                {facility.facility_name.toLowerCase().includes('breakfast') && <Coffee className="h-3 w-3" />}
+                {facility.facility_name.toLowerCase().includes('tv') && <Tv className="h-3 w-3" />}
+                {facility.facility_name.toLowerCase().includes('air') && <AirVent className="h-3 w-3" />}
+                {facility.facility_name}
+              </Badge>
+            ))}
+          </div>
+          {hotelFacilities.length > 5 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-3 text-[#388A94] hover:text-[#2e6b77]"
+              onClick={() => setShowAllFacilities(!showAllFacilities)}
+            >
+              {showAllFacilities ? 'Show Less' : `Show More (+${hotelFacilities.length - 5})`}
+            </Button>
+          )}
         </CardContent>
       </Card>
     );

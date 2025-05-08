@@ -131,7 +131,9 @@ export default function ShippingAddresses({
 
       const newAddress = response.data.shippingAddresses[response.data.shippingAddresses.length - 1];
       addedAddressId = newAddress._id;
+      console.log("before toast");
       showToast("Address added successfully!", "success");
+      console.log("after toast");
     }
 
     // Fetch the updated list of addresses
@@ -148,8 +150,9 @@ export default function ShippingAddresses({
     // console.log("after");
     // handleCloseModalNG();  // Close the second modal
     // console.log("Modal state after submission:", isAddressDialogOpen);
-    handleSetDefaultNG(addedAddressId);  // Set the added address as default if needed
-  }
+    if (addedAddressId) {
+      handleSetDefaultNG(addedAddressId);
+    }  }
 };  
 
   const handleSubmit = async (e) => {
@@ -192,7 +195,8 @@ export default function ShippingAddresses({
       fetch();
     }
   };
-    const handleSetDefaultNG = async (addressId) => {
+
+  const handleSetDefaultNG = async (addressId) => {
       try {
         const token = Cookies.get("jwt");
     
@@ -217,7 +221,7 @@ export default function ShippingAddresses({
         console.error("Error setting default address:", error);
         showToast("Error setting default address.", "error");
       }
-    };
+  };
 
   const handleSetDefault = async (addressId) => {
     try {
@@ -263,7 +267,7 @@ export default function ShippingAddresses({
       showToast("Address deleted successfully!", "success"); // Show success toast
     } catch (error) {
       console.error("Error deleting address:", error);
-      showToast("Error deleting address.", "error"); // Show error toast
+      //showToast("Error deleting address.", "error"); // Show error toast
     }
   };
 
@@ -292,10 +296,11 @@ export default function ShippingAddresses({
     }
   };
 
+  //clusters that will have the save button updates
   const onSubmit = (e) => {
     const userCluster = localStorage.getItem("cluster"); // Retrieve cluster from localStorage
     console.log("ENGY", userCluster);
-    if (userCluster === "4-0") {
+    if (userCluster === "0-0" || userCluster === "0-1" || userCluster === "1-0" || userCluster === "1-1" || userCluster === "2-0" || userCluster === "2-1" || userCluster === "3-0" || userCluster === "3-1" || userCluster === "4-0") {
       //law 3erefty hena later tghayary en el tany modal ye2fel yaret bas mosta7eel
       handleSubmitNG(e); // Call handleSubmitNG if cluster is 0-0
     } else {
