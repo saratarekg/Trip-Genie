@@ -16,15 +16,25 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
     const userCluster = localStorage.getItem("cluster");
     const specialClusters = ["1-0", "1-1", "3-0"]; // Clusters that should see genie
     
-    // Only show genie for special clusters
+    // Get or initialize shownPages from sessionStorage
+    const shownPages = JSON.parse(sessionStorage.getItem('shownPages') || '{}');
+    
+    // Only show genie for special clusters and if not shown for this page yet
     if (specialClusters.includes(userCluster)) {
       setShouldShowGenie(true);
-      setRunTour(true); // Show immediately on login
+      
+      // Check if we've shown the guide for this page in this session
+      if (!shownPages[pageName]) {
+        setRunTour(true);
+        // Mark this page as shown
+        shownPages[pageName] = true;
+        sessionStorage.setItem('shownPages', JSON.stringify(shownPages));
+      }
     } else {
       // All other clusters never see the genie
       setShouldShowGenie(false);
     }
-  }, []);
+  }, [pageName]); // Add pageName as dependency
 
   const handleJoyrideCallback = (data) => {
     const { action, index, type, status } = data;
